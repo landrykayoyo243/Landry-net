@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, Globe } from "lucide-react";
 import { projectPage as copy } from "@/content/portfolio";
 import type { PublicProject as Project } from "@/lib/content.queries";
+import { getOptimizedImageUrl } from "@/lib/siteConfig";
 
 export function ProjectCard({
   p,
@@ -33,11 +34,12 @@ export function ProjectCard({
         }`}
       >
         <img
-          src={p.image_url ?? ""}
+          src={getOptimizedImageUrl(p.image_url, { width: featured ? 900 : 700 })}
           alt={p.image_alt}
-          width={1200}
-          height={800}
+          width={featured ? 900 : 700}
+          height={featured ? 600 : 466}
           loading="lazy"
+          decoding="async"
           className={`aspect-[16/10] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04] ${
             featured ? "md:h-full" : ""
           }`}

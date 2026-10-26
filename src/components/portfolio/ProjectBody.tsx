@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { InlineItem, RichText } from "@/components/portfolio/RichText";
 import { listItems, safeUrl, type Block, type HeadingBlock, type ImageBlock, type MediaBlock, type MediaItem } from "@/lib/blocks";
+import { getOptimizedImageUrl } from "@/lib/siteConfig";
 
 const container = "mx-auto w-full max-w-6xl px-5 md:px-8";
 const pText = "mt-4 text-base sm:text-lg leading-relaxed text-muted-foreground";
@@ -53,7 +54,7 @@ function ZoomButton({ image }: { image: ImageBlock }) {
         <DialogTitle className="text-lg font-bold text-foreground">{image.title || image.alt}</DialogTitle>
         {image.note && <DialogDescription className="text-sm text-muted-foreground">{image.note}</DialogDescription>}
         <div className="mt-3 overflow-hidden rounded-xl bg-muted/40">
-          <img src={safeUrl(image.url) ?? ""} alt={image.alt} width={1200} height={800} className="h-auto w-full object-contain mx-auto max-h-[70vh]" />
+          <img src={getOptimizedImageUrl(safeUrl(image.url), { width: 1400 })} alt={image.alt} width={1200} height={800} decoding="async" className="h-auto w-full object-contain mx-auto max-h-[70vh]" />
         </div>
         {image.caption && <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{image.caption}</p>}
       </DialogContent>
@@ -125,9 +126,10 @@ function MediaSectionBlock({ block }: { block: MediaBlock }) {
             title="Cliquer pour agrandir"
           >
             <img
-              src={safeUrl(currentItem.url) ?? ""}
+              src={getOptimizedImageUrl(safeUrl(currentItem.url), { width: 1000 })}
               alt={currentItem.alt || blockTitle || "Média"}
               loading="lazy"
+              decoding="async"
               className="h-full w-full object-contain sm:object-cover transition-transform duration-300 group-hover:scale-[1.01]"
             />
 
@@ -200,8 +202,9 @@ function MediaSectionBlock({ block }: { block: MediaBlock }) {
           {/* Image plein écran avec boutons défilement */}
           <div className="relative mt-3 flex items-center justify-center rounded-2xl bg-muted/40 p-1 sm:p-2">
             <img
-              src={safeUrl(currentItem.url) ?? ""}
+              src={getOptimizedImageUrl(safeUrl(currentItem.url), { width: 1600 })}
               alt={currentItem.alt || blockTitle || "Média plein écran"}
+              decoding="async"
               className="max-h-[65vh] w-auto max-w-full rounded-xl object-contain mx-auto"
             />
 
@@ -279,7 +282,7 @@ function Child({ block, result }: { block: Block; result?: boolean | undefined }
       return (
         <figure className="my-8 max-w-4xl">
           <div className="overflow-hidden rounded-2xl sm:rounded-3xl border border-border/80 bg-muted/20 shadow-xs">
-            <img src={src} alt={block.alt} width={1200} height={800} loading="lazy" className="aspect-[16/10] sm:aspect-[3/2] w-full object-cover" />
+            <img src={getOptimizedImageUrl(src, { width: 1100 })} alt={block.alt} width={1200} height={800} loading="lazy" decoding="async" className="aspect-[16/10] sm:aspect-[3/2] w-full object-cover" />
           </div>
           {(block.title || block.caption || block.note) && (
             <figcaption className="mt-3 space-y-1">

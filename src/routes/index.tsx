@@ -38,7 +38,7 @@ import {
 import { about, conviction, profile, shareImage, skills } from "@/content/portfolio";
 import { AnimatedStats } from "@/components/portfolio/AnimatedStats";
 import { BrandsMarquee } from "@/components/portfolio/BrandsMarquee";
-import { absoluteUrl } from "@/lib/siteConfig";
+import { absoluteUrl, getOptimizedImageUrl } from "@/lib/siteConfig";
 import {
   Accordion,
   AccordionContent,
@@ -46,7 +46,10 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-const photo = { url: "/landry-a-propos.jpg" };
+const photo = {
+  webp: "/landry-a-propos.webp",
+  fallback: "/landry-a-propos.jpg",
+};
 
 const TITLE = "Landry Kayoyo — Administrateur systèmes & réseaux | Développeur web";
 const DESC =
@@ -176,15 +179,19 @@ function Hero() {
                 className="relative rounded-full md:rounded-[2.2rem] p-[3px] shadow-2xl"
                 style={{ background: "var(--gradient-primary)" }}
               >
-                <img
-                  src={photo.url}
-                  alt="Landry Kayoyo en costume, assis à son poste de travail"
-                  width={1080}
-                  height={1080}
-                  loading="eager"
-                  fetchPriority="high"
-                  className="aspect-square md:aspect-[4/5] w-full rounded-full md:rounded-[2rem] object-cover object-[55%_20%]"
-                />
+                <picture>
+                  <source srcSet={photo.webp} type="image/webp" />
+                  <img
+                    src={photo.fallback}
+                    alt="Landry Kayoyo en costume, assis à son poste de travail"
+                    width={800}
+                    height={800}
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
+                    className="aspect-square md:aspect-[4/5] w-full rounded-full md:rounded-[2rem] object-cover object-[55%_20%]"
+                  />
+                </picture>
               </div>
 
               {/* Bulle discrète */}
@@ -466,9 +473,10 @@ function Index() {
                   <Reveal key={item.id} className="group">
                     <div className="relative aspect-[4/3] sm:aspect-[16/11] overflow-hidden rounded-[26px] border border-border/80 bg-muted/40 shadow-sm transition-all duration-300 hover:border-primary/40 hover:shadow-lg">
                       <img
-                        src={item.image_url}
+                        src={getOptimizedImageUrl(item.image_url, { width: 600 })}
                         alt={item.image_alt ?? item.title}
                         loading="lazy"
+                        decoding="async"
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       {/* Dégradé cinématique pour lisibilité */}

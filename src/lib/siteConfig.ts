@@ -92,11 +92,58 @@ export function getOptimizedOgImageUrl(imageUrl?: string | null): string {
   return trimmed;
 }
 
+export interface OptimizeImageOptions {
+  width?: number;
+  height?: number;
+  quality?: "auto" | "auto:good" | "auto:best" | "auto:eco" | number;
+  format?: "auto" | "webp" | "avif" | "jpg" | "png";
+  crop?: "fill" | "scale" | "limit" | "fit" | "thumb";
+}
+
+/**
+ * Optimise dynamiquement les images hébergées sur Cloudinary.
+ * - Format automatique (f_auto -> AVIF / WebP selon le navigateur)
+ * - Compression intelligente (q_auto)
+ * - Redimensionnement à la taille requise (w_...)
+ */
+export function getOptimizedImageUrl(
+  imageUrl?: string | null,
+  options?: OptimizeImageOptions
+): string {
+  if (!imageUrl || typeof imageUrl !== "string" || !imageUrl.trim()) {
+    return "";
+  }
+
+  const trimmed = imageUrl.trim();
+
+  if (trimmed.includes("res.cloudinary.com") && trimmed.includes("/upload/")) {
+    const format = options?.format ?? "auto";
+    const quality = options?.quality ?? "auto";
+    const parts: string[] = [`f_${format}`, `q_${quality}`];
+
+    if (options?.width) parts.push(`w_${options.width}`);
+    if (options?.height) parts.push(`h_${options.height}`);
+    if (options?.crop) parts.push(`c_${options.crop}`);
+
+    const transform = parts.join(",");
+
+    if (trimmed.includes(`/upload/${transform}/`)) {
+      return trimmed;
+    }
+
+    return trimmed.replace("/upload/", `/upload/${transform}/`);
+  }
+
+  return trimmed;
+}
+
 export const siteConfig = {
   url: SITE_URL,
   host: SITE_HOST,
   absoluteUrl,
   getOptimizedOgImageUrl,
+  getOptimizedImageUrl,
 };
 
 export default siteConfig;
+

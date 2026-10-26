@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { brandsQuery } from "@/lib/content.queries";
+import { getOptimizedImageUrl } from "@/lib/siteConfig";
 
 /** Bandeau de marques / partenaires à défilement infini.
  *  Géré dynamiquement depuis l'espace admin.
@@ -76,9 +77,10 @@ export function BrandsMarquee() {
                 >
                   {b.logo_url ? (
                     <img
-                      src={b.logo_url}
+                      src={getOptimizedImageUrl(b.logo_url, { width: 240 })}
                       alt={b.name}
                       loading="lazy"
+                      decoding="async"
                       className={`h-11 sm:h-14 md:h-16 max-h-12 sm:max-h-16 md:max-h-20 w-auto max-w-[150px] sm:max-w-[200px] md:max-w-[230px] object-contain transition-all duration-300 select-none ${
                         isHighlighted
                           ? "opacity-100 grayscale-0 scale-110 drop-shadow-md"

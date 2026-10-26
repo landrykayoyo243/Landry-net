@@ -9,7 +9,7 @@ import { ProjectBody, firstImage } from "@/components/portfolio/ProjectBody";
 import { parseBlocks } from "@/lib/blocks";
 import { projectQuery, projectsQuery } from "@/lib/content.queries";
 import { profile, projectPage as copy, shareImage } from "@/content/portfolio";
-import { absoluteUrl, getOptimizedOgImageUrl } from "@/lib/siteConfig";
+import { absoluteUrl, getOptimizedImageUrl, getOptimizedOgImageUrl } from "@/lib/siteConfig";
 
 export const Route = createFileRoute("/projets/$slug")({
   loader: async ({ params, context }) => {
@@ -177,11 +177,12 @@ function ProjectDetail() {
             <div className="mt-10 md:mt-12 overflow-hidden rounded-[28px] border border-border/80 bg-card p-3 sm:p-4 shadow-sm">
               <div className="overflow-hidden rounded-[20px] bg-muted">
                 <img
-                  src={p.image_url || hero?.url || ""}
+                  src={getOptimizedImageUrl(p.image_url || hero?.url || "", { width: 1200 })}
                   alt={p.image_alt || hero?.alt || p.title}
                   width={1200}
                   height={800}
                   fetchPriority="high"
+                  decoding="async"
                   className="aspect-[16/10] sm:aspect-[16/9] w-full object-cover transition-transform duration-700 ease-out hover:scale-[1.02]"
                 />
               </div>
@@ -254,8 +255,10 @@ function ProjectDetail() {
                   <div className="relative h-16 w-22 shrink-0 overflow-hidden rounded-xl bg-muted">
                     {project.image_url ? (
                       <img
-                        src={project.image_url}
+                        src={getOptimizedImageUrl(project.image_url, { width: 220 })}
                         alt={project.image_alt || project.title}
+                        loading="lazy"
+                        decoding="async"
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                     ) : (

@@ -15,7 +15,10 @@ import { AnimatedStats } from "@/components/portfolio/AnimatedStats";
 import { BrandsMarquee } from "@/components/portfolio/BrandsMarquee";
 import { absoluteUrl } from "@/lib/siteConfig";
 
-const photo = { url: "/landry-a-propos.jpg" };
+const photo = {
+  webp: "/landry-a-propos.webp",
+  fallback: "/landry-a-propos.jpg",
+};
 
 const TITLE = "À propos — Landry Kayoyo | Administrateur systèmes & réseaux | Développeur web";
 const DESC = "Parcours, vision et méthodes de Landry Kayoyo, administrateur systèmes et réseaux et développeur web à Lubumbashi : Université Don Bosco, INPP, CNSS et XSECURITY.";
@@ -106,15 +109,19 @@ function APropos() {
             <div className="relative mx-auto w-full max-w-[340px]">
               <div className="absolute -inset-1 rounded-[2.2rem] bg-gradient-primary opacity-60 blur-2xl" aria-hidden />
               <div className="relative rounded-[2rem] bg-gradient-primary p-[3px] shadow-2xl">
-                <img
-                  src={photo.url}
-                  alt="Landry Kayoyo en costume, assis à son poste de travail"
-                  width={1080}
-                  height={1080}
-                  loading="eager"
-                  fetchPriority="high"
-                  className="aspect-[4/5] w-full rounded-[1.85rem] object-cover object-[55%_25%]"
-                />
+                <picture>
+                  <source srcSet={photo.webp} type="image/webp" />
+                  <img
+                    src={photo.fallback}
+                    alt="Landry Kayoyo en costume, assis à son poste de travail"
+                    width={800}
+                    height={800}
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
+                    className="aspect-[4/5] w-full rounded-[1.85rem] object-cover object-[55%_25%]"
+                  />
+                </picture>
               </div>
               <div className="absolute -left-6 bottom-10 rounded-2xl border border-border/80 bg-card/95 px-4 py-3 text-card-foreground shadow-card backdrop-blur-md">
                 <p className="flex items-center gap-2 text-sm font-semibold">
