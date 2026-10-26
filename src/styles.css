@@ -125,10 +125,26 @@
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 
 @utility reveal {
-  opacity: 0; transform: translateY(16px);
-  transition: opacity .7s ease, transform .7s ease;
-  &.is-visible { opacity: 1; transform: none; }
-  @media (prefers-reduced-motion: reduce) { opacity: 1; transform: none; transition: none; }
+  opacity: 0;
+  transform: translate3d(0, 16px, 0);
+  will-change: opacity, transform;
+  transition: opacity .6s cubic-bezier(0.16, 1, 0.3, 1), transform .6s cubic-bezier(0.16, 1, 0.3, 1);
+  &.is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    will-change: auto;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    will-change: auto;
+  }
+}
+
+@utility content-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 600px;
 }
 
 :root {
@@ -200,14 +216,15 @@
 
 /* ─── Marquee (bandeau marques défilant) ──────────────────────────────────── */
 @keyframes marquee-scroll {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
 }
 @utility marquee-track {
   display: flex;
   width: max-content;
   animation: marquee-scroll 28s linear infinite;
   will-change: transform;
+  transform: translateZ(0);
 }
 @utility marquee-pause {
   &:hover .marquee-track { animation-play-state: paused; }

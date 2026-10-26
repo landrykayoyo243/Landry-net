@@ -347,7 +347,7 @@ function Index() {
         </section>
 
         {/* 02 · Compétences — Piliers d'expertise */}
-        <section id="competences" className="border-y border-border bg-muted/40 py-20 md:py-28">
+        <section id="competences" className="content-auto border-y border-border bg-muted/40 py-20 md:py-28">
           <div className={container}>
             <Reveal>
               <SectionHeading
@@ -456,7 +456,7 @@ function Index() {
 
         {/* 04 · Immersion & Coulisses de terrain */}
         {immersionItems.length > 0 && (
-          <section className="border-t border-border bg-card py-20 md:py-28">
+          <section className="content-auto border-t border-border bg-card py-20 md:py-28">
             <div className={container}>
               <Reveal>
                 <SectionHeading
@@ -589,7 +589,7 @@ function Index() {
         </section>
 
         {/* 08 · Questions fréquentes (FAQ) — Inspiré des meilleures pratiques internationales */}
-        <section className="py-20 md:py-28">
+        <section className="content-auto py-20 md:py-28">
           <div className={`${container} max-w-4xl`}>
             <Reveal className="text-center mb-12">
               <div className="mb-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
