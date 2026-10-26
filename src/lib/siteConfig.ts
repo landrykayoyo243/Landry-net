@@ -118,7 +118,7 @@ export function getOptimizedImageUrl(
 
   if (trimmed.includes("res.cloudinary.com") && trimmed.includes("/upload/")) {
     const format = options?.format ?? "auto";
-    const quality = options?.quality ?? "auto";
+    const quality = options?.quality ?? "auto:best";
     const parts: string[] = [`f_${format}`, `q_${quality}`];
 
     if (options?.width) parts.push(`w_${options.width}`);

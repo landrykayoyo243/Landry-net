@@ -28,9 +28,9 @@ export interface CloudinaryUploadResult {
  */
 export async function compressImageBeforeUpload(
   file: File,
-  maxWidth = 1920,
-  maxHeight = 1920,
-  quality = 0.85
+  maxWidth = 2560,
+  maxHeight = 2560,
+  quality = 0.92
 ): Promise<File> {
   // Ignorer si ce n'est pas une image matricielle (SVG, GIF, PDF)
   if (!file.type.startsWith("image/") || file.type === "image/svg+xml" || file.type === "image/gif") {
