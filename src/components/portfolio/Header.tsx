@@ -28,8 +28,35 @@ const navIcons: Record<string, typeof User> = {
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [progress, setProgress] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // Détection du scroll fluide et non-bloquante (100% rAF + passive)
+  useEffect(() => {
+    let ticking = false;
+    const updateScroll = () => {
+      const currentY = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = docHeight > 0 ? Math.min(Math.max(currentY / docHeight, 0), 1) : 0;
+
+      setScrolled(currentY > 12);
+      setProgress(pct);
+      ticking = false;
+    };
+
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateScroll);
+        ticking = true;
+      }
+    };
+
+    updateScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   // Fermeture automatique lors d'un clic ou touch à l'extérieur du menu
   useEffect(() => {
@@ -72,7 +99,19 @@ export function Header() {
   }, [open]);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-card">
+    <header
+      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? "border-b border-border/80 bg-background/90 backdrop-blur-md shadow-xs py-0"
+          : "border-b border-border/40 bg-background/75 backdrop-blur-xs py-0.5"
+      }`}
+    >
+      {/* Jauge discrète de lecture au scroll (GPU transform, 100% non-bloquante) */}
+      <div
+        className="pointer-events-none absolute bottom-0 left-0 h-[2px] w-full bg-gradient-primary origin-left transition-transform duration-75 ease-out"
+        style={{ transform: `scaleX(${progress})`, opacity: scrolled ? 1 : 0 }}
+        aria-hidden="true"
+      />
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-5 md:h-20 md:px-8">
         {/* Logo */}
         <Link

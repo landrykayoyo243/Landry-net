@@ -20,7 +20,7 @@ export function Reveal({ children, className = "" }: { children: ReactNode; clas
           io.disconnect();
         }
       },
-      { threshold: 0.05, rootMargin: "80px" },
+      { threshold: 0.05, rootMargin: "140px" },
     );
     io.observe(el);
     return () => io.disconnect();
