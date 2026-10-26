@@ -25,4 +25,4 @@ Disallow: /connexion-requise
 Disallow: /acces-refuse
 Allow: /
 
-Sitemap: https://landryit.vercel.app/sitemap.xml
+Sitemap: https://landrynet.vercel.app/sitemap.xml
