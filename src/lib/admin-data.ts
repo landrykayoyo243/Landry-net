@@ -84,6 +84,6 @@ export async function uploadProjectImage(
 ): Promise<string> {
   const err = validateImage(file, 5);
   if (err) throw new Error(err);
-  const result = await uploadToCloudinary(file, "image", onProgress);
+  const result = await uploadToCloudinary(file, "image", onProgress, "projets");
   return result.secure_url;
 }

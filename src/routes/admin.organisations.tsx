@@ -144,7 +144,7 @@ function OrganisationsAdminPage() {
     try {
       setIsUploading(true);
       setUploadProgress(15);
-      const result = await uploadToCloudinary(file, "image", (pct) => setUploadProgress(pct));
+      const result = await uploadToCloudinary(file, "image", (pct) => setUploadProgress(pct), "organisations");
       setLogoUrl(result.secure_url);
       setUploadProgress(null);
       setIsUploading(false);

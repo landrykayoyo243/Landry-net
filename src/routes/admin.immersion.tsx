@@ -149,7 +149,7 @@ function ImmersionAdminPage() {
     try {
       setIsUploading(true);
       setUploadProgress(15);
-      const result = await uploadToCloudinary(file, "image", (pct) => setUploadProgress(pct));
+      const result = await uploadToCloudinary(file, "image", (pct) => setUploadProgress(pct), "immersion");
       setImageUrl(result.secure_url);
       if (!imageAlt) setImageAlt(file.name.replace(/\.[^/.]+$/, ""));
       setUploadProgress(null);

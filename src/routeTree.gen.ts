@@ -15,6 +15,7 @@ import { Route as AccesRefuseRouteImport } from './routes/acces-refuse'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ConnexionRequiseRouteImport } from './routes/connexion-requise'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminCertificationsRouteImport } from './routes/admin.certifications'
 import { Route as AdminCompteRouteImport } from './routes/admin.compte'
@@ -62,6 +63,11 @@ const ConnexionRequiseRoute = ConnexionRequiseRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -163,6 +169,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/connexion-requise': typeof ConnexionRequiseRoute
   '/contact': typeof ContactRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/certifications': typeof AdminCertificationsRoute
   '/admin/compte': typeof AdminCompteRoute
   '/admin/immersion': typeof AdminImmersionRoute
@@ -188,6 +195,7 @@ export interface FileRoutesByTo {
   '/acces-refuse': typeof AccesRefuseRoute
   '/connexion-requise': typeof ConnexionRequiseRoute
   '/contact': typeof ContactRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/certifications': typeof AdminCertificationsRoute
   '/admin/compte': typeof AdminCompteRoute
   '/admin/immersion': typeof AdminImmersionRoute
@@ -215,6 +223,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/connexion-requise': typeof ConnexionRequiseRoute
   '/contact': typeof ContactRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/certifications': typeof AdminCertificationsRoute
   '/admin/compte': typeof AdminCompteRoute
   '/admin/immersion': typeof AdminImmersionRoute
@@ -243,6 +252,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/connexion-requise'
     | '/contact'
+    | '/sitemap.xml'
     | '/admin/certifications'
     | '/admin/compte'
     | '/admin/immersion'
@@ -268,6 +278,7 @@ export interface FileRouteTypes {
     | '/acces-refuse'
     | '/connexion-requise'
     | '/contact'
+    | '/sitemap.xml'
     | '/admin/certifications'
     | '/admin/compte'
     | '/admin/immersion'
@@ -294,6 +305,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/connexion-requise'
     | '/contact'
+    | '/sitemap.xml'
     | '/admin/certifications'
     | '/admin/compte'
     | '/admin/immersion'
@@ -321,6 +333,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   ConnexionRequiseRoute: typeof ConnexionRequiseRoute
   ContactRoute: typeof ContactRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AdminLoginRoute: typeof AdminLoginRoute
   ApiCloudinarySignRoute: typeof ApiCloudinarySignRoute
   ApiContactRoute: typeof ApiContactRoute
@@ -372,6 +385,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -540,6 +560,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   ConnexionRequiseRoute: ConnexionRequiseRoute,
   ContactRoute: ContactRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   AdminLoginRoute: AdminLoginRoute,
   ApiCloudinarySignRoute: ApiCloudinarySignRoute,
   ApiContactRoute: ApiContactRoute,

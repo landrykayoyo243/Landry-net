@@ -42,7 +42,20 @@ export const Route = createFileRoute("/api/cloudinary-sign")({
         const cloudName = process.env["CLOUDINARY_CLOUD_NAME"]!;
         const apiKey = process.env["CLOUDINARY_API_KEY"]!;
         const apiSecret = process.env["CLOUDINARY_API_SECRET"]!;
-        const folder = body.folder ?? process.env["CLOUDINARY_FOLDER"] ?? "Landry_Media";
+        const baseFolder = (process.env["CLOUDINARY_FOLDER"] || "Landry_Media")
+          .trim()
+          .replace(/^\/+|\/+$/g, "");
+
+        // Organisation propre en sous-dossiers dans le dossier principal
+        let folder = baseFolder;
+        if (body.folder && typeof body.folder === "string" && body.folder.trim()) {
+          const sub = body.folder.trim().replace(/^\/+|\/+$/g, "");
+          folder = sub.startsWith(baseFolder) ? sub : `${baseFolder}/${sub}`;
+        } else {
+          // Classement par défaut selon le type de ressource
+          const defaultSub = body.resource_type === "raw" ? "cv" : "medias";
+          folder = `${baseFolder}/${defaultSub}`;
+        }
 
         if (!cloudName || !apiKey || !apiSecret) {
           return json({ error: "Cloudinary non configuré" }, 500);

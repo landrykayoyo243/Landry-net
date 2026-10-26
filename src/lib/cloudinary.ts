@@ -2,6 +2,17 @@ import { supabase } from "@/integrations/supabase/client";
 
 export type UploadResourceType = "image" | "raw";
 
+/**
+ * Sous-dossiers organisés dans le dossier principal Cloudinary (ex: Landry_Media/...)
+ */
+export type CloudinaryFolder =
+  | "projets"
+  | "cv"
+  | "organisations"
+  | "immersion"
+  | "medias"
+  | (string & {});
+
 export interface CloudinaryUploadResult {
   secure_url: string;
   public_id: string;
@@ -13,11 +24,14 @@ export interface CloudinaryUploadResult {
 /**
  * Upload un fichier vers Cloudinary via un upload signé côté serveur.
  * La clé API secrète ne passe jamais dans le navigateur.
+ *
+ * @param folder Sous-dossier de destination (projets, cv, organisations, immersion, etc.)
  */
 export async function uploadToCloudinary(
   file: File,
   resourceType: UploadResourceType = "image",
   onProgress?: (pct: number) => void,
+  folder: CloudinaryFolder = "medias",
 ): Promise<CloudinaryUploadResult> {
   // 1. Rafraîchir la session Supabase pour garantir un token valide
   await supabase.auth.refreshSession();
@@ -25,17 +39,17 @@ export async function uploadToCloudinary(
   const token = sessionData.session?.access_token;
   if (!token) throw new Error("Non authentifié. Veuillez vous reconnecter.");
 
-  // 2. Demander une signature au serveur
+  // 2. Demander une signature au serveur avec le dossier cible
   const signRes = await fetch("/api/cloudinary-sign", {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
-    body: JSON.stringify({ resource_type: resourceType }),
+    body: JSON.stringify({ resource_type: resourceType, folder }),
   });
   if (!signRes.ok) {
     const err = (await signRes.json().catch(() => ({}))) as { error?: string };
     throw new Error(err.error ?? "Erreur de signature Cloudinary.");
   }
-  const { signature, timestamp, apiKey, cloudName, folder } = (await signRes.json()) as {
+  const { signature, timestamp, apiKey, cloudName, folder: targetFolder } = (await signRes.json()) as {
     signature: string;
     timestamp: number;
     apiKey: string;
@@ -49,7 +63,7 @@ export async function uploadToCloudinary(
   fd.append("api_key", apiKey);
   fd.append("timestamp", String(timestamp));
   fd.append("signature", signature);
-  fd.append("folder", folder);
+  fd.append("folder", targetFolder);
 
   const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`;
 

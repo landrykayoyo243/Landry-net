@@ -450,7 +450,7 @@ function CvAdminPage() {
     setUploading(true);
     setProgress(0);
     try {
-      const result = await uploadToCloudinary(file, "raw", setProgress);
+      const result = await uploadToCloudinary(file, "raw", setProgress, "cv");
       // Stocker l'URL Cloudinary dans app_settings
       const { error } = await supabase
         .from("app_settings")

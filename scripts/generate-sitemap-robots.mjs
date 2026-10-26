@@ -178,14 +178,22 @@ Sitemap: ${effectiveSiteUrl}/sitemap.xml
     fs.mkdirSync(publicDir, { recursive: true });
   }
 
+  // Nettoyer l'ancien sitemap.xml statique s'il existe pour laisser la route dynamique SSR répondre
   const sitemapPath = path.join(publicDir, "sitemap.xml");
-  const robotsPath = path.join(publicDir, "robots.txt");
+  if (fs.existsSync(sitemapPath)) {
+    try {
+      fs.unlinkSync(sitemapPath);
+      console.log("🧹 [Sitemap/Robots] Ancien sitemap.xml statique retiré (géré dynamiquement par TanStack Start)");
+    } catch {
+      // Ignorer
+    }
+  }
 
-  fs.writeFileSync(sitemapPath, sitemapXml.trim() + "\n", "utf-8");
+  const robotsPath = path.join(publicDir, "robots.txt");
   fs.writeFileSync(robotsPath, robotsTxt.trim() + "\n", "utf-8");
 
-  console.log(`✅ [Sitemap/Robots] sitemap.xml généré (${allUrls.length} URLs)`);
   console.log(`✅ [Sitemap/Robots] robots.txt généré pointant vers ${effectiveSiteUrl}/sitemap.xml`);
+  console.log(`ℹ️ [Sitemap/Robots] sitemap.xml est désormais dynamique en temps réel via la route /sitemap.xml`);
 }
 
 // Exécution directe si appelé en script CLI
