@@ -35,6 +35,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "author", content: "Landry Kayoyo" },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Landry Kayoyo" },
+      { name: "google-site-verification", content: "7i407FtKGpD5q2BAf_JbE73Wc2niO1tXYjZ5n8sxq1I" },
       ...(isPreviewDeployment ? [{ name: "robots", content: "noindex, nofollow" }] : []),
     ],
     links: [
