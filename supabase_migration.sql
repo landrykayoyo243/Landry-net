@@ -138,7 +138,24 @@ CREATE TABLE IF NOT EXISTS public.app_settings (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 GRANT ALL ON public.app_settings TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.app_settings TO authenticated;
 ALTER TABLE public.app_settings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public reads app_settings" ON public.app_settings;
+CREATE POLICY "Public reads app_settings" ON public.app_settings FOR SELECT TO anon USING (true);
+
+DROP POLICY IF EXISTS "Admins select app_settings" ON public.app_settings;
+CREATE POLICY "Admins select app_settings" ON public.app_settings FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'));
+
+DROP POLICY IF EXISTS "Admins insert app_settings" ON public.app_settings;
+CREATE POLICY "Admins insert app_settings" ON public.app_settings FOR INSERT TO authenticated WITH CHECK (public.has_role(auth.uid(), 'admin'));
+
+DROP POLICY IF EXISTS "Admins update app_settings" ON public.app_settings;
+CREATE POLICY "Admins update app_settings" ON public.app_settings FOR UPDATE TO authenticated USING (public.has_role(auth.uid(), 'admin')) WITH CHECK (public.has_role(auth.uid(), 'admin'));
+
+DROP POLICY IF EXISTS "Admins delete app_settings" ON public.app_settings;
+CREATE POLICY "Admins delete app_settings" ON public.app_settings FOR DELETE TO authenticated USING (public.has_role(auth.uid(), 'admin'));
+
 
 CREATE TABLE IF NOT EXISTS public.login_attempts (
   id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
