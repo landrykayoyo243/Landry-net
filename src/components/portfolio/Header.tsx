@@ -102,8 +102,8 @@ export function Header() {
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "border-b border-border/80 bg-background/90 backdrop-blur-md shadow-xs py-0"
-          : "border-b border-border/40 bg-background/75 backdrop-blur-xs py-0.5"
+          ? "border-b border-border/80 bg-background shadow-xs py-0"
+          : "border-b border-border/80 bg-background py-0.5"
       }`}
     >
       {/* Jauge discrète de lecture au scroll (GPU transform, 100% non-bloquante) */}
@@ -160,7 +160,7 @@ export function Header() {
           <button
             ref={buttonRef}
             type="button"
-            className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-foreground transition-all duration-200 hover:bg-accent active:scale-95 md:hidden"
+            className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-foreground transition-all duration-200 hover:bg-accent active:scale-95 md:h-11 md:w-11"
             aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
             aria-expanded={open}
             onClick={() => setOpen((prev) => !prev)}
@@ -184,9 +184,7 @@ export function Header() {
       {/* Arrière-plan assombri (ferme au clic) */}
       <div
         className={`fixed inset-0 top-16 z-40 bg-black/40 transition-opacity duration-300 ease-in-out md:hidden ${
-          open
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
+          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
         onClick={() => setOpen(false)}
         aria-hidden="true"
