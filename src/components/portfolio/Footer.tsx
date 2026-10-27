@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowUp, Github, Globe, Linkedin, Mail, MapPin, Phone, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowUp, Github, Globe, Linkedin, Mail, MapPin, Phone, ShieldCheck, Sparkles, Youtube } from "lucide-react";
 import { profile } from "@/content/portfolio";
 
 const logo = { url: "/landry-net-logo.jpg" };
@@ -101,6 +101,16 @@ export function Footer() {
               </li>
               <li>
                 <a
+                  href={profile.youtube}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 text-ink-foreground/70 transition-colors hover:text-white"
+                >
+                  <Youtube size={15} /> YouTube
+                </a>
+              </li>
+              <li>
+                <a
                   href={`mailto:${profile.email}`}
                   className="inline-flex items-center gap-2 text-ink-foreground/70 transition-colors hover:text-white"
                 >
@@ -130,7 +140,7 @@ export function Footer() {
           <button
             type="button"
             onClick={scrollToTop}
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-ink-foreground/70 hover:text-white hover:border-white/20 transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-ink-foreground/70 hover:text-white hover:border-white/20 transition-all duration-200"
           >
             <span>Haut de page</span>
             <ArrowUp size={13} />
