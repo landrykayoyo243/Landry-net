@@ -1,0 +1,29 @@
+# Landry Kayoyo — Portfolio & Projets
+
+> Administrateur systèmes & réseaux et développeur web basé à Lubumbashi (RD Congo).
+> Diplômé en Administration des Systèmes et Réseaux à l'Université Don Bosco de Lubumbashi.
+
+## Projets et Réalisations (3 projets au total)
+
+1. **PayLix — Plateforme de gestion des frais scolaires**
+   - Type : Application Web & Fintech
+   - Description : Simplification du paiement et suivi des frais scolaires avec notifications SMS, reçus automatisés et tableaux de bord financiers.
+   - Lien direct en ligne : https://paylix-gamma.vercel.app/
+   - Étude de cas détaillée : https://landrynet.vercel.app/projets/paylix
+
+2. **MarketNet — Boutiques en ligne avec commandes WhatsApp**
+   - Type : Application Web E-Commerce
+   - Description : Plateforme e-commerce légère permettant aux commerçants de publier leur catalogue et de recevoir les commandes finalisées directement sur WhatsApp.
+   - Lien direct en ligne : https://appmarketnet.vercel.app/
+   - Étude de cas détaillée : https://landrynet.vercel.app/projets/marketnet
+
+3. **Infrastructure haute disponibilité par cluster étendu**
+   - Type : Infrastructure Systèmes & Réseaux (On-premise)
+   - Description : Déploiement d'une architecture résiliente avec basculement automatique (failover) sous Proxmox VE / Cisco / VyOS pour garantir une continuité de service 24/7.
+   - Accès : Infrastructure physique locale / réseau d'entreprise privé (pas de site web public, étude de cas technique consultable sur le portfolio).
+   - Étude de cas détaillée : https://landrynet.vercel.app/projets/cluster-haute-disponibilite
+
+## Contact
+- Email : Kayoyolandry@gmail.com
+- WhatsApp / Téléphone : +243 906 619 747
+- Localisation : Lubumbashi, RD Congo

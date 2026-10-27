@@ -1,9 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Briefcase,
   ChevronRight,
   Cpu,
+  FileText,
   GraduationCap,
   Mail,
   Menu,
@@ -11,7 +13,8 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { nav } from "@/content/portfolio";
+import { nav, profile } from "@/content/portfolio";
+import { cvUrlQuery } from "@/lib/content.queries";
 
 const logo = { url: "/landry-net-logo.jpg" };
 
@@ -32,6 +35,8 @@ export function Header() {
   const [progress, setProgress] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const cvUrlQ = useQuery(cvUrlQuery);
+  const cvUrl = cvUrlQ.data ?? profile.cvUrl;
 
   // Détection du scroll fluide et non-bloquante (100% rAF + passive)
   useEffect(() => {
@@ -135,32 +140,45 @@ export function Header() {
 
         {/* Navigation Desktop */}
         <nav aria-label="Navigation principale" className="hidden items-center gap-7 md:flex">
-          {nav.map((n) =>
-            "to" in n ? (
-              <Link key={n.label} to={n.to} className={desktopLink}>
-                {n.label}
-              </Link>
-            ) : (
-              <Link key={n.label} to="/" hash={n.href.slice(1)} className={desktopLink}>
-                {n.label}
-              </Link>
-            ),
-          )}
+          {nav
+            .filter((n) => ("to" in n ? n.to !== "/contact" : n.href !== "#contact"))
+            .map((n) =>
+              "to" in n ? (
+                <Link key={n.label} to={n.to} className={desktopLink}>
+                  {n.label}
+                </Link>
+              ) : (
+                <Link key={n.label} to="/" hash={n.href.slice(1)} className={desktopLink}>
+                  {n.label}
+                </Link>
+              ),
+            )}
         </nav>
 
         {/* CTA Desktop & Bouton burger Mobile */}
         <div className="flex items-center gap-2.5">
+          {cvUrl && (
+            <span className="hidden md:inline-flex">
+              <Button asChild variant="outline" size="sm" className="rounded-full px-3.5 gap-1.5 border-border hover:border-primary/50 text-foreground">
+                <a href={cvUrl} target="_blank" rel="noopener noreferrer">
+                  <FileText size={14} className="text-primary" />
+                  <span>Mon CV</span>
+                </a>
+              </Button>
+            </span>
+          )}
+
           <span className="hidden sm:inline-flex">
             <Button asChild className="rounded-full bg-gradient-primary px-5 shadow-sm">
               <Link to="/contact">Me contacter</Link>
             </Button>
           </span>
 
-          {/* Bouton burger animé avec ref pour exclusion clic extérieur */}
+          {/* Bouton burger animé (uniquement visible sur mobile/tablette) */}
           <button
             ref={buttonRef}
             type="button"
-            className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-foreground transition-all duration-200 hover:bg-accent active:scale-95 md:h-11 md:w-11"
+            className="relative flex md:hidden h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-foreground transition-all duration-200 hover:bg-accent active:scale-95"
             aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
             aria-expanded={open}
             onClick={() => setOpen((prev) => !prev)}
@@ -244,6 +262,30 @@ export function Header() {
                 </Link>
               );
             })}
+
+            {/* Lien direct de téléchargement du CV sur le menu mobile */}
+            {cvUrl && (
+              <a
+                href={cvUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setOpen(false)}
+                className="group flex items-center justify-between rounded-2xl border border-primary/25 bg-primary/5 px-4 py-3.5 transition-all duration-150 hover:bg-primary/10 active:scale-[0.99] mt-1"
+              >
+                <div className="flex items-center gap-3.5">
+                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+                    <FileText size={19} />
+                  </div>
+                  <span className="font-semibold text-base text-foreground transition-colors group-hover:text-primary">
+                    Télécharger mon CV
+                  </span>
+                </div>
+                <ChevronRight
+                  size={16}
+                  className="text-muted-foreground transition-transform duration-200 group-hover:translate-x-1 group-hover:text-primary"
+                />
+              </a>
+            )}
           </nav>
         </div>
       </div>

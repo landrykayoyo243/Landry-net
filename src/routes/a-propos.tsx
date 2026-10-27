@@ -9,8 +9,8 @@ import { Reveal, SectionHeading } from "@/components/portfolio/Reveal";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { ContentError, ContentLoading } from "@/components/portfolio/ContentState";
-import { experiencesQuery } from "@/lib/content.queries";
-import { aboutPage, conviction, shareImage } from "@/content/portfolio";
+import { cvUrlQuery, experiencesQuery } from "@/lib/content.queries";
+import { aboutPage, conviction, profile } from "@/content/portfolio";
 import { AnimatedStats } from "@/components/portfolio/AnimatedStats";
 import { BrandsMarquee } from "@/components/portfolio/BrandsMarquee";
 import { absoluteUrl } from "@/lib/siteConfig";
@@ -22,6 +22,7 @@ const photo = {
 
 const TITLE = "À propos — Landry Kayoyo | Administrateur systèmes & réseaux | Développeur web";
 const DESC = "Parcours, vision et méthodes de Landry Kayoyo, administrateur systèmes et réseaux et développeur web à Lubumbashi : Université Don Bosco, INPP, CNSS et XSECURITY.";
+const aboutShareImageUrl = absoluteUrl(photo.fallback);
 
 export const Route = createFileRoute("/a-propos")({
   head: () => ({
@@ -33,18 +34,22 @@ export const Route = createFileRoute("/a-propos")({
       { property: "og:type", content: "profile" },
       { property: "og:url", content: absoluteUrl("/a-propos") },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:image", content: shareImage.url },
-      { property: "og:image:secure_url", content: shareImage.url },
+      { property: "og:image", content: aboutShareImageUrl },
+      { property: "og:image:secure_url", content: aboutShareImageUrl },
       { property: "og:image:type", content: "image/jpeg" },
-      { property: "og:image:width", content: String(shareImage.width) },
-      { property: "og:image:height", content: String(shareImage.height) },
-      { property: "og:image:alt", content: shareImage.alt },
-      { name: "twitter:image", content: shareImage.url },
-      { name: "twitter:image:alt", content: shareImage.alt },
+      { property: "og:image:width", content: "800" },
+      { property: "og:image:height", content: "800" },
+      { property: "og:image:alt", content: "Landry Kayoyo — À propos" },
+      { name: "twitter:image", content: aboutShareImageUrl },
+      { name: "twitter:image:alt", content: "Landry Kayoyo — À propos" },
     ],
     links: [{ rel: "canonical", href: absoluteUrl("/a-propos") }],
   }),
-  loader: ({ context }) => context.queryClient.prefetchQuery(experiencesQuery),
+  loader: ({ context }) =>
+    Promise.all([
+      context.queryClient.prefetchQuery(experiencesQuery),
+      context.queryClient.prefetchQuery(cvUrlQuery),
+    ]),
   component: APropos,
 });
 
@@ -55,6 +60,8 @@ const valueIcons = [ShieldCheck, Lock, FileText, Lightbulb] as const;
 
 function APropos() {
   const timelineQ = useQuery(experiencesQuery);
+  const cvUrlQ = useQuery(cvUrlQuery);
+  const cvUrl = cvUrlQ.data ?? profile.cvUrl;
 
   return (
     <div id="top" className="bg-background text-foreground">
@@ -91,11 +98,21 @@ function APropos() {
                 {aboutPage.intro}
               </p>
 
-              {/* CTAs réécrits avec contraste maximal */}
+              {/* CTAs réécrits avec contraste maximal et bouton CV synchronisé */}
               <div className="mt-8 flex flex-wrap items-center gap-3">
                 <Link to="/contact" className={btnPrimary}>
                   Échanger sur votre projet <ArrowRight size={16} />
                 </Link>
+                {cvUrl && (
+                  <a
+                    href={cvUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-md transition duration-300 hover:bg-white/20 hover:border-white/40 ${focus}`}
+                  >
+                    <FileText size={16} /> Télécharger mon CV
+                  </a>
+                )}
                 <a
                   href="#recit"
                   className={`inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-md transition duration-300 hover:bg-white/20 hover:border-white/40 ${focus}`}

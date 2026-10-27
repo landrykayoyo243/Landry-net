@@ -6,6 +6,7 @@ import {
   Camera,
   CheckCircle2,
   Code2,
+  FileText,
   GraduationCap,
   HelpCircle,
   Layers,
@@ -82,6 +83,7 @@ export const Route = createFileRoute("/")({
       context.queryClient.prefetchQuery(experiencesQuery),
       context.queryClient.prefetchQuery(certificationsQuery),
       context.queryClient.prefetchQuery(immersionQuery),
+      context.queryClient.prefetchQuery(cvUrlQuery),
     ]),
   component: Index,
 });
@@ -119,7 +121,7 @@ const FAQS = [
   },
 ] as const;
 
-function Hero() {
+function Hero({ cvUrl }: { cvUrl: string | null }) {
   return (
     <section className="relative overflow-hidden bg-hero text-ink-foreground">
       <div className="bg-grid pointer-events-none absolute inset-0" aria-hidden />
@@ -159,9 +161,20 @@ function Hero() {
               <Link to="/contact" className={btnPrimary}>
                 Échangeons sur votre projet <ArrowRight size={16} />
               </Link>
-              <a href="#projets" className={btnGhostDark}>
-                Voir mes réalisations ↓
-              </a>
+              {cvUrl ? (
+                <a
+                  href={cvUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={btnGhostDark}
+                >
+                  <FileText size={16} /> Télécharger mon CV
+                </a>
+              ) : (
+                <a href="#projets" className={btnGhostDark}>
+                  Voir mes réalisations ↓
+                </a>
+              )}
             </div>
           </div>
 
@@ -214,9 +227,11 @@ function Index() {
   const timelineQ = useQuery(experiencesQuery);
   const certsQ = useQuery(certificationsQuery);
   const immersionQ = useQuery(immersionQuery);
+  const cvUrlQ = useQuery(cvUrlQuery);
   const projects = projectsQ.data ?? [];
   const featured = projects.filter((p) => p.featured);
   const immersionItems = immersionQ.data ?? [];
+  const cvUrl = cvUrlQ.data ?? profile.cvUrl;
 
   return (
     <div id="top" className="bg-background text-foreground">
@@ -228,7 +243,7 @@ function Index() {
       </a>
       <Header />
       <main id="main">
-        <Hero />
+        <Hero cvUrl={cvUrl} />
 
         {/* Conviction & Philosophie */}
         <section className="relative overflow-hidden border-b border-border bg-card py-14 md:py-20">
@@ -277,9 +292,6 @@ function Index() {
                       <Link to="/a-propos">
                         Lire mon histoire complète <ArrowRight size={16} />
                       </Link>
-                    </Button>
-                    <Button asChild size="lg" variant="outline" className="rounded-full">
-                      <a href="#competences">Découvrir mes compétences</a>
                     </Button>
                   </div>
                 </div>
@@ -436,15 +448,8 @@ function Index() {
                     variant="outline"
                     className="rounded-full px-8 hover:bg-card"
                   >
-                    <Link to="/projets">
-                      Voir tous les projets (+
-                      <span className="md:hidden">
-                        {projects.length - Math.min(featured.length, 3)}
-                      </span>
-                      <span className="hidden md:inline">
-                        {projects.length - Math.min(featured.length, 4)}
-                      </span>
-                      )
+                    <Link to="/projets" className="flex items-center gap-2">
+                      Voir tous les projets
                       <ArrowRight size={16} />
                     </Link>
                   </Button>

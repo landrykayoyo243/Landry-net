@@ -25,4 +25,4 @@ Disallow: /connexion-requise
 Disallow: /acces-refuse
 Allow: /
 
-Sitemap: http://localhost:8080/sitemap.xml
+Sitemap: https://landrynet.vercel.app/sitemap.xml

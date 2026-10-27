@@ -157,14 +157,14 @@ function ProjectDetail() {
           {p.external_url && (
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <Button asChild size="lg" className="rounded-full bg-gradient-primary gap-2 shadow-sm">
-                <a href={p.external_url} target="_blank" rel="noreferrer">
+                <a href={p.external_url} target="_blank" rel="noopener noreferrer">
                   <Globe size={18} /> {copy.live} <ArrowUpRight size={16} />
                 </a>
               </Button>
               <a
                 href={p.external_url}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="break-all text-xs sm:text-sm text-muted-foreground underline-offset-4 hover:underline hover:text-foreground transition-colors"
               >
                 {p.external_url}
