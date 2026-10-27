@@ -81,7 +81,7 @@ export const conviction = {
 // Contenu de la page dédiée /a-propos.
 export const aboutPage = {
   back: "Retour à l'accueil",
-  readStory: "Lire mon histoire complète",
+  readStory: "Lire mon histoire",
   eyebrow: "Mon histoire · Ma vision",
   title: "Derrière les réseaux et le code, une exigence de fiabilité.",
   intro:
