@@ -40,6 +40,7 @@ export const profile = {
   whatsapp: whatsappUrl,
   linkedin: "https://cd.linkedin.com/in/landry-kayoyo-48141534b",
   github: "https://github.com/landrykayoyo",
+  youtube: "https://share.google/6fI4VCZ680YWEZgCY",
   location: "Lubumbashi, RD Congo",
   cvUrl: cv.url,
 };
@@ -92,31 +93,31 @@ export const aboutPage = {
       number: "01",
       tag: "Vocation & Rigueur académique",
       title: "Les fondations à l'Université Don Bosco",
-      text: "Diplômé en Administration des Systèmes et Réseaux à l'Université Don Bosco de Lubumbashi, j'ai forgé mes bases autour de principes stricts : la haute disponibilité par cluster, la redondance des liaisons et la sécurité dès la conception. Là où beaucoup découvrent l'informatique par la surface, j'ai appris à maîtriser les couches profondes — de la trame Ethernet au routage dynamique.",
+      text: "Diplômé en Administration des Systèmes et Réseaux à l'Université Don Bosco de Lubumbashi, j'ai forgé mes bases autour de principes stricts : la haute disponibilité par cluster, la documentation claire et l'analyse rigoureuse du besoin.",
     },
     {
       number: "02",
       tag: "Épreuve du terrain critique",
       title: "L'apprentissage opérationnel : INPP & CNSS",
-      text: "Mes immersions au sein de l'INPP (Institut National de Préparation Professionnelle) et de la CNSS (Caisse Nationale de Sécurité Sociale) m'ont confronté aux réalités du terrain d'entreprise : maintenir des services vitaux 24/7, assister les utilisateurs avec bienveillance sans jargon, et neutraliser les pannes avant qu'elles n'impactent l'activité économique.",
+      text: "Mes immersions au sein de l'INPP (Institut National de Préparation Professionnelle) et de la CNSS (Caisse Nationale de Sécurité Sociale) m'ont confronté aux réalités du terrain : infrastructures sensibles, maintenance critique et continuité de service.",
     },
     {
       number: "03",
       tag: "Pratique en production",
       title: "XSECURITY & Le développement web utile",
-      text: "Aujourd'hui membre de l'équipe technique de XSECURITY à Lubumbashi, j'accompagne les entreprises locales dans la sécurisation de leurs réseaux, l'administration de leurs serveurs et la création d'applications web modernes (comme PayLix). Cette double maîtrise — matériel/réseau et code applicatif — me permet de livrer des solutions cohérentes sans intermédiaire ni rupture de responsabilité.",
+      text: "Aujourd'hui membre de l'équipe technique de XSECURITY à Lubumbashi, j'accompagne les entreprises locales dans la sécurisation de leurs réseaux, l'administration de leurs serveurs et la création d'applications utiles.",
     },
     {
       number: "04",
       tag: "Engagement & Vision",
       title: "Construire des outils qui durent",
-      text: "En République Démocratique du Congo, les défis d'infrastructure exigent du pragmatisme : des réseaux tolérants aux pannes, des données protégées et des applications rapides même avec une bande passante contrainte. Ma mission est de transformer la complexité technologique en sérénité opérationnelle pour chaque organisation qui me fait confiance.",
+      text: "En République Démocratique du Congo, les défis d'infrastructure exigent du pragmatisme : des réseaux tolérants aux pannes, des données protégées et des applications rapides mais robustes.",
     },
   ],
   story: [
     "Administrateur systèmes & réseaux et développeur web à Lubumbashi, j'interviens au cœur des infrastructures numériques pour garantir leur continuité, leur sécurité et leur efficacité.",
-    "Diplômé en administration des systèmes et réseaux de l'Université Don Bosco de Lubumbashi, j'ai forgé mes compétences autour des architectures résilientes et de la haute disponibilité par cluster. Mes expériences pratiques au sein de l'INPP et de la CNSS m'ont confronté aux réalités du terrain : maintenir des services critiques, assister les utilisateurs et anticiper les pannes avant qu'elles n'impactent l'activité.",
-    "Aujourd'hui membre de l'équipe technique de XSECURITY, j'accompagne les entreprises dans l'installation de réseaux fiables, la sécurisation de leurs données et la création d'applications web modernes (comme PayLix). Ma double maîtrise des réseaux et du code me permet de livrer des solutions cohérentes de bout en bout, sans intermédiaire.",
+    "Diplômé en administration des systèmes et réseaux de l'Université Don Bosco de Lubumbashi, j'ai forgé mes compétences autour des architectures résilientes et de la haute disponibilité.",
+    "Aujourd'hui membre de l'équipe technique de XSECURITY, j'accompagne les entreprises dans l'installation de réseaux fiables, la sécurisation de leurs données et la création d'applications utiles.",
     "Mon engagement est simple : transformer la complexité technique en outils stables, clairs et immédiatement utiles à votre organisation.",
   ],
   valuesTitle: "Ce qui guide chacune de mes missions",
@@ -204,7 +205,7 @@ export const languages = [
 
 // À remplacer par de vrais témoignages.
 export const testimonials = [
-  { quote: "Landry est rigoureux et toujours prêt à apprendre. Il a su s'intégrer rapidement à l'équipe et prendre en charge le support aux utilisateurs.", name: "Jean Ngoy", role: "Encadreur de stage" },
+  { quote: "Landry est rigoureux et toujours prêt à apprendre. Il a su s'intégrer rapidement à l'équipe et prendre en charge le support aux utilisateurs.", name: "Jean Ngoy", role: "Encadreur, XSECURITY" },
   { quote: "Un technicien sérieux qui comprend à la fois le réseau et le développement. Il explique clairement ses choix.", name: "Don Moen", role: "Collègue, XSECURITY" },
   { quote: "Travail soigné, délais respectés et une vraie envie de bien faire. Je le recommande.", name: "Leader Bokassa", role: "Client" },
 ];
