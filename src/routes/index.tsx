@@ -290,7 +290,7 @@ function Index() {
                   <div className="mt-8 flex flex-wrap gap-4">
                     <Button asChild size="lg" className="rounded-full bg-gradient-primary">
                       <Link to="/a-propos">
-                        Lire mon histoire complète <ArrowRight size={16} />
+                        Lire mon histoire <ArrowRight size={16} />
                       </Link>
                     </Button>
                   </div>
