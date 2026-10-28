@@ -10,6 +10,9 @@ import {
   Send,
   Trash2,
   X,
+  Sparkles,
+  Loader2,
+  Wand2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -22,6 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { adminMessagesQuery, type ContactMessageRow } from "@/lib/admin-data";
 import { supabase } from "@/integrations/supabase/client";
+import { adminApi } from "@/lib/admin-api-client";
 
 export const Route = createFileRoute("/admin/messages")({
   component: AdminMessagesPage,
@@ -37,6 +41,9 @@ export function AdminMessagesPage() {
   const [replyBody, setReplyBody] = useState("");
   const [replySubject, setReplySubject] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+  const [isSummarizingAi, setIsSummarizingAi] = useState(false);
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: "read" | "replied" | "unread" }) => {
@@ -79,6 +86,7 @@ export function AdminMessagesPage() {
     setSelectedMessage(m);
     setShowReplyForm(false);
     setReplyBody("");
+    setAiSummary(null);
     setReplySubject("Re: Contact Portfolio - Landry Kayoyo");
     if (m.status === "unread") updateStatusMutation.mutate({ id: m.id, status: "read" });
   }
@@ -87,6 +95,81 @@ export function AdminMessagesPage() {
     setSelectedMessage(null);
     setShowReplyForm(false);
     setReplyBody("");
+    setAiSummary(null);
+  }
+
+  async function handleGenerateAiReply() {
+    if (!selectedMessage) return;
+    setIsGeneratingAi(true);
+    try {
+      const prompt = `Tu es l'assistant de Landry Kayoyo, Développeur Full-Stack & DevOps.
+Voici un message reçu via le formulaire de contact du portfolio :
+- Expéditeur : ${selectedMessage.name} (${selectedMessage.email})
+- Message reçu :
+"""
+${selectedMessage.message}
+"""
+
+Rédige une proposition de réponse par email professionnelle, polie, chaleureuse et concise en français.
+Consignes :
+1. Salue poliment ("Bonjour ${selectedMessage.name},")
+2. Remercie pour le message et l'intérêt porté au profil de Landry.
+3. Réponds de façon adaptée à la demande.
+4. Propose d'échanger prochainement par email ou par appel.
+5. Termine par :
+"Bien cordialement,
+Landry Kayoyo
+Développeur Full-Stack & DevOps"
+
+Fournis UNIQUEMENT le texte de l'email prêt à l'envoi sans aucun texte d'accompagnement.`;
+
+      const res = await adminApi.generateAiText({
+        prompt,
+        isContactMessage: true,
+        temperature: 0.6,
+      });
+
+      setReplyBody(res.text.trim());
+      setShowReplyForm(true);
+      toast.success("Proposition de réponse générée par l'IA !");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Erreur de génération IA";
+      toast.error(msg, { duration: 6000 });
+    } finally {
+      setIsGeneratingAi(false);
+    }
+  }
+
+  async function handleSummarizeAi() {
+    if (!selectedMessage) return;
+    setIsSummarizingAi(true);
+    try {
+      const prompt = `Analyse ce message de contact reçu sur le portfolio de Landry Kayoyo :
+Expéditeur : ${selectedMessage.name} (${selectedMessage.email})
+Message :
+"""
+${selectedMessage.message}
+"""
+
+Donne une analyse ultra-concise en 3 lignes maximum au format exact suivant :
+• Intention : (ex: Proposition d'embauche CDI, Mission freelance, Demande de devis, Question technique, Démarchage)
+• Sujet clé : (le besoin ou projet en 1 phrase claire)
+• Recommandation : (action conseillée pour Landry)`;
+
+      const res = await adminApi.generateAiText({
+        prompt,
+        isContactMessage: true,
+        temperature: 0.3,
+      });
+
+      setAiSummary(res.text.trim());
+      toast.success("Analyse IA réalisée !");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Erreur d'analyse IA";
+      toast.error(msg, { duration: 6000 });
+    } finally {
+      setIsSummarizingAi(false);
+    }
   }
 
   function openReplyForm() {
@@ -248,7 +331,44 @@ export function AdminMessagesPage() {
 
             {/* Fil de conversation */}
             <div className="px-6 py-4 space-y-3 max-h-72 overflow-y-auto">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Conversation</p>
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Conversation</p>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    disabled={isSummarizingAi}
+                    onClick={handleSummarizeAi}
+                    className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/5 px-2.5 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/10 transition-colors"
+                  >
+                    {isSummarizingAi ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />}
+                    <span>{aiSummary ? "Réanalyser IA" : "Analyser IA"}</span>
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isGeneratingAi}
+                    onClick={handleGenerateAiReply}
+                    className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary hover:bg-primary/20 transition-colors"
+                  >
+                    {isGeneratingAi ? <Loader2 size={11} className="animate-spin" /> : <Wand2 size={11} />}
+                    <span>Suggérer réponse IA</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Résumé IA si présent */}
+              {aiSummary && (
+                <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-xs text-foreground space-y-1 animate-in fade-in-50">
+                  <div className="flex items-center justify-between font-semibold text-primary">
+                    <span className="flex items-center gap-1.5"><Sparkles size={13} /> Synthèse IA du message</span>
+                    <button type="button" onClick={() => setAiSummary(null)} className="text-muted-foreground hover:text-foreground">
+                      <X size={12} />
+                    </button>
+                  </div>
+                  <div className="whitespace-pre-wrap leading-relaxed text-muted-foreground">
+                    {aiSummary}
+                  </div>
+                </div>
+              )}
 
               {/* Message du visiteur */}
               <div className="flex gap-2.5">
@@ -288,7 +408,18 @@ export function AdminMessagesPage() {
             {showReplyForm ? (
               <div className="px-6 pb-6 space-y-3 border-t border-border pt-4">
                 <div className="flex items-center justify-between">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Votre reponse</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Votre reponse</p>
+                    <button
+                      type="button"
+                      disabled={isGeneratingAi}
+                      onClick={handleGenerateAiReply}
+                      className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary hover:bg-primary/20 transition-colors"
+                    >
+                      {isGeneratingAi ? <Loader2 size={10} className="animate-spin" /> : <Wand2 size={10} />}
+                      <span>Aide IA</span>
+                    </button>
+                  </div>
                   <button type="button" onClick={() => { setShowReplyForm(false); setReplyBody(""); }} className="text-muted-foreground hover:text-foreground transition-colors">
                     <X size={15} />
                   </button>

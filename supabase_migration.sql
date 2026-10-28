@@ -236,3 +236,113 @@ DROP POLICY IF EXISTS "Admins delete contact_messages" ON public.contact_message
 CREATE POLICY "Admins delete contact_messages" ON public.contact_messages FOR DELETE TO authenticated
   USING (public.has_role(auth.uid(), 'admin'));
 
+-- ==============================================================================
+-- 6. SECRETS CHIFFRÉS, JOURNAL D'AUDIT ET MODULE IA
+-- ==============================================================================
+
+CREATE TABLE IF NOT EXISTS public.app_secrets (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL UNIQUE,
+  label text NOT NULL,
+  value_encrypted text NOT NULL,
+  iv text NOT NULL,
+  tag text NOT NULL,
+  last4 text NOT NULL,
+  key_version integer NOT NULL DEFAULT 1,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  updated_by uuid REFERENCES auth.users(id) ON DELETE SET NULL
+);
+
+GRANT ALL ON public.app_secrets TO service_role;
+REVOKE ALL ON public.app_secrets FROM anon, authenticated;
+ALTER TABLE public.app_secrets ENABLE ROW LEVEL SECURITY;
+
+DROP TRIGGER IF EXISTS app_secrets_updated_at ON public.app_secrets;
+CREATE TRIGGER app_secrets_updated_at BEFORE UPDATE ON public.app_secrets
+  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+CREATE TABLE IF NOT EXISTS public.audit_log (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+  user_email text,
+  action text NOT NULL,
+  target text NOT NULL,
+  result text NOT NULL DEFAULT 'success' CHECK (result IN ('success', 'failure')),
+  details jsonb NOT NULL DEFAULT '{}'::jsonb,
+  approx_country text DEFAULT 'Inconnu',
+  approx_device text DEFAULT 'Inconnu',
+  ip_masked text DEFAULT 'anonyme'
+);
+
+CREATE INDEX IF NOT EXISTS idx_audit_log_created_at ON public.audit_log (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_log_action ON public.audit_log (action);
+
+GRANT ALL ON public.audit_log TO service_role;
+GRANT SELECT ON public.audit_log TO authenticated;
+REVOKE INSERT, UPDATE, DELETE ON public.audit_log FROM anon, authenticated;
+ALTER TABLE public.audit_log ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Admins read audit_log" ON public.audit_log;
+CREATE POLICY "Admins read audit_log" ON public.audit_log FOR SELECT TO authenticated
+  USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE TABLE IF NOT EXISTS public.ai_usage_daily (
+  day date PRIMARY KEY DEFAULT CURRENT_DATE,
+  request_count integer NOT NULL DEFAULT 0,
+  token_count integer NOT NULL DEFAULT 0,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+GRANT ALL ON public.ai_usage_daily TO service_role;
+GRANT SELECT ON public.ai_usage_daily TO authenticated;
+REVOKE INSERT, UPDATE, DELETE ON public.ai_usage_daily FROM anon, authenticated;
+ALTER TABLE public.ai_usage_daily ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Admins read ai_usage_daily" ON public.ai_usage_daily;
+CREATE POLICY "Admins read ai_usage_daily" ON public.ai_usage_daily FOR SELECT TO authenticated
+  USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE TABLE IF NOT EXISTS public.ai_skills (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  slug text NOT NULL UNIQUE,
+  title text NOT NULL,
+  description text NOT NULL DEFAULT '',
+  content text NOT NULL,
+  is_system boolean NOT NULL DEFAULT false,
+  is_active boolean NOT NULL DEFAULT true,
+  version integer NOT NULL DEFAULT 1,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+GRANT ALL ON public.ai_skills TO service_role;
+GRANT SELECT ON public.ai_skills TO authenticated;
+REVOKE INSERT, UPDATE, DELETE ON public.ai_skills FROM anon, authenticated;
+ALTER TABLE public.ai_skills ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Admins read ai_skills" ON public.ai_skills;
+CREATE POLICY "Admins read ai_skills" ON public.ai_skills FOR SELECT TO authenticated
+  USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE TABLE IF NOT EXISTS public.ai_skill_versions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  skill_id uuid REFERENCES public.ai_skills(id) ON DELETE CASCADE NOT NULL,
+  version integer NOT NULL,
+  title text NOT NULL,
+  content text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  created_by uuid REFERENCES auth.users(id) ON DELETE SET NULL
+);
+
+GRANT ALL ON public.ai_skill_versions TO service_role;
+GRANT SELECT ON public.ai_skill_versions TO authenticated;
+REVOKE INSERT, UPDATE, DELETE ON public.ai_skill_versions FROM anon, authenticated;
+ALTER TABLE public.ai_skill_versions ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Admins read ai_skill_versions" ON public.ai_skill_versions;
+CREATE POLICY "Admins read ai_skill_versions" ON public.ai_skill_versions FOR SELECT TO authenticated
+  USING (public.has_role(auth.uid(), 'admin'));
+
+

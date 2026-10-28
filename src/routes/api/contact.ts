@@ -45,13 +45,31 @@ export const Route = createFileRoute("/api/contact")({
               .filter((line) => line !== null)
               .join("\n");
 
-            // Insère avec repli automatique compatible
             await supabase.from("contact_messages").insert({
               name,
               email,
               message: formattedMessage,
               status: "unread",
             });
+
+            // Notification instantanée via Telegram
+            try {
+              const { sendTelegramNotification } = await import("@/lib/telegram.server");
+              const tgMsg = [
+                "<b>[Nouveau message reçu sur le portfolio]</b>",
+                "",
+                `<b>Expéditeur :</b> ${escapeHtml(name)}`,
+                `<b>Email :</b> ${escapeHtml(email)}`,
+                phone ? `<b>Téléphone :</b> ${escapeHtml(phone)}` : null,
+                `<b>Objet :</b> ${escapeHtml(subject)}`,
+                "",
+                "<b>Message :</b>",
+                escapeHtml(message.slice(0, 1200)),
+              ].filter(Boolean).join("\n");
+              void sendTelegramNotification(tgMsg);
+            } catch {
+              // Ne bloque pas la soumission si Telegram n'est pas joignable
+            }
           } catch (dbErr) {
             console.error("Erreur enregistrement message en base :", dbErr);
           }

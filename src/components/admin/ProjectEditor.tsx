@@ -16,6 +16,7 @@ import { ConfirmDelete, FieldError } from "@/components/admin/ui";
 import { ProjectBody, firstImage } from "@/components/portfolio/ProjectBody";
 import { blockLabels, createBlock, newId, parseBlocks, safeUrl, slugify, starterTemplate, type Block, type BlockType, type HeadingBlock, type MediaBlock, type MediaItem } from "@/lib/blocks";
 import { uploadProjectImage, type ProjectRow } from "@/lib/admin-data";
+import { ProjectAiAssistant } from "@/components/admin/ProjectAiAssistant";
 
 type Form = {
   title: string; slug: string; tag: string; intro: string; summary: string;
@@ -66,6 +67,7 @@ export function ProjectEditor({
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [preview, setPreview] = useState(false);
+  const [showAiAssistant, setShowAiAssistant] = useState(false);
   const [deletingBlock, setDeletingBlock] = useState<Block | null>(null);
   const savingRef = useRef(false);
 
@@ -240,6 +242,14 @@ export function ProjectEditor({
       {asModal && onClose && (
         <Button type="button" variant="outline" className="min-h-10 text-xs sm:text-sm flex-1 sm:flex-none" onClick={onClose}>Annuler</Button>
       )}
+      <Button
+        type="button"
+        variant="outline"
+        className="min-h-10 text-xs sm:text-sm flex-1 sm:flex-none gap-1.5 border-primary/40 text-primary hover:bg-primary/10"
+        onClick={() => setShowAiAssistant(true)}
+      >
+        <Sparkles size={15} /><span>Assistant IA</span>
+      </Button>
       <Button type="button" variant="outline" className="min-h-10 text-xs sm:text-sm flex-1 sm:flex-none gap-1.5" onClick={() => setPreview(true)}>
         <Eye size={15} /><span>Aperçu</span>
       </Button>
@@ -277,6 +287,21 @@ export function ProjectEditor({
             setDeletingBlock(null);
           }
         }}
+      />
+
+      <ProjectAiAssistant
+        open={showAiAssistant}
+        onOpenChange={setShowAiAssistant}
+        projectData={{
+          title: form.title,
+          tag: form.tag,
+          intro: form.intro,
+          summary: form.summary,
+          technologies: form.technologies,
+        }}
+        onApplySummary={(intro, summary) => update({ intro, summary })}
+        onApplyTechnologies={(technologies) => update({ technologies })}
+        onApplyCaseStudyBlocks={(blocks) => update({ content: [...form.content, ...blocks] })}
       />
     </>
   );

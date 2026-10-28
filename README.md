@@ -19,12 +19,15 @@ Landry Net est un site portfolio destiné à présenter :
 - Portfolio moderne et responsive
 - Page d'accueil orientée marketing et repositionnement professionnel
 - Pages “À propos”, “Projets”, “Contact”
-- Gestion de contenus via une interface d'administration
+- Gestion de contenus via une interface d'administration avec mode Brouillon / Publié
+- Module Assistant IA (Google Gemini) : assistance à la rédaction d'études de cas, vulgarisation technique et réponses professionnelles (sans émoji)
+- Coffre-fort de secrets chiffré en AES-256-GCM et journal d'audit avec masquage IP
+- Alertes instantanées par bot Telegram lors de la réception d'un message de contact
 - Stockage d'images via Cloudinary
 - Base de données gérée avec Supabase / Postgres
 - Formulaire de contact avec envoi d'email via SMTP
 - SEO et métadonnées Open Graph
-- Tests unitaires avec Vitest
+- Tests unitaires et d'intégration avec Vitest
 
 ## Stack technique
 

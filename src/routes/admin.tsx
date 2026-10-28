@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, redirect, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Award, Briefcase, Building2, Camera, FileText, FolderKanban, LayoutDashboard, LogOut, Menu, MessageSquare, UserCog } from "lucide-react";
+import { Award, BrainCircuit, Briefcase, Building2, Camera, FileText, FolderKanban, KeyRound, LayoutDashboard, LogOut, Menu, MessageSquare, ShieldCheck, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Toaster } from "@/components/ui/sonner";
@@ -34,6 +34,9 @@ const links = [
   { to: "/admin/certifications", label: "Certifications", icon: Award },
   { to: "/admin/organisations", label: "Organisations", icon: Building2 },
   { to: "/admin/medias", label: "Mon CV", icon: FileText },
+  { to: "/admin/ia", label: "Assistant IA", icon: BrainCircuit },
+  { to: "/admin/parametres", label: "Paramètres & Secrets", icon: KeyRound },
+  { to: "/admin/journal", label: "Journal d'audit", icon: ShieldCheck },
   { to: "/admin/compte", label: "Mon compte", icon: UserCog },
 ] as const;
 

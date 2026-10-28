@@ -20,9 +20,11 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminCertificationsRouteImport } from './routes/admin.certifications'
 import { Route as AdminCompteRouteImport } from './routes/admin.compte'
 import { Route as AdminImmersionRouteImport } from './routes/admin.immersion'
+import { Route as AdminJournalRouteImport } from './routes/admin.journal'
 import { Route as AdminMediasRouteImport } from './routes/admin.medias'
 import { Route as AdminMessagesRouteImport } from './routes/admin.messages'
 import { Route as AdminOrganisationsRouteImport } from './routes/admin.organisations'
+import { Route as AdminParametresRouteImport } from './routes/admin.parametres'
 import { Route as AdminParcoursRouteImport } from './routes/admin.parcours'
 import { Route as AdminLoginRouteImport } from './routes/admin_.login'
 import { Route as ApiCloudinarySignRouteImport } from './routes/api/cloudinary-sign'
@@ -30,9 +32,18 @@ import { Route as ApiContactRouteImport } from './routes/api/contact'
 import { Route as ApiReplyRouteImport } from './routes/api/reply'
 import { Route as ProjetsIndexRouteImport } from './routes/projets.index'
 import { Route as ProjetsSlugRouteImport } from './routes/projets.$slug'
+import { Route as AdminIaIndexRouteImport } from './routes/admin.ia.index'
+import { Route as AdminIaAssistantRouteImport } from './routes/admin.ia.assistant'
+import { Route as AdminIaSkillsRouteImport } from './routes/admin.ia.skills'
 import { Route as AdminProjetsIndexRouteImport } from './routes/admin.projets.index'
 import { Route as AdminProjetsIdRouteImport } from './routes/admin.projets.$id'
 import { Route as AdminProjetsNouveauRouteImport } from './routes/admin.projets.nouveau'
+import { Route as ApiAdminAiRouteImport } from './routes/api/admin/ai'
+import { Route as ApiAdminAssistantRouteImport } from './routes/api/admin/assistant'
+import { Route as ApiAdminAuditRouteImport } from './routes/api/admin/audit'
+import { Route as ApiAdminSecretsRouteImport } from './routes/api/admin/secrets'
+import { Route as ApiAdminSkillsRouteImport } from './routes/api/admin/skills'
+import { Route as ApiAdminTelegramRouteImport } from './routes/api/admin/telegram'
 import { Route as ApiPublicProjectImagesSplatRouteImport } from './routes/api/public/project-images.$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -90,6 +101,11 @@ const AdminImmersionRoute = AdminImmersionRouteImport.update({
   path: '/immersion',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminJournalRoute = AdminJournalRouteImport.update({
+  id: '/journal',
+  path: '/journal',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminMediasRoute = AdminMediasRouteImport.update({
   id: '/medias',
   path: '/medias',
@@ -103,6 +119,11 @@ const AdminMessagesRoute = AdminMessagesRouteImport.update({
 const AdminOrganisationsRoute = AdminOrganisationsRouteImport.update({
   id: '/organisations',
   path: '/organisations',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminParametresRoute = AdminParametresRouteImport.update({
+  id: '/parametres',
+  path: '/parametres',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminParcoursRoute = AdminParcoursRouteImport.update({
@@ -140,6 +161,21 @@ const ProjetsSlugRoute = ProjetsSlugRouteImport.update({
   path: '/projets/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIaIndexRoute = AdminIaIndexRouteImport.update({
+  id: '/ia/',
+  path: '/ia/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminIaAssistantRoute = AdminIaAssistantRouteImport.update({
+  id: '/ia/assistant',
+  path: '/ia/assistant',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminIaSkillsRoute = AdminIaSkillsRouteImport.update({
+  id: '/ia/skills',
+  path: '/ia/skills',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminProjetsIndexRoute = AdminProjetsIndexRouteImport.update({
   id: '/projets/',
   path: '/projets/',
@@ -154,6 +190,36 @@ const AdminProjetsNouveauRoute = AdminProjetsNouveauRouteImport.update({
   id: '/projets/nouveau',
   path: '/projets/nouveau',
   getParentRoute: () => AdminRoute,
+} as any)
+const ApiAdminAiRoute = ApiAdminAiRouteImport.update({
+  id: '/api/admin/ai',
+  path: '/api/admin/ai',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminAssistantRoute = ApiAdminAssistantRouteImport.update({
+  id: '/api/admin/assistant',
+  path: '/api/admin/assistant',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminAuditRoute = ApiAdminAuditRouteImport.update({
+  id: '/api/admin/audit',
+  path: '/api/admin/audit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminSecretsRoute = ApiAdminSecretsRouteImport.update({
+  id: '/api/admin/secrets',
+  path: '/api/admin/secrets',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminSkillsRoute = ApiAdminSkillsRouteImport.update({
+  id: '/api/admin/skills',
+  path: '/api/admin/skills',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminTelegramRoute = ApiAdminTelegramRouteImport.update({
+  id: '/api/admin/telegram',
+  path: '/api/admin/telegram',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicProjectImagesSplatRoute =
   ApiPublicProjectImagesSplatRouteImport.update({
@@ -173,9 +239,11 @@ export interface FileRoutesByFullPath {
   '/admin/certifications': typeof AdminCertificationsRoute
   '/admin/compte': typeof AdminCompteRoute
   '/admin/immersion': typeof AdminImmersionRoute
+  '/admin/journal': typeof AdminJournalRoute
   '/admin/medias': typeof AdminMediasRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/organisations': typeof AdminOrganisationsRoute
+  '/admin/parametres': typeof AdminParametresRoute
   '/admin/parcours': typeof AdminParcoursRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/cloudinary-sign': typeof ApiCloudinarySignRoute
@@ -184,8 +252,17 @@ export interface FileRoutesByFullPath {
   '/projets/$slug': typeof ProjetsSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/projets/': typeof ProjetsIndexRoute
+  '/admin/ia/assistant': typeof AdminIaAssistantRoute
+  '/admin/ia/skills': typeof AdminIaSkillsRoute
   '/admin/projets/$id': typeof AdminProjetsIdRoute
   '/admin/projets/nouveau': typeof AdminProjetsNouveauRoute
+  '/api/admin/ai': typeof ApiAdminAiRoute
+  '/api/admin/assistant': typeof ApiAdminAssistantRoute
+  '/api/admin/audit': typeof ApiAdminAuditRoute
+  '/api/admin/secrets': typeof ApiAdminSecretsRoute
+  '/api/admin/skills': typeof ApiAdminSkillsRoute
+  '/api/admin/telegram': typeof ApiAdminTelegramRoute
+  '/admin/ia/': typeof AdminIaIndexRoute
   '/admin/projets/': typeof AdminProjetsIndexRoute
   '/api/public/project-images/$': typeof ApiPublicProjectImagesSplatRoute
 }
@@ -199,9 +276,11 @@ export interface FileRoutesByTo {
   '/admin/certifications': typeof AdminCertificationsRoute
   '/admin/compte': typeof AdminCompteRoute
   '/admin/immersion': typeof AdminImmersionRoute
+  '/admin/journal': typeof AdminJournalRoute
   '/admin/medias': typeof AdminMediasRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/organisations': typeof AdminOrganisationsRoute
+  '/admin/parametres': typeof AdminParametresRoute
   '/admin/parcours': typeof AdminParcoursRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/cloudinary-sign': typeof ApiCloudinarySignRoute
@@ -210,8 +289,17 @@ export interface FileRoutesByTo {
   '/projets/$slug': typeof ProjetsSlugRoute
   '/admin': typeof AdminIndexRoute
   '/projets': typeof ProjetsIndexRoute
+  '/admin/ia/assistant': typeof AdminIaAssistantRoute
+  '/admin/ia/skills': typeof AdminIaSkillsRoute
   '/admin/projets/$id': typeof AdminProjetsIdRoute
   '/admin/projets/nouveau': typeof AdminProjetsNouveauRoute
+  '/api/admin/ai': typeof ApiAdminAiRoute
+  '/api/admin/assistant': typeof ApiAdminAssistantRoute
+  '/api/admin/audit': typeof ApiAdminAuditRoute
+  '/api/admin/secrets': typeof ApiAdminSecretsRoute
+  '/api/admin/skills': typeof ApiAdminSkillsRoute
+  '/api/admin/telegram': typeof ApiAdminTelegramRoute
+  '/admin/ia': typeof AdminIaIndexRoute
   '/admin/projets': typeof AdminProjetsIndexRoute
   '/api/public/project-images/$': typeof ApiPublicProjectImagesSplatRoute
 }
@@ -227,9 +315,11 @@ export interface FileRoutesById {
   '/admin/certifications': typeof AdminCertificationsRoute
   '/admin/compte': typeof AdminCompteRoute
   '/admin/immersion': typeof AdminImmersionRoute
+  '/admin/journal': typeof AdminJournalRoute
   '/admin/medias': typeof AdminMediasRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/organisations': typeof AdminOrganisationsRoute
+  '/admin/parametres': typeof AdminParametresRoute
   '/admin/parcours': typeof AdminParcoursRoute
   '/admin_/login': typeof AdminLoginRoute
   '/api/cloudinary-sign': typeof ApiCloudinarySignRoute
@@ -238,8 +328,17 @@ export interface FileRoutesById {
   '/projets/$slug': typeof ProjetsSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/projets/': typeof ProjetsIndexRoute
+  '/admin/ia/assistant': typeof AdminIaAssistantRoute
+  '/admin/ia/skills': typeof AdminIaSkillsRoute
   '/admin/projets/$id': typeof AdminProjetsIdRoute
   '/admin/projets/nouveau': typeof AdminProjetsNouveauRoute
+  '/api/admin/ai': typeof ApiAdminAiRoute
+  '/api/admin/assistant': typeof ApiAdminAssistantRoute
+  '/api/admin/audit': typeof ApiAdminAuditRoute
+  '/api/admin/secrets': typeof ApiAdminSecretsRoute
+  '/api/admin/skills': typeof ApiAdminSkillsRoute
+  '/api/admin/telegram': typeof ApiAdminTelegramRoute
+  '/admin/ia/': typeof AdminIaIndexRoute
   '/admin/projets/': typeof AdminProjetsIndexRoute
   '/api/public/project-images/$': typeof ApiPublicProjectImagesSplatRoute
 }
@@ -256,9 +355,11 @@ export interface FileRouteTypes {
     | '/admin/certifications'
     | '/admin/compte'
     | '/admin/immersion'
+    | '/admin/journal'
     | '/admin/medias'
     | '/admin/messages'
     | '/admin/organisations'
+    | '/admin/parametres'
     | '/admin/parcours'
     | '/admin/login'
     | '/api/cloudinary-sign'
@@ -267,8 +368,17 @@ export interface FileRouteTypes {
     | '/projets/$slug'
     | '/admin/'
     | '/projets/'
+    | '/admin/ia/assistant'
+    | '/admin/ia/skills'
     | '/admin/projets/$id'
     | '/admin/projets/nouveau'
+    | '/api/admin/ai'
+    | '/api/admin/assistant'
+    | '/api/admin/audit'
+    | '/api/admin/secrets'
+    | '/api/admin/skills'
+    | '/api/admin/telegram'
+    | '/admin/ia/'
     | '/admin/projets/'
     | '/api/public/project-images/$'
   fileRoutesByTo: FileRoutesByTo
@@ -282,9 +392,11 @@ export interface FileRouteTypes {
     | '/admin/certifications'
     | '/admin/compte'
     | '/admin/immersion'
+    | '/admin/journal'
     | '/admin/medias'
     | '/admin/messages'
     | '/admin/organisations'
+    | '/admin/parametres'
     | '/admin/parcours'
     | '/admin/login'
     | '/api/cloudinary-sign'
@@ -293,8 +405,17 @@ export interface FileRouteTypes {
     | '/projets/$slug'
     | '/admin'
     | '/projets'
+    | '/admin/ia/assistant'
+    | '/admin/ia/skills'
     | '/admin/projets/$id'
     | '/admin/projets/nouveau'
+    | '/api/admin/ai'
+    | '/api/admin/assistant'
+    | '/api/admin/audit'
+    | '/api/admin/secrets'
+    | '/api/admin/skills'
+    | '/api/admin/telegram'
+    | '/admin/ia'
     | '/admin/projets'
     | '/api/public/project-images/$'
   id:
@@ -309,9 +430,11 @@ export interface FileRouteTypes {
     | '/admin/certifications'
     | '/admin/compte'
     | '/admin/immersion'
+    | '/admin/journal'
     | '/admin/medias'
     | '/admin/messages'
     | '/admin/organisations'
+    | '/admin/parametres'
     | '/admin/parcours'
     | '/admin_/login'
     | '/api/cloudinary-sign'
@@ -320,8 +443,17 @@ export interface FileRouteTypes {
     | '/projets/$slug'
     | '/admin/'
     | '/projets/'
+    | '/admin/ia/assistant'
+    | '/admin/ia/skills'
     | '/admin/projets/$id'
     | '/admin/projets/nouveau'
+    | '/api/admin/ai'
+    | '/api/admin/assistant'
+    | '/api/admin/audit'
+    | '/api/admin/secrets'
+    | '/api/admin/skills'
+    | '/api/admin/telegram'
+    | '/admin/ia/'
     | '/admin/projets/'
     | '/api/public/project-images/$'
   fileRoutesById: FileRoutesById
@@ -340,6 +472,12 @@ export interface RootRouteChildren {
   ApiReplyRoute: typeof ApiReplyRoute
   ProjetsSlugRoute: typeof ProjetsSlugRoute
   ProjetsIndexRoute: typeof ProjetsIndexRoute
+  ApiAdminAiRoute: typeof ApiAdminAiRoute
+  ApiAdminAssistantRoute: typeof ApiAdminAssistantRoute
+  ApiAdminAuditRoute: typeof ApiAdminAuditRoute
+  ApiAdminSecretsRoute: typeof ApiAdminSecretsRoute
+  ApiAdminSkillsRoute: typeof ApiAdminSkillsRoute
+  ApiAdminTelegramRoute: typeof ApiAdminTelegramRoute
   ApiPublicProjectImagesSplatRoute: typeof ApiPublicProjectImagesSplatRoute
 }
 
@@ -422,6 +560,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminImmersionRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/journal': {
+      id: '/admin/journal'
+      path: '/journal'
+      fullPath: '/admin/journal'
+      preLoaderRoute: typeof AdminJournalRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/medias': {
       id: '/admin/medias'
       path: '/medias'
@@ -441,6 +586,13 @@ declare module '@tanstack/react-router' {
       path: '/organisations'
       fullPath: '/admin/organisations'
       preLoaderRoute: typeof AdminOrganisationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/parametres': {
+      id: '/admin/parametres'
+      path: '/parametres'
+      fullPath: '/admin/parametres'
+      preLoaderRoute: typeof AdminParametresRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/parcours': {
@@ -492,6 +644,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjetsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/ia/': {
+      id: '/admin/ia/'
+      path: '/ia'
+      fullPath: '/admin/ia/'
+      preLoaderRoute: typeof AdminIaIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/ia/assistant': {
+      id: '/admin/ia/assistant'
+      path: '/ia/assistant'
+      fullPath: '/admin/ia/assistant'
+      preLoaderRoute: typeof AdminIaAssistantRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/ia/skills': {
+      id: '/admin/ia/skills'
+      path: '/ia/skills'
+      fullPath: '/admin/ia/skills'
+      preLoaderRoute: typeof AdminIaSkillsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/projets/': {
       id: '/admin/projets/'
       path: '/projets'
@@ -513,6 +686,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminProjetsNouveauRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/admin/ai': {
+      id: '/api/admin/ai'
+      path: '/api/admin/ai'
+      fullPath: '/api/admin/ai'
+      preLoaderRoute: typeof ApiAdminAiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/assistant': {
+      id: '/api/admin/assistant'
+      path: '/api/admin/assistant'
+      fullPath: '/api/admin/assistant'
+      preLoaderRoute: typeof ApiAdminAssistantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/audit': {
+      id: '/api/admin/audit'
+      path: '/api/admin/audit'
+      fullPath: '/api/admin/audit'
+      preLoaderRoute: typeof ApiAdminAuditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/secrets': {
+      id: '/api/admin/secrets'
+      path: '/api/admin/secrets'
+      fullPath: '/api/admin/secrets'
+      preLoaderRoute: typeof ApiAdminSecretsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/skills': {
+      id: '/api/admin/skills'
+      path: '/api/admin/skills'
+      fullPath: '/api/admin/skills'
+      preLoaderRoute: typeof ApiAdminSkillsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/telegram': {
+      id: '/api/admin/telegram'
+      path: '/api/admin/telegram'
+      fullPath: '/api/admin/telegram'
+      preLoaderRoute: typeof ApiAdminTelegramRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/project-images/$': {
       id: '/api/public/project-images/$'
       path: '/api/public/project-images/$'
@@ -527,13 +742,18 @@ interface AdminRouteChildren {
   AdminCertificationsRoute: typeof AdminCertificationsRoute
   AdminCompteRoute: typeof AdminCompteRoute
   AdminImmersionRoute: typeof AdminImmersionRoute
+  AdminJournalRoute: typeof AdminJournalRoute
   AdminMediasRoute: typeof AdminMediasRoute
   AdminMessagesRoute: typeof AdminMessagesRoute
   AdminOrganisationsRoute: typeof AdminOrganisationsRoute
+  AdminParametresRoute: typeof AdminParametresRoute
   AdminParcoursRoute: typeof AdminParcoursRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminIaAssistantRoute: typeof AdminIaAssistantRoute
+  AdminIaSkillsRoute: typeof AdminIaSkillsRoute
   AdminProjetsIdRoute: typeof AdminProjetsIdRoute
   AdminProjetsNouveauRoute: typeof AdminProjetsNouveauRoute
+  AdminIaIndexRoute: typeof AdminIaIndexRoute
   AdminProjetsIndexRoute: typeof AdminProjetsIndexRoute
 }
 
@@ -541,13 +761,18 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCertificationsRoute: AdminCertificationsRoute,
   AdminCompteRoute: AdminCompteRoute,
   AdminImmersionRoute: AdminImmersionRoute,
+  AdminJournalRoute: AdminJournalRoute,
   AdminMediasRoute: AdminMediasRoute,
   AdminMessagesRoute: AdminMessagesRoute,
   AdminOrganisationsRoute: AdminOrganisationsRoute,
+  AdminParametresRoute: AdminParametresRoute,
   AdminParcoursRoute: AdminParcoursRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminIaAssistantRoute: AdminIaAssistantRoute,
+  AdminIaSkillsRoute: AdminIaSkillsRoute,
   AdminProjetsIdRoute: AdminProjetsIdRoute,
   AdminProjetsNouveauRoute: AdminProjetsNouveauRoute,
+  AdminIaIndexRoute: AdminIaIndexRoute,
   AdminProjetsIndexRoute: AdminProjetsIndexRoute,
 }
 
@@ -567,6 +792,12 @@ const rootRouteChildren: RootRouteChildren = {
   ApiReplyRoute: ApiReplyRoute,
   ProjetsSlugRoute: ProjetsSlugRoute,
   ProjetsIndexRoute: ProjetsIndexRoute,
+  ApiAdminAiRoute: ApiAdminAiRoute,
+  ApiAdminAssistantRoute: ApiAdminAssistantRoute,
+  ApiAdminAuditRoute: ApiAdminAuditRoute,
+  ApiAdminSecretsRoute: ApiAdminSecretsRoute,
+  ApiAdminSkillsRoute: ApiAdminSkillsRoute,
+  ApiAdminTelegramRoute: ApiAdminTelegramRoute,
   ApiPublicProjectImagesSplatRoute: ApiPublicProjectImagesSplatRoute,
 }
 export const routeTree = rootRouteImport
