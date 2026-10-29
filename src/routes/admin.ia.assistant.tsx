@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Bot,
@@ -14,6 +14,10 @@ import {
   FileText,
   Code2,
   UserCheck,
+  FileEdit,
+  BookmarkPlus,
+  Loader2,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { adminApi, type AiSkill } from "@/lib/admin-api-client";
+import { adminApi, type AiSkill, type AdminActionExecuted } from "@/lib/admin-api-client";
 import { IaSubNav } from "@/components/admin/IaSubNav";
 
 export const Route = createFileRoute("/admin/ia/assistant")({
@@ -40,6 +44,39 @@ interface ChatMessage {
   model?: string;
   timestamp: Date;
   error?: boolean;
+  actionExecuted?: AdminActionExecuted;
+}
+
+function extractDraftDataFromText(text: string) {
+  const titleMatch = text.match(/(?:Titre\s*(?:du projet)?\s*[:]\s*["«']?([^"»'\n]+)["»']?)|(?:^#+\s+(.+)$)/m);
+  const rawTitle = titleMatch ? (titleMatch[1] || titleMatch[2]) : "Nouveau projet brouillon";
+  const title = rawTitle.trim().replace(/^["'«]+|["'»]+$/g, "");
+
+  const techMatch = text.match(/(?:Technologies|Stack)\s*[:]\s*([^\n]+)/i);
+  const technologies = techMatch
+    ? techMatch[1]
+        .split(/[,;]/)
+        .map((t) => t.trim())
+        .filter((t) => t.length > 1 && t.length < 50)
+    : [];
+
+  const introMatch = text.match(/(?:Introduction|Intro)\s*[:]\s*([\s\S]*?)(?=\n\n|\[SECTION|$)/i);
+  const intro = introMatch ? introMatch[1].trim() : "";
+
+  const summaryMatch = text.match(/(?:Résumé|Summary)\s*[:]\s*([\s\S]*?)(?=\n\n|\[SECTION|$)/i);
+  const summary = summaryMatch ? summaryMatch[1].trim().slice(0, 450) : "";
+
+  const sections: Array<{ title: string; content: string }> = [];
+  const pattern = /\[SECTION:\s*([^\]]+)\]\s*([\s\S]*?)(?=\[SECTION:|$)/gi;
+  let match;
+  while ((match = pattern.exec(text)) !== null) {
+    sections.push({
+      title: match[1].trim(),
+      content: match[2].trim(),
+    });
+  }
+
+  return { title, intro, summary, technologies, sections };
 }
 
 function generateId() {
@@ -93,8 +130,15 @@ function renderBoldParts(text: string) {
   });
 }
 
-function MessageBubble({ msg }: { msg: ChatMessage }) {
+function MessageBubble({
+  msg,
+  onActionExecuted,
+}: {
+  msg: ChatMessage;
+  onActionExecuted?: (action: AdminActionExecuted) => void;
+}) {
   const [copied, setCopied] = useState(false);
+  const [savingDraft, setSavingDraft] = useState(false);
   const isUser = msg.role === "user";
 
   const handleCopy = async () => {
@@ -103,6 +147,27 @@ function MessageBubble({ msg }: { msg: ChatMessage }) {
     toast.success("Texte copié !");
     setTimeout(() => setCopied(false), 2000);
   };
+
+  const handleSaveQuickDraft = async () => {
+    setSavingDraft(true);
+    try {
+      const data = extractDraftDataFromText(msg.text);
+      const res = await adminApi.executeDirectAction({
+        type: "create_project_draft",
+        data: data as never,
+      });
+      if (onActionExecuted) {
+        onActionExecuted(res.actionExecuted);
+      }
+      toast.success("Projet créé en mode brouillon !");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur lors de l'enregistrement.");
+    } finally {
+      setSavingDraft(false);
+    }
+  };
+
+  const hasSections = !isUser && !msg.error && msg.text.includes("[SECTION:");
 
   return (
     <div className={`flex gap-2 sm:gap-3 ${isUser ? "flex-row-reverse" : "flex-row"} animate-in fade-in-50`}>
@@ -116,7 +181,7 @@ function MessageBubble({ msg }: { msg: ChatMessage }) {
         {isUser ? "LK" : <Bot size={15} className="text-primary" />}
       </div>
 
-      <div className={`group max-w-[92%] sm:max-w-[82%] space-y-1 ${isUser ? "items-end" : "items-start"} flex flex-col`}>
+      <div className={`group max-w-[92%] sm:max-w-[82%] space-y-1.5 ${isUser ? "items-end" : "items-start"} flex flex-col`}>
         <div
           className={`rounded-2xl px-3.5 py-2.5 sm:px-4 sm:py-3 shadow-xs ${
             isUser
@@ -131,7 +196,80 @@ function MessageBubble({ msg }: { msg: ChatMessage }) {
           ) : (
             <FormattedMessageText text={msg.text} />
           )}
+
+          {/* Widget interactif lorsqu'un projet a été enregistré en mode brouillon */}
+          {msg.actionExecuted && msg.actionExecuted.entity === "project" && (
+            <div className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 dark:bg-amber-500/5 p-3 sm:p-3.5 space-y-2 text-foreground">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="border-amber-500/50 bg-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold text-[11px] gap-1 px-2 py-0.5">
+                    <FileText size={12} />
+                    Brouillon enregistré
+                  </Badge>
+                  <span className="font-bold text-xs sm:text-sm text-foreground truncate max-w-[200px] sm:max-w-[280px]">
+                    {msg.actionExecuted.title}
+                  </span>
+                </div>
+                {msg.actionExecuted.slug && (
+                  <code className="text-[10px] text-muted-foreground bg-background/80 border border-border/60 px-1.5 py-0.5 rounded font-mono">
+                    /{msg.actionExecuted.slug}
+                  </code>
+                )}
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Le projet a été enregistré en mode brouillon confidentiel. Vous pouvez maintenant l'ouvrir dans l'éditeur de projet pour formater les sections avec le composant Word et ajouter vos illustrations.
+              </p>
+              <div className="pt-1 flex items-center justify-end">
+                <Link to="/admin/projets/$id" params={{ id: msg.actionExecuted.id }}>
+                  <Button size="sm" className="h-8 gap-1.5 text-xs bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90">
+                    <FileEdit size={13} />
+                    Ouvrir dans l'éditeur Word
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* Widget interactif lorsqu'une expérience ou certification a été enregistrée */}
+          {msg.actionExecuted && msg.actionExecuted.entity !== "project" && (
+            <div className="mt-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 dark:bg-emerald-500/5 p-3 space-y-1.5 text-foreground">
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="border-emerald-500/50 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-semibold text-[11px] gap-1 px-2 py-0.5">
+                  <Check size={12} />
+                  {msg.actionExecuted.entity === "experience" ? "Expérience publiée" : "Certification publiée"}
+                </Badge>
+                <span className="font-bold text-xs sm:text-sm text-foreground truncate">
+                  {msg.actionExecuted.title}
+                </span>
+              </div>
+              <div className="pt-1 flex items-center justify-end">
+                <Link to={msg.actionExecuted.editUrl as never}>
+                  <Button size="sm" variant="outline" className="h-8 gap-1.5 text-xs font-semibold rounded-lg">
+                    <ExternalLink size={13} />
+                    Voir dans l'administration
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Bouton d'action rapide si l'étude de cas n'a pas encore été enregistrée */}
+        {hasSections && !msg.actionExecuted && (
+          <div className="pt-0.5 flex items-center gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={savingDraft}
+              onClick={handleSaveQuickDraft}
+              className="h-7 px-2.5 text-[11px] font-semibold gap-1.5 border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
+            >
+              {savingDraft ? <Loader2 size={12} className="animate-spin" /> : <BookmarkPlus size={12} />}
+              Enregistrer comme Brouillon de Projet
+            </Button>
+          </div>
+        )}
 
         <div className={`flex items-center gap-1.5 sm:gap-2 px-1 text-[11px] text-muted-foreground ${isUser ? "flex-row-reverse" : "flex-row"}`}>
           <span>{formatTime(msg.timestamp)}</span>
@@ -262,10 +400,19 @@ function AdminAssistantPage() {
         role: "assistant",
         text: result.reply,
         model: result.model,
+        actionExecuted: result.actionExecuted,
         timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, assistantMsg]);
+
+      if (result.actionExecuted) {
+        if (result.actionExecuted.entity === "project") {
+          toast.success("Projet créé en mode brouillon !");
+        } else {
+          toast.success("Contenu enregistré avec succès !");
+        }
+      }
     } catch (err) {
       const errorMsg: ChatMessage = {
         id: generateId(),
@@ -411,7 +558,15 @@ function AdminAssistantPage() {
           ) : (
             <>
               {messages.map((msg) => (
-                <MessageBubble key={msg.id} msg={msg} />
+                <MessageBubble
+                  key={msg.id}
+                  msg={msg}
+                  onActionExecuted={(action) => {
+                    setMessages((prev) =>
+                      prev.map((m) => (m.id === msg.id ? { ...m, actionExecuted: action } : m)),
+                    );
+                  }}
+                />
               ))}
               {isLoading && <TypingIndicator />}
               <div ref={bottomRef} />

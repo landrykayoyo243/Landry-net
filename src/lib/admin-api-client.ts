@@ -66,6 +66,15 @@ export interface AiSkillVersion {
   created_at: string;
 }
 
+export interface AdminActionExecuted {
+  type: "create_project_draft" | "create_experience" | "create_certification";
+  entity: "project" | "experience" | "certification";
+  id: string;
+  title: string;
+  slug?: string;
+  status: "draft" | "published";
+  editUrl?: string;
+}
 
 export const adminApi = {
   /** Récupérer la liste des secrets (métadonnées uniquement) */
@@ -302,7 +311,12 @@ export const adminApi = {
     history?: Array<{ role: "user" | "model"; text: string }>;
     skillSlugs?: string[];
     temperature?: number;
-  }): Promise<{ reply: string; model: string; tokensUsed?: number }> {
+  }): Promise<{
+    reply: string;
+    model: string;
+    tokensUsed?: number;
+    actionExecuted?: AdminActionExecuted;
+  }> {
     const headers = await getAuthHeaders();
     const res = await fetch("/api/admin/assistant", {
       method: "POST",
@@ -318,5 +332,22 @@ export const adminApi = {
     if (!res.ok) throw new Error(json.error || "Échec de l'assistant IA.");
     return json;
   },
+
+  /** Exécuter directement une action de publication ou de mise en brouillon */
+  async executeDirectAction(params: {
+    type: "create_project_draft" | "create_experience" | "create_certification";
+    data: Record<string, unknown>;
+  }): Promise<{ reply: string; actionExecuted: AdminActionExecuted }> {
+    const headers = await getAuthHeaders();
+    const res = await fetch("/api/admin/assistant", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ directAction: params }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || "Échec de l'action.");
+    return json;
+  },
 };
+
 

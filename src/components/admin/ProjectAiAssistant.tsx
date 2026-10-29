@@ -18,7 +18,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { adminApi, type AiSkill } from "@/lib/admin-api-client";
-import { createBlock, type Block } from "@/lib/blocks";
+import { createBlock, textDoc, type Block, type HeadingBlock, type ParagraphBlock } from "@/lib/blocks";
 
 interface ProjectAiAssistantProps {
   open: boolean;
@@ -163,15 +163,27 @@ Demande : ${customPrompt || "Améliore la présentation du projet"}`;
           const sectionTitle = match[1].trim();
           const sectionContent = match[2].trim();
           if (sectionTitle) {
-            const heading = createBlock("heading");
+            const heading = createBlock("heading") as HeadingBlock;
             heading.text = sectionTitle;
-            heading.level = 2;
+            heading.layout = "full";
+            heading.tone = "plain";
+            heading.variant = sectionTitle.toLowerCase().includes("résultat") ? "result" : "default";
             sections.push(heading);
           }
           if (sectionContent) {
-            const paragraph = createBlock("paragraph");
-            paragraph.text = sectionContent;
-            sections.push(paragraph);
+            // Découpage en paragraphes pour une intégration parfaite dans l'éditeur Word (RichEditor)
+            const paragraphs = sectionContent.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+            if (paragraphs.length > 0) {
+              for (const p of paragraphs) {
+                const para = createBlock("paragraph") as ParagraphBlock;
+                para.doc = textDoc(p);
+                sections.push(para);
+              }
+            } else {
+              const para = createBlock("paragraph") as ParagraphBlock;
+              para.doc = textDoc(sectionContent);
+              sections.push(para);
+            }
           }
         }
         if (sections.length > 0) {

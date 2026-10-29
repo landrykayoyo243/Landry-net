@@ -6,7 +6,7 @@ import { executeAiGeneration } from "@/lib/ai.server";
 import { buildSystemInstruction } from "@/lib/skills.server";
 
 const chatSchema = z.object({
-  message: z.string().min(1).max(10000),
+  message: z.string().max(10000).optional(),
   history: z
     .array(
       z.object({
@@ -18,12 +18,18 @@ const chatSchema = z.object({
     .default([]),
   skillSlugs: z.array(z.string().max(80)).max(20).default([]),
   temperature: z.number().min(0).max(2).optional(),
+  directAction: z
+    .object({
+      type: z.enum(["create_project_draft", "create_experience", "create_certification"]),
+      data: z.record(z.unknown()),
+    })
+    .optional(),
 });
 
 export const Route = createFileRoute("/api/admin/assistant")({
   server: {
     handlers: {
-      /** POST : Envoyer un message à l'assistant */
+      /** POST : Envoyer un message à l'assistant ou exécuter une action */
       POST: async ({ request }) => {
         const auth = await verifyAdminRequest(request);
         if (!auth.authorized) {
@@ -45,7 +51,58 @@ export const Route = createFileRoute("/api/admin/assistant")({
           );
         }
 
-        const { message, history, skillSlugs, temperature } = parsed.data;
+        const { message, history, skillSlugs, temperature, directAction } = parsed.data;
+
+        // 1. Exécution d'une action directe (bouton UI cliqué par l'administrateur)
+        if (directAction) {
+          try {
+            const {
+              executeCreateProjectDraft,
+              executeCreateExperience,
+              executeCreateCertification,
+            } = await import("@/lib/assistant-actions.server");
+
+            let actionResult;
+            if (directAction.type === "create_project_draft") {
+              actionResult = await executeCreateProjectDraft(directAction.data as never, {
+                userId: auth.user.id,
+                userEmail: auth.user.email,
+                headers: request.headers,
+              });
+            } else if (directAction.type === "create_experience") {
+              actionResult = await executeCreateExperience(directAction.data as never, {
+                userId: auth.user.id,
+                userEmail: auth.user.email,
+                headers: request.headers,
+              });
+            } else if (directAction.type === "create_certification") {
+              actionResult = await executeCreateCertification(directAction.data as never, {
+                userId: auth.user.id,
+                userEmail: auth.user.email,
+                headers: request.headers,
+              });
+            }
+
+            return jsonResponse({
+              success: true,
+              reply:
+                directAction.type === "create_project_draft"
+                  ? "Projet enregistré avec succès en mode brouillon."
+                  : "Contenu enregistré avec succès.",
+              actionExecuted: actionResult,
+            });
+          } catch (err) {
+            console.error("[api/admin/assistant directAction]", err);
+            return jsonResponse(
+              { error: err instanceof Error ? err.message : "Erreur lors de l'enregistrement." },
+              400,
+            );
+          }
+        }
+
+        if (!message || !message.trim()) {
+          return jsonResponse({ error: "Le message ne peut pas être vide." }, 400);
+        }
 
         try {
           // Construire le system instruction depuis les skills actifs
@@ -71,9 +128,18 @@ export const Route = createFileRoute("/api/admin/assistant")({
             requestHeaders: request.headers,
           });
 
+          // Analyser et exécuter les blocs d'action si présents dans la réponse
+          const { processAiActionBlock } = await import("@/lib/assistant-actions.server");
+          const { cleanedText, actionExecuted } = await processAiActionBlock(result.text, {
+            userId: auth.user.id,
+            userEmail: auth.user.email,
+            headers: request.headers,
+          });
+
           return jsonResponse({
             success: true,
-            reply: result.text,
+            reply: cleanedText,
+            actionExecuted,
             model: result.model,
             tokensUsed: result.tokensUsed,
           });
