@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { ArrowUpRight, CheckCircle2, ChevronLeft, ChevronRight, Globe, ZoomIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { InlineItem, RichText } from "@/components/portfolio/RichText";
-import { listItems, safeUrl, type Block, type HeadingBlock, type ImageBlock, type MediaBlock, type MediaItem } from "@/lib/blocks";
+import { listItems, safeUrl, type Block, type HeadingBlock, type ImageBlock, type MediaBlock } from "@/lib/blocks";
 import { getOptimizedImageUrl } from "@/lib/siteConfig";
 
 const container = "mx-auto w-full max-w-6xl px-4 sm:px-6 md:px-8";
@@ -41,24 +41,182 @@ function toGroups(sections: Section[]): Group[] {
 
 const isPlainFull = (g: Group | undefined) => g?.kind === "full" && g.section.heading?.tone !== "muted";
 
-function ZoomButton({ image }: { image: ImageBlock }) {
+export interface ImageViewerItem {
+  url: string;
+  alt?: string;
+  title?: string;
+  caption?: string;
+  note?: string;
+}
+
+export function ImageViewerDialog({
+  open,
+  onOpenChange,
+  items,
+  initialIndex = 0,
+  globalTitle,
+  globalCaption,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  items: ImageViewerItem[];
+  initialIndex?: number;
+  globalTitle?: string;
+  globalCaption?: string;
+}) {
+  const validItems = items.filter((it) => !!safeUrl(it.url));
+  const total = validItems.length;
+
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      setCurrentIndex(initialIndex >= 0 && initialIndex < total ? initialIndex : 0);
+    }
+  }, [open, initialIndex, total]);
+
+  const safeIndex = total === 0 ? 0 : (currentIndex >= total ? 0 : currentIndex < 0 ? total - 1 : currentIndex);
+  const currentItem = validItems[safeIndex];
+
+  const prev = useCallback(() => {
+    if (total <= 1) return;
+    setCurrentIndex((i) => (i <= 0 ? total - 1 : i - 1));
+  }, [total]);
+
+  const next = useCallback(() => {
+    if (total <= 1) return;
+    setCurrentIndex((i) => (i >= total - 1 ? 0 : i + 1));
+  }, [total]);
+
+  useEffect(() => {
+    if (!open || total <= 1) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") prev();
+      if (e.key === "ArrowRight") next();
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [open, total, prev, next]);
+
+  if (!currentItem) return null;
+
+  const currentTitle = getCleanTitle(currentItem.title) || globalTitle || currentItem.alt || "Aperçu du visuel";
+  const currentCaption = currentItem.caption?.trim() || globalCaption?.trim();
+  const currentNote = currentItem.note?.trim();
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (total <= 1) return;
+    setTouchStartX(e.touches[0]?.clientX ?? null);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (total <= 1 || touchStartX === null) return;
+    const touchEndX = e.changedTouches[0]?.clientX ?? null;
+    if (touchEndX === null) return;
+    const diff = touchStartX - touchEndX;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) next();
+      else prev();
+    }
+    setTouchStartX(null);
+  };
+
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="rounded-full gap-1.5 shadow-2xs hover:bg-accent">
-          <ZoomIn size={14} />
-          <span>Agrandir l'image</span>
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-h-[92dvh] max-w-5xl overflow-y-auto p-4 sm:p-6 bg-card border-border">
-        <DialogTitle className="text-lg font-bold text-foreground">{image.title || image.alt}</DialogTitle>
-        {image.note && <DialogDescription className="text-sm text-muted-foreground">{image.note}</DialogDescription>}
-        <div className="mt-3 overflow-hidden rounded-xl bg-muted/40">
-          <img src={getOptimizedImageUrl(safeUrl(image.url), { width: 1400 })} alt={image.alt} width={1200} height={800} decoding="async" className="h-auto w-full object-contain mx-auto max-h-[70vh]" />
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className="flex flex-col gap-0 w-[calc(100vw-1rem)] sm:w-[calc(100vw-2.5rem)] md:w-full md:max-w-4xl lg:max-w-5xl max-h-[92dvh] sm:max-h-[94dvh] p-3 sm:p-5 md:p-6 bg-card/95 backdrop-blur-md border border-border/90 shadow-2xl rounded-2xl sm:rounded-3xl overflow-hidden"
+      >
+        {/* Header avec titre, note, compteur et bouton de fermeture */}
+        <div className="flex items-center justify-between gap-3 border-b border-border/60 pb-2.5 sm:pb-3 pr-10 min-w-0 shrink-0">
+          <div className="min-w-0 flex-1">
+            <DialogTitle className="text-sm sm:text-base md:text-lg font-bold text-foreground truncate">
+              {currentTitle}
+            </DialogTitle>
+            {currentNote ? (
+              <DialogDescription className="text-xs text-muted-foreground truncate mt-0.5">
+                {currentNote}
+              </DialogDescription>
+            ) : (
+              <DialogDescription className="sr-only">
+                Aperçu agrandi de l'image
+              </DialogDescription>
+            )}
+          </div>
+          {total > 1 && (
+            <span className="text-xs font-semibold text-primary bg-primary/10 rounded-full px-2.5 py-0.5 shrink-0">
+              {safeIndex + 1} / {total}
+            </span>
+          )}
         </div>
-        {image.caption && <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{image.caption}</p>}
+
+        {/* Zone centrale image avec support tactile et flèches */}
+        <div
+          className="relative flex-1 min-h-0 flex items-center justify-center rounded-xl sm:rounded-2xl bg-black/5 dark:bg-black/30 overflow-hidden my-2.5 sm:my-3 select-none touch-pan-y"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
+          <img
+            src={getOptimizedImageUrl(safeUrl(currentItem.url), { width: 1600 })}
+            alt={currentItem.alt || currentTitle}
+            decoding="async"
+            className="max-h-[46vh] sm:max-h-[60vh] md:max-h-[68vh] w-auto max-w-full h-auto object-contain mx-auto rounded-lg transition-transform duration-200"
+          />
+
+          {total > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); prev(); }}
+                aria-label="Image précédente"
+                className="absolute left-1.5 sm:left-3 top-1/2 -translate-y-1/2 grid h-8 w-8 sm:h-11 sm:w-11 place-items-center rounded-full bg-black/60 hover:bg-black/85 text-white shadow-lg backdrop-blur-xs transition-transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <ChevronLeft className="h-4 w-4 sm:h-6 sm:w-6" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); next(); }}
+                aria-label="Image suivante"
+                className="absolute right-1.5 sm:right-3 top-1/2 -translate-y-1/2 grid h-8 w-8 sm:h-11 sm:w-11 place-items-center rounded-full bg-black/60 hover:bg-black/85 text-white shadow-lg backdrop-blur-xs transition-transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <ChevronRight className="h-4 w-4 sm:h-6 sm:w-6" />
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Légende / caption si présente */}
+        {currentCaption && (
+          <div className="rounded-xl border border-border/60 bg-muted/30 p-2.5 sm:p-3.5 max-h-[14vh] sm:max-h-[18vh] overflow-y-auto shrink-0">
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed whitespace-pre-line break-words">
+              {currentCaption}
+            </p>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
+  );
+}
+
+function ZoomButton({ image }: { image: ImageBlock }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setOpen(true)}
+        className="rounded-full gap-1.5 shadow-2xs hover:bg-accent shrink-0 text-xs sm:text-sm"
+      >
+        <ZoomIn size={14} />
+        <span>Agrandir l'image</span>
+      </Button>
+      <ImageViewerDialog
+        open={open}
+        onOpenChange={setOpen}
+        items={[image]}
+      />
+    </>
   );
 }
 
@@ -78,6 +236,7 @@ function MediaSectionBlock({ block }: { block: MediaBlock }) {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   const total = validItems.length;
   const safeIndex = currentIndex >= total ? 0 : currentIndex;
@@ -91,27 +250,35 @@ function MediaSectionBlock({ block }: { block: MediaBlock }) {
     setCurrentIndex((i) => (i >= total - 1 ? 0 : i + 1));
   }, [total]);
 
-  // Défilement au clavier (Flèches gauche / droite)
-  useEffect(() => {
-    if (!lightboxOpen) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") prev();
-      if (e.key === "ArrowRight") next();
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [lightboxOpen, prev, next]);
+  const handleInlineTouchStart = (e: React.TouchEvent) => {
+    if (total <= 1) return;
+    setTouchStartX(e.touches[0]?.clientX ?? null);
+  };
 
-  // Le titre et la description appartiennent au bloc : ils restent toujours affichés au défilement des images
+  const handleInlineTouchEnd = (e: React.TouchEvent) => {
+    if (total <= 1 || touchStartX === null) return;
+    const touchEndX = e.changedTouches[0]?.clientX ?? null;
+    if (touchEndX === null) return;
+    const diff = touchStartX - touchEndX;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) next();
+      else prev();
+    }
+    setTouchStartX(null);
+  };
+
   const blockTitle = block.title?.trim() || validItems.find((it) => getCleanTitle(it.title))?.title?.trim();
   const blockCaption = block.caption?.trim() || validItems.find((it) => it.caption?.trim())?.caption?.trim();
 
   return (
     <>
-      <div className="my-10 space-y-4 max-w-4xl">
-
-        {/* Image EN HAUT */}
-        <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-border/80 bg-muted/20 shadow-sm">
+      <div className="my-8 sm:my-10 space-y-3 sm:space-y-4 max-w-4xl min-w-0">
+        {/* Cadre de l'image avec boutons responsives et support tactile */}
+        <div
+          className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-border/80 bg-muted/20 shadow-xs select-none touch-pan-y"
+          onTouchStart={handleInlineTouchStart}
+          onTouchEnd={handleInlineTouchEnd}
+        >
           <div
             role="button"
             tabIndex={0}
@@ -133,53 +300,53 @@ function MediaSectionBlock({ block }: { block: MediaBlock }) {
               className="h-full w-full object-contain sm:object-cover transition-transform duration-300 group-hover:scale-[1.01]"
             />
 
-            {/* Compteur */}
+            {/* Compteur discret */}
             {total > 1 && (
-              <div className="absolute top-3 left-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white shadow-sm">
+              <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[11px] sm:text-xs font-semibold text-white shadow-sm backdrop-blur-xs">
                 {safeIndex + 1} / {total}
               </div>
             )}
 
-            {/* Agrandir */}
-            <div className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-black/80 transition-colors">
-              <ZoomIn size={13} />
+            {/* Badge Agrandir */}
+            <div className="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 inline-flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1 sm:px-3 sm:py-1.5 text-[11px] sm:text-xs font-semibold text-white shadow-sm backdrop-blur-xs hover:bg-black/80 transition-colors">
+              <ZoomIn size={12} className="sm:size-3.5" />
               <span>Agrandir</span>
             </div>
           </div>
 
-          {/* Flèches visibles avec fond sombre */}
+          {/* Flèches de défilement responsives */}
           {total > 1 && (
             <>
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); prev(); }}
                 aria-label="Image précédente"
-                className="absolute left-3 top-1/2 -translate-y-1/2 grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-full bg-black/60 text-white shadow-lg transition-all hover:bg-black/80 hover:scale-105 active:scale-95"
+                className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 grid h-8 w-8 sm:h-11 sm:w-11 place-items-center rounded-full bg-black/60 hover:bg-black/80 text-white shadow-lg backdrop-blur-xs transition-transform hover:scale-105 active:scale-95"
               >
-                <ChevronLeft size={22} />
+                <ChevronLeft className="h-4 w-4 sm:h-6 sm:w-6" />
               </button>
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); next(); }}
                 aria-label="Image suivante"
-                className="absolute right-3 top-1/2 -translate-y-1/2 grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-full bg-black/60 text-white shadow-lg transition-all hover:bg-black/80 hover:scale-105 active:scale-95"
+                className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 grid h-8 w-8 sm:h-11 sm:w-11 place-items-center rounded-full bg-black/60 hover:bg-black/80 text-white shadow-lg backdrop-blur-xs transition-transform hover:scale-105 active:scale-95"
               >
-                <ChevronRight size={22} />
+                <ChevronRight className="h-4 w-4 sm:h-6 sm:w-6" />
               </button>
             </>
           )}
         </div>
 
-        {/* Titre et description EN BAS (toujours visibles même si on change d'image) */}
+        {/* Titre et description sous le média */}
         {(blockTitle || blockCaption) && (
-          <div className="space-y-1.5 pt-1">
+          <div className="space-y-1.5 pt-1 min-w-0">
             {blockTitle && (
-              <h3 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
+              <h3 className="text-base sm:text-lg md:text-xl font-bold tracking-tight text-foreground break-words">
                 {blockTitle}
               </h3>
             )}
             {blockCaption && (
-              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed whitespace-pre-line">
+              <p className="text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed whitespace-pre-line break-words">
                 {blockCaption}
               </p>
             )}
@@ -187,59 +354,67 @@ function MediaSectionBlock({ block }: { block: MediaBlock }) {
         )}
       </div>
 
-      {/* Visionneur plein écran défilable (Lightbox) */}
-      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
-        <DialogContent className="max-h-[96dvh] w-[calc(100vw-1rem)] sm:w-[calc(100vw-3rem)] max-w-5xl overflow-y-auto p-3 sm:p-6 bg-card border-border">
-          <div className="flex items-center justify-between border-b border-border/60 pb-3 pr-8">
-            <DialogTitle className="text-base sm:text-lg font-bold truncate">
-              {blockTitle || `Visuel ${safeIndex + 1}/${total}`}
-            </DialogTitle>
-            <span className="text-xs font-semibold text-primary bg-primary/10 rounded-full px-2.5 py-0.5 shrink-0">
-              {safeIndex + 1} / {total}
-            </span>
+      <ImageViewerDialog
+        open={lightboxOpen}
+        onOpenChange={setLightboxOpen}
+        items={validItems}
+        initialIndex={safeIndex}
+        {...(blockTitle !== undefined ? { globalTitle: blockTitle } : {})}
+        {...(blockCaption !== undefined ? { globalCaption: blockCaption } : {})}
+      />
+    </>
+  );
+}
+
+function ImageFigureBlock({ block }: { block: ImageBlock }) {
+  const [open, setOpen] = useState(false);
+  const src = safeUrl(block.url);
+  if (!src) return null;
+
+  return (
+    <>
+      <figure className="my-6 sm:my-8 max-w-4xl min-w-0">
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => setOpen(true)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setOpen(true);
+            }
+          }}
+          className="group relative cursor-pointer overflow-hidden rounded-2xl sm:rounded-3xl border border-border/80 bg-muted/20 shadow-xs select-none"
+          title="Cliquer pour agrandir"
+        >
+          <img
+            src={getOptimizedImageUrl(src, { width: 1100 })}
+            alt={block.alt}
+            width={1200}
+            height={800}
+            loading="lazy"
+            decoding="async"
+            className="aspect-[16/10] sm:aspect-[3/2] w-full object-cover transition-transform duration-300 group-hover:scale-[1.01]"
+          />
+          <div className="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 inline-flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1 sm:px-3 sm:py-1.5 text-[11px] sm:text-xs font-semibold text-white shadow-sm backdrop-blur-xs hover:bg-black/80 transition-colors">
+            <ZoomIn size={12} className="sm:size-3.5" />
+            <span>Agrandir</span>
           </div>
+        </div>
+        {(block.title || block.caption || block.note) && (
+          <figcaption className="mt-2.5 sm:mt-3 space-y-1 min-w-0">
+            {block.title && <h4 className="text-base sm:text-lg font-bold text-foreground break-words">{block.title}</h4>}
+            {block.caption && <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed break-words">{block.caption}</p>}
+            {block.note && <p className="text-xs text-muted-foreground break-words">{block.note}</p>}
+          </figcaption>
+        )}
+      </figure>
 
-          {/* Image plein écran avec boutons défilement */}
-          <div className="relative mt-3 flex items-center justify-center rounded-2xl bg-muted/40 p-1 sm:p-2">
-            <img
-              src={getOptimizedImageUrl(safeUrl(currentItem.url), { width: 1600 })}
-              alt={currentItem.alt || blockTitle || "Média plein écran"}
-              decoding="async"
-              className="max-h-[65vh] w-auto max-w-full rounded-xl object-contain mx-auto"
-            />
-
-            {total > 1 && (
-              <>
-                <button
-                  type="button"
-                  onClick={prev}
-                  aria-label="Image précédente"
-                  className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-full bg-background/90 backdrop-blur text-foreground shadow-lg transition-transform hover:scale-110 active:scale-95"
-                >
-                  <ChevronLeft size={22} />
-                </button>
-                <button
-                  type="button"
-                  onClick={next}
-                  aria-label="Image suivante"
-                  className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-full bg-background/90 backdrop-blur text-foreground shadow-lg transition-transform hover:scale-110 active:scale-95"
-                >
-                  <ChevronRight size={22} />
-                </button>
-              </>
-            )}
-          </div>
-
-          {/* Description en plein écran */}
-          {blockCaption && (
-            <div className="mt-3 rounded-xl border border-border/60 bg-muted/20 p-3 sm:p-4">
-              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
-                {blockCaption}
-              </p>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <ImageViewerDialog
+        open={open}
+        onOpenChange={setOpen}
+        items={[block]}
+      />
     </>
   );
 }
@@ -276,24 +451,7 @@ function Child({ block, result }: { block: Block; result?: boolean | undefined }
       return <RichText doc={block.doc} pClass={pText} />;
     }
     case "media": return <MediaSectionBlock block={block as MediaBlock} />;
-    case "image": {
-      const src = safeUrl(block.url);
-      if (!src) return null;
-      return (
-        <figure className="my-6 sm:my-8 max-w-4xl min-w-0">
-          <div className="overflow-hidden rounded-2xl sm:rounded-3xl border border-border/80 bg-muted/20 shadow-xs">
-            <img src={getOptimizedImageUrl(src, { width: 1100 })} alt={block.alt} width={1200} height={800} loading="lazy" decoding="async" className="aspect-[16/10] sm:aspect-[3/2] w-full object-cover" />
-          </div>
-          {(block.title || block.caption || block.note) && (
-            <figcaption className="mt-2.5 sm:mt-3 space-y-1">
-              {block.title && <h4 className="text-base sm:text-lg font-bold text-foreground break-words">{block.title}</h4>}
-              {block.caption && <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed break-words">{block.caption}</p>}
-              {block.note && <p className="text-xs text-muted-foreground break-words">{block.note}</p>}
-            </figcaption>
-          )}
-        </figure>
-      );
-    }
+    case "image": return <ImageFigureBlock block={block as ImageBlock} />;
     case "quote": return (
       <blockquote className="my-6 sm:my-8 border-l-2 border-primary pl-4 sm:pl-6 text-foreground max-w-3xl min-w-0">
         <RichText doc={block.doc} pClass="text-sm sm:text-base md:text-lg leading-relaxed text-foreground italic break-words font-serif" />
