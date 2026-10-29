@@ -6,9 +6,9 @@ import { InlineItem, RichText } from "@/components/portfolio/RichText";
 import { listItems, safeUrl, type Block, type HeadingBlock, type ImageBlock, type MediaBlock, type MediaItem } from "@/lib/blocks";
 import { getOptimizedImageUrl } from "@/lib/siteConfig";
 
-const container = "mx-auto w-full max-w-6xl px-5 md:px-8";
-const pText = "mt-4 text-base sm:text-lg leading-relaxed text-muted-foreground";
-const pResult = "mt-4 max-w-3xl text-lg sm:text-xl leading-relaxed text-foreground/90";
+const container = "mx-auto w-full max-w-6xl px-4 sm:px-6 md:px-8";
+const pText = "mt-3 sm:mt-4 text-base sm:text-lg leading-relaxed text-muted-foreground break-words";
+const pResult = "mt-3 sm:mt-4 max-w-3xl text-base sm:text-xl leading-relaxed text-foreground/90 break-words";
 
 type Section = { heading?: HeadingBlock; children: Block[] };
 type Group = { kind: "half"; tone: "plain" | "muted"; sections: Section[] } | { kind: "full"; section: Section };
@@ -247,16 +247,16 @@ function MediaSectionBlock({ block }: { block: MediaBlock }) {
 function Child({ block, result }: { block: Block; result?: boolean | undefined }) {
   switch (block.type) {
     case "paragraph": return <RichText doc={block.doc} pClass={result ? pResult : pText} />;
-    case "subheading": return <h3 className="mt-8 text-xl sm:text-2xl font-bold tracking-tight text-foreground">{block.text}</h3>;
+    case "subheading": return <h3 className="mt-6 sm:mt-8 text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-foreground break-words">{block.text}</h3>;
     case "list": {
       const items = listItems(block.doc);
       if (block.style === "check") {
         return (
-          <ul className="mt-6 space-y-3.5">
+          <ul className="mt-5 sm:mt-6 space-y-2.5 sm:space-y-3.5">
             {items.map((it, i) => (
-              <li key={i} className="flex items-start gap-3 text-base sm:text-lg leading-relaxed text-muted-foreground">
-                <CheckCircle2 size={22} className="mt-0.5 shrink-0 text-primary" />
-                <span className="flex-1"><InlineItem item={it} /></span>
+              <li key={i} className="flex items-start gap-2.5 sm:gap-3 text-sm sm:text-base md:text-lg leading-relaxed text-muted-foreground min-w-0">
+                <CheckCircle2 size={20} className="mt-0.5 shrink-0 text-primary" />
+                <span className="flex-1 min-w-0 break-words"><InlineItem item={it} /></span>
               </li>
             ))}
           </ul>
@@ -264,9 +264,9 @@ function Child({ block, result }: { block: Block; result?: boolean | undefined }
       }
       if (block.style === "tags") {
         return (
-          <ul className="mt-6 flex flex-wrap gap-2.5">
+          <ul className="mt-5 sm:mt-6 flex flex-wrap gap-2 sm:gap-2.5">
             {items.map((it, i) => (
-              <li key={i} className="rounded-full border border-border/80 bg-secondary/80 px-4 py-1.5 text-xs sm:text-sm font-semibold text-secondary-foreground shadow-2xs">
+              <li key={i} className="rounded-full border border-border/80 bg-secondary/80 px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold text-secondary-foreground shadow-2xs">
                 <InlineItem item={it} />
               </li>
             ))}
@@ -280,32 +280,32 @@ function Child({ block, result }: { block: Block; result?: boolean | undefined }
       const src = safeUrl(block.url);
       if (!src) return null;
       return (
-        <figure className="my-8 max-w-4xl">
+        <figure className="my-6 sm:my-8 max-w-4xl min-w-0">
           <div className="overflow-hidden rounded-2xl sm:rounded-3xl border border-border/80 bg-muted/20 shadow-xs">
             <img src={getOptimizedImageUrl(src, { width: 1100 })} alt={block.alt} width={1200} height={800} loading="lazy" decoding="async" className="aspect-[16/10] sm:aspect-[3/2] w-full object-cover" />
           </div>
           {(block.title || block.caption || block.note) && (
-            <figcaption className="mt-3 space-y-1">
-              {block.title && <h4 className="text-base sm:text-lg font-bold text-foreground">{block.title}</h4>}
-              {block.caption && <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{block.caption}</p>}
-              {block.note && <p className="text-xs text-muted-foreground">{block.note}</p>}
+            <figcaption className="mt-2.5 sm:mt-3 space-y-1">
+              {block.title && <h4 className="text-base sm:text-lg font-bold text-foreground break-words">{block.title}</h4>}
+              {block.caption && <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed break-words">{block.caption}</p>}
+              {block.note && <p className="text-xs text-muted-foreground break-words">{block.note}</p>}
             </figcaption>
           )}
         </figure>
       );
     }
     case "quote": return (
-      <blockquote className="my-8 border-l-2 border-primary pl-5 sm:pl-6 text-foreground max-w-3xl">
-        <RichText doc={block.doc} pClass="text-base sm:text-lg leading-relaxed text-foreground" />
-        {block.cite && <footer className="mt-2 text-sm font-semibold text-primary">— {block.cite}</footer>}
+      <blockquote className="my-6 sm:my-8 border-l-2 border-primary pl-4 sm:pl-6 text-foreground max-w-3xl min-w-0">
+        <RichText doc={block.doc} pClass="text-sm sm:text-base md:text-lg leading-relaxed text-foreground italic break-words font-serif" />
+        {block.cite && <footer className="mt-2 text-xs sm:text-sm font-semibold text-primary not-italic break-words">— {block.cite}</footer>}
       </blockquote>
     );
     case "code": return (
-      <div className="my-6 max-w-3xl overflow-hidden rounded-2xl border border-border bg-ink shadow-xs">
-        <div className="flex items-center justify-between border-b border-white/10 px-4 py-2 text-xs text-ink-foreground/60">
+      <div className="my-5 sm:my-6 max-w-3xl overflow-hidden rounded-xl sm:rounded-2xl border border-border bg-ink shadow-xs min-w-0">
+        <div className="flex items-center justify-between border-b border-white/10 px-3.5 py-1.5 sm:px-4 sm:py-2 text-xs text-ink-foreground/60">
           <span>Snippet</span>
         </div>
-        <pre className="overflow-x-auto p-4 text-xs sm:text-sm text-ink-foreground font-mono leading-relaxed">
+        <pre className="overflow-x-auto p-3 sm:p-4 text-xs sm:text-sm text-ink-foreground font-mono leading-relaxed">
           <code>{block.code}</code>
         </pre>
       </div>
@@ -315,16 +315,16 @@ function Child({ block, result }: { block: Block; result?: boolean | undefined }
       if (!href) return null;
       const external = /^https?:/.test(href);
       return (
-        <Button asChild size="lg" className="mt-6 rounded-full bg-gradient-primary gap-2 shadow-sm">
-          <a href={href} target={external ? "_blank" : undefined} rel={external ? "noreferrer" : undefined}>
-            {external && <Globe size={18} />}
-            {block.label}
-            {external && <ArrowUpRight size={16} />}
+        <Button asChild size="lg" className="mt-5 sm:mt-6 rounded-full bg-gradient-primary gap-2 shadow-sm w-full sm:w-auto justify-center">
+          <a href={href} target={external ? "_blank" : undefined} rel={external ? "noreferrer" : undefined} className="truncate">
+            {external && <Globe size={18} className="shrink-0" />}
+            <span className="truncate">{block.label}</span>
+            {external && <ArrowUpRight size={16} className="shrink-0" />}
           </a>
         </Button>
       );
     }
-    case "divider": return <hr className="my-10 border-border/80 max-w-4xl" />;
+    case "divider": return <hr className="my-8 sm:my-10 border-border/80 max-w-4xl" />;
     default: return null;
   }
 }
@@ -342,18 +342,18 @@ function Steps({ blocks }: { blocks: Block[] }) {
     else intro.push(b);
   }
   return (
-    <div className="mt-6 space-y-8 max-w-4xl">
+    <div className="mt-6 space-y-6 sm:space-y-8 max-w-4xl min-w-0">
       <Children blocks={intro} />
-      <div className="space-y-8 divide-y divide-border/60">
+      <div className="space-y-6 sm:space-y-8 divide-y divide-border/60">
         {steps.map((s, i) => (
-          <div key={s.id} className={i > 0 ? "pt-8" : ""}>
-            <div className="flex items-center gap-3">
-              <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+          <div key={s.id} className={i > 0 ? "pt-6 sm:pt-8" : ""}>
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <span className="inline-flex h-6 w-6 sm:h-7 sm:w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
                 {String(i + 1).padStart(2, "0")}
               </span>
-              <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">{s.title}</h3>
+              <h3 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-foreground break-words">{s.title}</h3>
             </div>
-            <div className="mt-3 pl-10 space-y-4">
+            <div className="mt-2.5 sm:mt-3 pl-8 sm:pl-10 space-y-3 sm:space-y-4 min-w-0">
               {s.body.map((b) => (
                 b.type === "paragraph"
                   ? <RichText key={b.id} doc={b.doc} pClass={pText} />
@@ -373,11 +373,11 @@ function FullSection({ section, pb }: { section: Section; pb: boolean }) {
   const firstImage = section.children[0]?.type === "image" ? (section.children[0] as ImageBlock) : null;
   if (h?.variant === "result") {
     return (
-      <section className={`${container} ${pb ? "pb-12 md:pb-16" : ""}`}>
-        <div className="mt-12 border-t-2 border-primary/30 pt-8 max-w-4xl">
-          <h2 className="flex items-center gap-3 text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-            <CheckCircle2 className="shrink-0 text-primary h-7 w-7" />
-            {h.text}
+      <section className={`${container} ${pb ? "pb-10 md:pb-16" : ""}`}>
+        <div className="mt-8 sm:mt-12 border-t-2 border-primary/30 pt-6 sm:pt-8 max-w-4xl min-w-0">
+          <h2 className="flex items-start sm:items-center gap-2.5 sm:gap-3 text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-foreground break-words">
+            <CheckCircle2 className="shrink-0 text-primary h-6 w-6 sm:h-7 sm:w-7 mt-0.5 sm:mt-0" />
+            <span>{h.text}</span>
           </h2>
           <Children blocks={section.children} result />
         </div>
@@ -385,27 +385,27 @@ function FullSection({ section, pb }: { section: Section; pb: boolean }) {
     );
   }
   const inner = (
-    <div className="max-w-4xl">
+    <div className="max-w-4xl min-w-0">
       {h && (firstImage
-        ? <div className="flex flex-wrap items-center justify-between gap-4 mb-4"><h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">{h.text}</h2><ZoomButton image={firstImage} /></div>
-        : <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground mb-4">{h.text}</h2>)}
+        ? <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4 mb-3 sm:mb-4"><h2 className="text-xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground break-words">{h.text}</h2><ZoomButton image={firstImage} /></div>
+        : <h2 className="text-xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground mb-3 sm:mb-4 break-words">{h.text}</h2>)}
       {h?.variant === "steps" ? <Steps blocks={section.children} /> : <Children blocks={section.children} />}
     </div>
   );
-  if (muted) return <section className="border-y border-border/60 bg-muted/20 py-12 md:py-16 my-8"><div className={container}>{inner}</div></section>;
-  return <section className={`${container} pt-10 md:pt-14 ${pb ? "pb-10 md:pb-14" : ""}`}>{inner}</section>;
+  if (muted) return <section className="border-y border-border/60 bg-muted/20 py-8 sm:py-12 md:py-16 my-6 sm:my-8"><div className={container}>{inner}</div></section>;
+  return <section className={`${container} pt-8 sm:pt-10 md:pt-14 ${pb ? "pb-8 sm:pb-10 md:pb-14" : ""}`}>{inner}</section>;
 }
 
 function HalfGroup({ group }: { group: Extract<Group, { kind: "half" }> }) {
   const muted = group.tone === "muted";
   const cols = group.sections.map((s, i) => (
-    <div key={s.heading?.id ?? i} className="space-y-4">
-      {s.heading && <h2 className={`${muted ? "text-2xl sm:text-3xl" : "text-xl sm:text-2xl"} font-bold tracking-tight text-foreground`}>{s.heading.text}</h2>}
+    <div key={s.heading?.id ?? i} className="space-y-3 sm:space-y-4 min-w-0">
+      {s.heading && <h2 className={`${muted ? "text-xl sm:text-2xl md:text-3xl" : "text-lg sm:text-xl md:text-2xl"} font-bold tracking-tight text-foreground break-words`}>{s.heading.text}</h2>}
       <Children blocks={s.children} />
     </div>
   ));
-  if (muted) return <section className="border-y border-border/60 bg-muted/20 py-12 md:py-16 my-8"><div className={`${container} grid gap-8 md:grid-cols-2 md:gap-14`}>{cols}</div></section>;
-  return <section className={`${container} grid gap-8 py-10 md:grid-cols-2 md:gap-14 md:py-14`}>{cols}</section>;
+  if (muted) return <section className="border-y border-border/60 bg-muted/20 py-8 sm:py-12 md:py-16 my-6 sm:my-8"><div className={`${container} grid gap-6 sm:gap-8 md:grid-cols-2 md:gap-14`}>{cols}</div></section>;
+  return <section className={`${container} grid gap-6 sm:gap-8 py-8 sm:py-10 md:grid-cols-2 md:gap-14 md:py-14`}>{cols}</section>;
 }
 
 /** Corps d'une étude de cas, rendu à partir des blocs structurés. */

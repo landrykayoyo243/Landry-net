@@ -61,7 +61,7 @@ export const Route = createFileRoute("/projets/$slug")({
   errorComponent: ProjectError,
 });
 
-const container = "mx-auto w-full max-w-6xl px-5 md:px-8";
+const container = "mx-auto w-full max-w-6xl px-4 sm:px-6 md:px-8";
 
 function ProjectNotFound() {
   return (
@@ -102,25 +102,25 @@ function ProjectDetail() {
     .slice(0, 3);
 
   return (
-    <div id="top" className="bg-background text-foreground">
+    <div id="top" className="bg-background text-foreground overflow-x-clip min-w-0">
       <Header />
-      <main key={p.slug} className="page-enter pt-24 md:pt-32">
+      <main key={p.slug} className="page-enter pt-20 sm:pt-24 md:pt-32 min-w-0">
         {/* Navigation retour & Catégories */}
         <div className={container}>
-          <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+          <div className="mb-6 sm:mb-8 flex flex-wrap items-center justify-between gap-3">
             <Link
               to="/projets"
-              className="group inline-flex items-center gap-2 rounded-full border border-border/70 bg-card px-4 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground hover:border-primary/40"
+              className="group inline-flex items-center gap-2 rounded-full border border-border/70 bg-card px-3.5 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground hover:border-primary/40 shrink-0"
             >
               <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-1" />
               <span>{copy.back}</span>
             </Link>
 
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3.5 py-1 text-xs font-semibold text-primary">
-                <Sparkles size={12} /> {copy.eyebrow}
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3 py-0.5 sm:px-3.5 sm:py-1 text-[11px] sm:text-xs font-semibold text-primary">
+                <Sparkles size={11} /> {copy.eyebrow}
               </span>
-              <span className="rounded-full bg-secondary/80 border border-border px-3.5 py-1 text-xs font-semibold text-secondary-foreground">
+              <span className="rounded-full bg-secondary/80 border border-border px-3 py-0.5 sm:px-3.5 sm:py-1 text-[11px] sm:text-xs font-semibold text-secondary-foreground">
                 {p.tag}
               </span>
             </div>
@@ -129,23 +129,23 @@ function ProjectDetail() {
 
         {/* En-tête héro du projet */}
         <section className={container}>
-          <h1 className="max-w-4xl font-serif text-3xl sm:text-5xl md:text-6xl font-normal leading-[1.08] tracking-tight text-foreground break-words">
+          <h1 className="max-w-4xl font-serif text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-normal leading-[1.14] sm:leading-[1.08] tracking-tight text-foreground break-words hyphens-auto">
             {p.title}
           </h1>
 
           {p.intro && (
-            <p className="mt-6 max-w-3xl text-base sm:text-xl leading-relaxed text-muted-foreground">
+            <p className="mt-4 sm:mt-6 max-w-3xl text-sm sm:text-lg md:text-xl leading-relaxed text-muted-foreground break-words">
               {p.intro}
             </p>
           )}
 
           {/* Badges des technologies */}
           {p.technologies.length > 0 && (
-            <div className="mt-7 flex flex-wrap gap-2" aria-label={copy.technologies}>
+            <div className="mt-5 sm:mt-7 flex flex-wrap gap-1.5 sm:gap-2" aria-label={copy.technologies}>
               {p.technologies.map((t) => (
                 <span
                   key={t}
-                  className="rounded-full border border-border/70 bg-secondary/70 px-3.5 py-1 text-xs font-medium text-secondary-foreground shadow-xs transition-colors hover:border-primary/40"
+                  className="rounded-full border border-border/70 bg-secondary/70 px-3 py-0.5 sm:px-3.5 sm:py-1 text-[11px] sm:text-xs font-medium text-secondary-foreground shadow-xs transition-colors hover:border-primary/40"
                 >
                   {t}
                 </span>
@@ -155,8 +155,8 @@ function ProjectDetail() {
 
           {/* Actions & Lien Live */}
           {p.external_url && (
-            <div className="mt-8 flex flex-wrap items-center gap-4">
-              <Button asChild size="lg" className="rounded-full bg-gradient-primary gap-2 shadow-sm">
+            <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+              <Button asChild size="lg" className="rounded-full bg-gradient-primary gap-2 shadow-sm w-full sm:w-auto justify-center">
                 <a href={p.external_url} target="_blank" rel="noopener noreferrer">
                   <Globe size={18} /> {copy.live} <ArrowUpRight size={16} />
                 </a>
@@ -165,7 +165,7 @@ function ProjectDetail() {
                 href={p.external_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="break-all text-xs sm:text-sm text-muted-foreground underline-offset-4 hover:underline hover:text-foreground transition-colors"
+                className="break-all text-xs sm:text-sm text-muted-foreground underline-offset-4 hover:underline hover:text-foreground transition-colors truncate max-w-full"
               >
                 {p.external_url}
               </a>
@@ -174,8 +174,8 @@ function ProjectDetail() {
 
           {/* Image de couverture principale dans un cadre studio */}
           {(p.image_url || hero?.url) && (
-            <div className="mt-10 md:mt-12 overflow-hidden rounded-[28px] border border-border/80 bg-card p-3 sm:p-4 shadow-sm">
-              <div className="overflow-hidden rounded-[20px] bg-muted">
+            <div className="mt-8 sm:mt-10 md:mt-12 overflow-hidden rounded-2xl sm:rounded-3xl border border-border/80 bg-card p-2 sm:p-4 shadow-sm">
+              <div className="overflow-hidden rounded-xl sm:rounded-2xl bg-muted">
                 <img
                   src={getOptimizedImageUrl(p.image_url || hero?.url || "", { width: 1200 })}
                   alt={p.image_alt || hero?.alt || p.title}
@@ -195,22 +195,22 @@ function ProjectDetail() {
         <ProjectBody blocks={blocks} />
 
         {/* Section Contact / CTA */}
-        <section className="relative overflow-hidden bg-hero py-16 text-ink-foreground md:py-24 my-14 md:my-20">
+        <section className="relative overflow-hidden bg-hero py-12 sm:py-16 text-ink-foreground md:py-24 my-10 sm:my-14 md:my-20">
           <div className="bg-grid pointer-events-none absolute inset-0" aria-hidden />
           <div className={`${container} relative`}>
             <div className="max-w-xl">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-foreground/20 bg-ink-foreground/10 px-3.5 py-1 text-xs font-semibold text-primary-glow mb-5 backdrop-blur-sm">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-foreground/20 bg-ink-foreground/10 px-3.5 py-1 text-xs font-semibold text-primary-glow mb-4 sm:mb-5 backdrop-blur-sm">
                 <Sparkles size={11} /> Travaillons ensemble
               </span>
-              <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-normal leading-tight text-white tracking-tight">
+              <h2 className="font-serif text-2xl sm:text-4xl md:text-5xl font-normal leading-tight text-white tracking-tight">
                 Ce projet vous inspire ?<br />
                 <span className="italic font-serif text-primary-glow">Construisons le vôtre.</span>
               </h2>
-              <p className="mt-4 text-sm sm:text-base leading-relaxed text-ink-foreground/75">
+              <p className="mt-3 sm:mt-4 text-sm sm:text-base leading-relaxed text-ink-foreground/75">
                 Chaque projet commence par une conversation. Décrivez-moi votre besoin et je vous réponds rapidement avec une approche concrète.
               </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Button asChild size="lg" className="rounded-full bg-gradient-primary gap-2 shadow-glow">
+              <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3">
+                <Button asChild size="lg" className="rounded-full bg-gradient-primary gap-2 shadow-glow w-full sm:w-auto justify-center">
                   <Link to="/contact">
                     <Mail size={16} /> Démarrer un projet <ArrowRight size={15} />
                   </Link>
@@ -219,7 +219,7 @@ function ProjectDetail() {
                   asChild
                   size="lg"
                   variant="outline"
-                  className="rounded-full border-ink-foreground/20 bg-ink-foreground/5 text-ink-foreground hover:bg-ink-foreground/15"
+                  className="rounded-full border-ink-foreground/20 bg-ink-foreground/5 text-ink-foreground hover:bg-ink-foreground/15 w-full sm:w-auto justify-center"
                 >
                   <Link to="/projets">
                     Voir les autres projets
