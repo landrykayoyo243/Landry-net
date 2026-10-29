@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
+  ArrowDown,
   ArrowRight,
   Award,
   Briefcase,
@@ -158,9 +159,9 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
 
             {/* 2 CTAs */}
             <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <Link to="/contact" className={btnPrimary}>
-                Échangeons sur votre projet <ArrowRight size={16} />
-              </Link>
+              <a href="#projets" className={btnPrimary}>
+                Voir mes réalisations <ArrowDown size={16} />
+              </a>
               {cvUrl ? (
                 <a
                   href={cvUrl}
@@ -171,9 +172,9 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
                   <FileText size={16} /> Télécharger mon CV
                 </a>
               ) : (
-                <a href="#projets" className={btnGhostDark}>
-                  Voir mes réalisations ↓
-                </a>
+                <Link to="/contact" className={btnGhostDark}>
+                  <Mail size={16} /> Me contacter
+                </Link>
               )}
             </div>
           </div>
