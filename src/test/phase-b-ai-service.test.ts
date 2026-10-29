@@ -12,11 +12,13 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const TEST_GEMINI_KEY = "AIzaSyDummyTestKeyForUnitTests123456789";
 let userOriginalKey: string | null = null;
+let userOriginalConfig: import("@/lib/ai.server").AiConfig | null = null;
 
 describe("PHASE B : Service IA Google Gemini (Porte d'entrée unique & Quotas)", { timeout: 15000 }, () => {
   beforeAll(async () => {
-    // Sauvegarder la vraie clé de l'utilisateur si elle existe pour ne JAMAIS l'effacer
+    // Sauvegarder la vraie clé et la vraie configuration de l'utilisateur pour ne JAMAIS les effacer
     userOriginalKey = await getSecret("ai_api_key");
+    userOriginalConfig = await getAiConfig();
   });
 
   beforeEach(async () => {
@@ -27,7 +29,7 @@ describe("PHASE B : Service IA Google Gemini (Porte d'entrée unique & Quotas)",
       value: TEST_GEMINI_KEY,
     });
 
-    // Configuration par défaut pour les tests
+    // Configuration temporaire isolée pour les tests
     await saveAiConfig({
       model: "gemini-1.5-flash",
       daily_request_limit: 5,
@@ -37,7 +39,7 @@ describe("PHASE B : Service IA Google Gemini (Porte d'entrée unique & Quotas)",
   });
 
   afterAll(async () => {
-    // Restaurer impérativement la vraie clé de l'utilisateur après les tests
+    // Restaurer impérativement la vraie clé et la vraie configuration de l'utilisateur après les tests
     if (userOriginalKey) {
       await saveSecret({
         name: "ai_api_key",
@@ -46,6 +48,10 @@ describe("PHASE B : Service IA Google Gemini (Porte d'entrée unique & Quotas)",
       });
     } else {
       await deleteSecret({ name: "ai_api_key" }).catch(() => {});
+    }
+
+    if (userOriginalConfig) {
+      await saveAiConfig(userOriginalConfig);
     }
   });
 

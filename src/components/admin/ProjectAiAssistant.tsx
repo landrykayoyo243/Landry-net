@@ -142,7 +142,22 @@ export function ProjectAiAssistant({
   onAppendSingleSection,
 }: ProjectAiAssistantProps) {
   const [tab, setTab] = useState<"chat" | "generator">("chat");
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    const title = projectData.title.trim() || "ce projet";
+    return [
+      {
+        id: "welcome",
+        role: "assistant" as const,
+        text:
+          "Bonjour Landry. Je suis votre assistant de rédaction et d'optimisation pour ce projet.\n\n" +
+          "Je peux enrichir l'étude de cas, rédiger des sections détaillées (contexte, défi technique, " +
+          "architecture Cisco & serveurs, haute disponibilité, résultats), affiner votre accroche ou " +
+          "proposer les technologies les plus valorisantes.\n\n" +
+          "Que souhaitez-vous ajouter ou perfectionner sur cette fiche ?",
+        timestamp: new Date(),
+      },
+    ];
+  });
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [skills, setSkills] = useState<AiSkill[]>([]);
@@ -161,30 +176,14 @@ export function ProjectAiAssistant({
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (open) {
+    if (open && skills.length === 0) {
       adminApi
         .listSkills()
         .then((data) => setSkills(data.filter((s) => s.is_active)))
         .catch(() => {});
-
-      // Message d'accueil proactif de l'assistant dans le chat
-      if (messages.length === 0) {
-        const title = projectData.title.trim() || "ce projet";
-        setMessages([
-          {
-            id: "welcome",
-            role: "assistant",
-            text: `Bonjour Landry. Je suis votre assistant de rédaction et d'optimisation pour « ${title} ».
-
-Je peux enrichir l'étude de cas, rédiger des sections détaillées (contexte, défi technique, architecture Cisco & serveurs, haute disponibilité, résultats), affiner votre accroche ou proposer les technologies les plus valorisantes.
-
-Que souhaitez-vous ajouter ou perfectionner sur cette fiche ?`,
-            timestamp: new Date(),
-          },
-        ]);
-      }
     }
   }, [open]);
+
 
   useEffect(() => {
     if (tab === "chat") {
@@ -244,14 +243,14 @@ FICHE DU PROJET ACTUEL :
 CONTENU ACTUEL DU PROJET DANS L'ÉDITEUR :
 ${existingContent}
 
-RÈGLES D'OR DE RÉDACTION :
-1. N'utilise AUCUN émoji. Ton style est sobre, prestigieux, technique et limpide.
-2. N'utilise AUCUN symbole markdown inutile comme des séries de ### ou de ** qui polluent le texte.
-3. Si tu rédiges une ou plusieurs sections de l'étude de cas, encadre chaque titre avec la balise [SECTION: Nom de la section] puis place le texte en prose fluide immédiatement en dessous.
-4. Si tu proposes une nouvelle accroche ou un nouveau résumé, utilise :
-NOUVELLE INTRO : Le texte...
-NOUVEAU RESUME : Le texte...
-5. Valorise l'expertise de Landry : administration réseaux Cisco, systèmes Windows Server/Linux, haute disponibilité, virtualisation, rigueur technique et développement web React/TypeScript/Node.js.
+DIRECTIVES RÉDACTIONNELLES ET ÉDITORIALES (DIRECTEUR ÉDITORIAL TECHNIQUE) :
+1. SECTIONS SUR-MESURE : 4 à 6 sections balisées [SECTION: Titre Pertinent]. Jamais de titres génériques répétés. Adapte chaque intitulé au sujet précis du projet.
+2. STYLE WORD ÉPURÉ : Zéro émoji, zéro markdown brut (pas de ###, pas de **). Prose noble, fluide, directement lisible.
+3. PROSE VS LISTES : La prose prime. Les listes à puces sont réservées aux nomenclatures d'équipements matériels, protocoles précis ou métriques chiffrées — jamais pour remplacer une analyse.
+4. NOUVELLE INTRO / RÉSUMÉ : Si tu proposes une accroche, utilise NOUVELLE INTRO : ... et NOUVEAU RESUME : ...
+5. DATE ACTUELLE — 2026 : Pour tout poste ou formation en cours, écris impérativement « 2026 — En cours ». Ne jamais écrire 2024.
+6. LIEN D'ACCÈS : Si Landry mentionne une URL (https://...), écris « Lien d'accès configuré : https://... » dans ta réponse et retiens-le pour le champ external_url.
+7. CONSEIL SUR LES BLOCS : Quand Landry demande quelle structure adopter, explique avec conviction pourquoi tel titre de section est plus pertinent pour ce type de projet — raisonne en directeur éditorial technique.
 `;
 
       // Historique pour Gemini
@@ -399,32 +398,20 @@ NOUVEAU RESUME : Le texte...
       let prompt = "";
 
       if (targetMode === "case_study") {
-        prompt = `Rédige une étude de cas complète, percutante et professionnelle pour le portfolio de Landry Kayoyo.
+        prompt = `Tu es un rédacteur technique d'élite pour le portfolio de Landry Kayoyo (Administrateur Systèmes & Réseaux — Développeur Web Full-Stack).
+Rédige une étude de cas complète, percutante et captivante pour le projet suivant :
 - Titre : "${projectData.title}"
 - Catégorie : "${projectData.tag || "Systèmes, Réseaux & Web"}"
 - Technologies associées : ${techList}
 - Contexte initial : "${projectData.intro || projectData.summary || ""}"
 
-RÈGLES STRICTES : AUCUN ÉMOJI. AUCUN SYMBOLE MARKDOWN INUTILE (pas de ### ni de **). Rédige en prose soignée.
-Structure obligatoire avec les balises [SECTION: Nom de section] :
-[SECTION: Contexte & Objectifs]
-(Contexte, organisation, problématique et besoin)
-
-[SECTION: Le Défi Technique]
-(Contraintes d'architecture, sécurité, disponibilité ou intégration)
-
-[SECTION: Architecture & Choix Technologiques]
-(Justification rigoureuse des technologies et topologies adoptées)
-
-[SECTION: Mon Rôle & Réalisations]
-(Réalisations concrètes de Landry : configuration, développement, tests, mise en production)
-
-[SECTION: Suggestion d'Illustration]
-(Recommandation d'emplacement pour capture d'écran ou schéma réseau à ajouter)
-
-[SECTION: Résultats & Impact]
-(Métriques, gains concrets et fiabilité constatée)`;
+CONSIGNES DE RÉDACTION SUR-MESURE (ZÉRO GABARIT RÉPÉTITIF) :
+1. N'utilise PAS de titres génériques ou stéréotypés. Les titres et le nombre de sections doivent DÉPENDRE ENTIÈREMENT de la nature réelle de ce projet.
+2. Rédige une étude de cas complète comportant entre 4 et 6 sections approfondies avec des titres percutants (par exemple : problématique et contexte terrain, choix d'architecture ou topologie réseau, étapes de mise en œuvre et configuration, sécurisation et résilience, résultats concrets et bilan d'exploitation).
+3. Balisage obligatoire pour chaque section : [SECTION: Titre Personnalisé de la Section], suivi d'une prose fluide, riche et détaillée.
+4. RÈGLES STRICTES : AUCUN ÉMOJI. AUCUN SYMBOLE MARKDOWN ENCOMBRANT (pas de ### ni de **). Rédige en belle prose aérée digne d'un traitement de texte Word.`;
       } else if (targetMode === "summary") {
+
         prompt = `Pour le projet "${projectData.title}" (${techList}) :
 RÈGLE STRICTE : AUCUN ÉMOJI. AUCUN SYMBOLE MARKDOWN.
 Génère :
@@ -515,51 +502,51 @@ Réponds uniquement par la liste séparée par des virgules. Sans aucun émoji n
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[92vh] flex flex-col p-0 rounded-2xl sm:rounded-3xl border border-border bg-card shadow-2xl overflow-hidden">
-        {/* Header */}
-        <DialogHeader className="p-4 sm:p-5 pb-3 border-b border-border/80 bg-muted/20">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary shrink-0 shadow-xs">
-                <Sparkles size={18} />
+        {/* Header épuré et ergonomique sur mobile */}
+        <DialogHeader className="p-3 sm:p-4 pb-2.5 border-b border-border/70 bg-muted/20">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary shrink-0">
+                <Sparkles size={16} />
               </div>
-              <div>
-                <DialogTitle className="text-base sm:text-lg font-bold flex items-center gap-2 text-foreground">
-                  <span>Assistant IA du Projet</span>
-                  <Badge variant="outline" className="text-[10px] font-semibold border-primary/40 text-primary bg-primary/5 py-0 px-1.5">
-                    Rédaction & Insertion Directe
-                  </Badge>
+              <div className="min-w-0 flex-1">
+                <DialogTitle className="text-sm sm:text-base font-bold text-foreground truncate flex items-center gap-1.5">
+                  <span>Assistant Rédaction</span>
+                  <span className="text-xs font-normal text-muted-foreground truncate hidden xs:inline">
+                    · {projectData.title || "Projet"}
+                  </span>
                 </DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground line-clamp-1">
-                  Projet : <strong className="text-foreground">{projectData.title || "(Sans titre)"}</strong> — Rédigez, appliquez et retrouvez directement vos sections dans l'éditeur Word.
+                <DialogDescription className="text-[11px] text-muted-foreground truncate">
+                  Rédigez et insérez vos sections sur-mesure directement dans l'éditeur Word.
                 </DialogDescription>
               </div>
             </div>
 
-            {/* Sélecteur d'onglets */}
-            <div className="flex items-center rounded-xl bg-muted p-1 border border-border/60">
+            {/* Sélecteur d'onglets épuré */}
+            <div className="flex items-center self-start sm:self-auto rounded-xl bg-muted/80 p-0.5 border border-border/60">
               <button
                 type="button"
                 onClick={() => setTab("chat")}
-                className={`flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg transition-all ${
                   tab === "chat"
-                    ? "bg-background text-foreground shadow-xs"
+                    ? "bg-background text-foreground shadow-2xs"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <MessageSquare size={13} />
-                <span>Chat Direct</span>
+                <span>Chat</span>
               </button>
               <button
                 type="button"
                 onClick={() => setTab("generator")}
-                className={`flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg transition-all ${
                   tab === "generator"
-                    ? "bg-background text-foreground shadow-xs"
+                    ? "bg-background text-foreground shadow-2xs"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <Wand2 size={13} />
-                <span>Générateur Express</span>
+                <span>Générateur</span>
               </button>
             </div>
           </div>
@@ -567,9 +554,9 @@ Réponds uniquement par la liste séparée par des virgules. Sans aucun émoji n
 
         {/* Corps de l'onglet : CHAT DIRECT */}
         {tab === "chat" && (
-          <div className="flex flex-col flex-1 overflow-hidden min-h-[460px] max-h-[68vh]">
-            {/* Fil des messages */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+          <div className="flex flex-col flex-1 overflow-hidden min-h-[440px] max-h-[68vh]">
+            {/* Fil des messages avec overscroll-contain */}
+            <div className="flex-1 overflow-y-auto overscroll-contain p-3 sm:p-5 space-y-3 sm:space-y-4">
               {messages.map((m) => {
                 const isUser = m.role === "user";
                 return (
@@ -587,12 +574,12 @@ Réponds uniquement par la liste séparée par des virgules. Sans aucun émoji n
                       {isUser ? "LK" : <Bot size={15} className="text-primary" />}
                     </div>
 
-                    <div className={`space-y-2 max-w-[92%] sm:max-w-[88%] ${isUser ? "items-end" : "items-start"} flex flex-col`}>
+                    <div className={`space-y-2 max-w-[92%] sm:max-w-[86%] ${isUser ? "items-end" : "items-start"} flex flex-col`}>
                       <div
                         className={`rounded-2xl px-3.5 py-2.5 sm:px-4 sm:py-3 shadow-xs text-xs sm:text-sm leading-relaxed ${
                           isUser
                             ? "bg-primary text-primary-foreground rounded-tr-xs"
-                            : "bg-card border border-border/80 text-foreground rounded-tl-xs space-y-3"
+                            : "bg-card border border-border/80 text-foreground rounded-tl-xs space-y-2.5"
                         }`}
                       >
                         {/* Rendu du texte sans markdown brut */}
@@ -602,25 +589,26 @@ Réponds uniquement par la liste séparée par des virgules. Sans aucun émoji n
 
                         {/* Cartes d'action si l'assistant a proposé des sections */}
                         {!isUser && m.parsedSections && m.parsedSections.length > 0 && (
-                          <div className="pt-2 border-t border-border/60 space-y-2.5">
-                            {/* Bannière principale de confirmation */}
-                            <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl bg-primary/10 border border-primary/30">
+                          <div className="pt-2 border-t border-border/60 space-y-2">
+                            {/* Bannière principale compacte */}
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2 sm:p-2.5 rounded-xl bg-primary/5 border border-primary/20">
                               <div className="flex items-center gap-1.5">
-                                <Layers size={15} className="text-primary shrink-0" />
-                                <span className="text-xs font-bold text-foreground">
-                                  {m.parsedSections.length} sections prêtes pour l'éditeur Word
+                                <Layers size={14} className="text-primary shrink-0" />
+                                <span className="text-xs font-semibold text-foreground">
+                                  {m.parsedSections.length} sections rédigées sur-mesure
                                 </span>
                               </div>
                               <Button
                                 type="button"
                                 size="sm"
                                 onClick={() => handleInsertAllSections(m.parsedSections!, true)}
-                                className="h-8 text-xs font-bold gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg shadow-sm"
+                                className="h-7.5 px-3 text-xs font-semibold gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg shadow-2xs w-full sm:w-auto"
                               >
                                 <Sparkles size={13} />
-                                Tout insérer & Voir le projet
+                                <span>Tout insérer dans le projet</span>
                               </Button>
                             </div>
+
 
                             {/* Liste détaillée des sections avec état d'insertion */}
                             <div className="space-y-1.5 pt-1">
@@ -681,17 +669,17 @@ Réponds uniquement par la liste séparée par des virgules. Sans aucun émoji n
                             </div>
 
                             {/* Barre inférieure : Tout appliquer et/ou fermer */}
-                            <div className="pt-2 flex flex-wrap items-center justify-between gap-2 border-t border-border/40">
+                            <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-border/40">
                               <span className="text-[11px] text-muted-foreground">
-                                Vous pouvez inspecter le projet dans l'éditeur Word à tout moment.
+                                Les blocs s'ouvrent ensuite dans votre éditeur Word.
                               </span>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 w-full sm:w-auto">
                                 <Button
                                   type="button"
                                   variant="outline"
                                   size="sm"
                                   onClick={() => onOpenChange(false)}
-                                  className="h-7 text-xs rounded-lg gap-1"
+                                  className="h-7 text-xs rounded-lg gap-1 flex-1 sm:flex-initial"
                                 >
                                   <Eye size={12} />
                                   <span>Voir l'éditeur</span>
@@ -700,10 +688,10 @@ Réponds uniquement par la liste séparée par des virgules. Sans aucun émoji n
                                   type="button"
                                   size="sm"
                                   onClick={() => handleApplyAll(m)}
-                                  className="h-7 text-xs font-semibold gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg shadow-xs"
+                                  className="h-7 text-xs font-semibold gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg shadow-2xs flex-1 sm:flex-initial"
                                 >
                                   <Check size={12} />
-                                  <span>Tout appliquer & Fermer</span>
+                                  <span>Tout appliquer</span>
                                 </Button>
                               </div>
                             </div>

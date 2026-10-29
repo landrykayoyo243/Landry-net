@@ -67,6 +67,11 @@ function extractDraftDataFromText(text: string) {
   const summaryMatch = text.match(/(?:Résumé|Summary)\s*[:]\s*([\s\S]*?)(?=\n\n|\[SECTION|$)/i);
   const summary = summaryMatch ? summaryMatch[1].trim().slice(0, 450) : "";
 
+  // Détection du lien d'accès / démo
+  const urlMatch = text.match(/(?:Lien(?:\s*d['’]accès|\s*externe|\s*du projet)?|URL|Accès|Démo)\s*[:]\s*(https?:\/\/[^\s\n)]+)/i) ||
+                   text.match(/(https?:\/\/[^\s\n)]+)/i);
+  const external_url = urlMatch ? urlMatch[1].trim().replace(/[.,;)]+$/, "") : undefined;
+
   const sections: Array<{ title: string; content: string }> = [];
   const pattern = /\[SECTION:\s*([^\]]+)\]\s*([\s\S]*?)(?=\[SECTION:|$)/gi;
   let match;
@@ -77,7 +82,7 @@ function extractDraftDataFromText(text: string) {
     });
   }
 
-  return { title, intro, summary, technologies, sections };
+  return { title, intro, summary, technologies, external_url, sections };
 }
 
 function generateId() {
@@ -89,27 +94,34 @@ function formatTime(d: Date) {
 }
 
 function FormattedMessageText({ text }: { text: string }) {
-  // Retirer les blocs action s'il y en a
+  // Retirer les blocs action techniques s'il y en a
   const cleaned = text.replace(/```action:[a-z0-9_-]+\s*[\s\S]*?```/gi, "").trim();
   const lines = cleaned.split("\n");
 
   return (
-    <div className="space-y-1.5 text-xs sm:text-sm leading-relaxed">
+    <div className="space-y-2 text-xs sm:text-sm leading-relaxed text-foreground/95">
       {lines.map((line, idx) => {
         const trimmed = line.trim();
         if (!trimmed) return <div key={idx} className="h-1.5" />;
 
-        // Titre de section ou en-tête
-        if (trimmed.startsWith("[SECTION:") || trimmed.startsWith("###") || trimmed.startsWith("##") || trimmed.startsWith("#")) {
+        // Titre de section éditoriale (format [SECTION: ...] ou titre propre)
+        if (
+          trimmed.startsWith("[SECTION:") ||
+          trimmed.startsWith("###") ||
+          trimmed.startsWith("##") ||
+          trimmed.startsWith("#")
+        ) {
           const cleanTitle = trimmed
             .replace(/^[#\[\]\s:]+|[\]]+$/g, "")
             .replace(/^SECTION:\s*/i, "")
             .replace(/^\*\*|\*\*$/g, "")
             .trim();
           return (
-            <h4 key={idx} className="font-bold text-foreground pt-2 pb-0.5 text-xs sm:text-sm text-primary flex items-center gap-1.5">
-              <span>{cleanTitle}</span>
-            </h4>
+            <div key={idx} className="pt-2.5 pb-1">
+              <h4 className="font-bold text-foreground text-xs sm:text-sm text-primary flex items-center gap-2 pl-2 border-l-2 border-primary">
+                <span>{cleanTitle}</span>
+              </h4>
+            </div>
           );
         }
 
@@ -117,14 +129,18 @@ function FormattedMessageText({ text }: { text: string }) {
         if (/^[-*•]\s+/.test(trimmed)) {
           const content = trimmed.replace(/^[-*•]\s+/, "");
           return (
-            <div key={idx} className="flex items-start gap-2 pl-1">
-              <span className="text-primary mt-1 text-[8px] shrink-0">•</span>
-              <span className="flex-1">{renderBoldParts(content)}</span>
+            <div key={idx} className="flex items-start gap-2 pl-2">
+              <span className="text-primary mt-1.5 text-[6px] shrink-0">●</span>
+              <span className="flex-1 leading-relaxed">{renderBoldParts(content)}</span>
             </div>
           );
         }
 
-        return <p key={idx}>{renderBoldParts(trimmed)}</p>;
+        return (
+          <p key={idx} className="leading-relaxed">
+            {renderBoldParts(trimmed)}
+          </p>
+        );
       })}
     </div>
   );
@@ -134,11 +150,16 @@ function renderBoldParts(text: string) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
   return parts.map((part, i) => {
     if (part.startsWith("**") && part.endsWith("**")) {
-      return <strong key={i} className="font-semibold text-foreground">{part.slice(2, -2)}</strong>;
+      return (
+        <strong key={i} className="font-semibold text-foreground">
+          {part.slice(2, -2)}
+        </strong>
+      );
     }
     return part;
   });
 }
+
 
 function MessageBubble({
   msg,
@@ -184,7 +205,7 @@ function MessageBubble({
   const hasSections = !isUser && !msg.error && msg.text.includes("[SECTION:");
 
   return (
-    <div className={`flex gap-2 sm:gap-3 ${isUser ? "flex-row-reverse" : "flex-row"} animate-in fade-in-50`}>
+    <div className={`flex gap-1.5 sm:gap-3 ${isUser ? "flex-row-reverse" : "flex-row"} animate-in fade-in-50 min-w-0 w-full`}>
       <div
         className={`flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-xl text-xs font-bold shadow-2xs mt-0.5 ${
           isUser
@@ -195,9 +216,9 @@ function MessageBubble({
         {isUser ? "LK" : <Bot size={15} className="text-primary" />}
       </div>
 
-      <div className={`group max-w-[92%] sm:max-w-[82%] space-y-1.5 ${isUser ? "items-end" : "items-start"} flex flex-col`}>
+      <div className={`group max-w-[94%] sm:max-w-[84%] space-y-1.5 ${isUser ? "items-end" : "items-start"} flex flex-col min-w-0`}>
         <div
-          className={`rounded-2xl px-3.5 py-2.5 sm:px-4 sm:py-3 shadow-xs ${
+          className={`rounded-2xl px-3 py-2 sm:px-4 sm:py-3 shadow-xs break-words [overflow-wrap:anywhere] ${
             isUser
               ? "bg-primary text-primary-foreground rounded-tr-xs"
               : msg.error
@@ -213,29 +234,29 @@ function MessageBubble({
 
           {/* Widget interactif lorsqu'un projet a été enregistré en mode brouillon */}
           {msg.actionExecuted && msg.actionExecuted.entity === "project" && (
-            <div className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 dark:bg-amber-500/5 p-3 sm:p-3.5 space-y-2 text-foreground">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="border-amber-500/50 bg-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold text-[11px] gap-1 px-2 py-0.5">
-                    <FileText size={12} />
-                    Brouillon enregistré
+            <div className="mt-2.5 sm:mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 dark:bg-amber-500/5 p-2.5 sm:p-3.5 space-y-2 text-foreground">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <Badge variant="outline" className="border-amber-500/50 bg-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold text-[10px] sm:text-[11px] gap-1 px-1.5 py-0.5 shrink-0">
+                    <FileText size={11} />
+                    Brouillon
                   </Badge>
-                  <span className="font-bold text-xs sm:text-sm text-foreground truncate max-w-[200px] sm:max-w-[280px]">
+                  <span className="font-bold text-xs sm:text-sm text-foreground truncate max-w-[180px] sm:max-w-[280px]">
                     {msg.actionExecuted.title}
                   </span>
                 </div>
                 {msg.actionExecuted.slug && (
-                  <code className="text-[10px] text-muted-foreground bg-background/80 border border-border/60 px-1.5 py-0.5 rounded font-mono">
+                  <code className="text-[10px] text-muted-foreground bg-background/80 border border-border/60 px-1.5 py-0.5 rounded font-mono self-start sm:self-auto truncate max-w-full">
                     /{msg.actionExecuted.slug}
                   </code>
                 )}
               </div>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Le projet a été enregistré en mode brouillon confidentiel. Vous pouvez maintenant l'ouvrir dans l'éditeur de projet pour formater les sections avec le composant Word et ajouter vos illustrations.
+                Le projet a été enregistré en mode brouillon. Vous pouvez maintenant l'ouvrir dans l'éditeur Word pour enrichir ses sections.
               </p>
               <div className="pt-1 flex items-center justify-end">
-                <Link to="/admin/projets/$id" params={{ id: msg.actionExecuted.id }}>
-                  <Button size="sm" className="h-8 gap-1.5 text-xs bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90">
+                <Link to="/admin/projets/$id" params={{ id: msg.actionExecuted.id }} className="w-full sm:w-auto">
+                  <Button size="sm" className="h-8 gap-1.5 text-xs bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 w-full sm:w-auto">
                     <FileEdit size={13} />
                     Ouvrir dans l'éditeur Word
                   </Button>
@@ -246,19 +267,19 @@ function MessageBubble({
 
           {/* Widget interactif lorsqu'une expérience ou certification a été enregistrée */}
           {msg.actionExecuted && msg.actionExecuted.entity !== "project" && (
-            <div className="mt-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 dark:bg-emerald-500/5 p-3 space-y-1.5 text-foreground">
+            <div className="mt-2.5 sm:mt-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 dark:bg-emerald-500/5 p-2.5 sm:p-3 space-y-1.5 text-foreground">
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="border-emerald-500/50 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-semibold text-[11px] gap-1 px-2 py-0.5">
-                  <Check size={12} />
-                  {msg.actionExecuted.entity === "experience" ? "Expérience publiée" : "Certification publiée"}
+                <Badge variant="outline" className="border-emerald-500/50 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-semibold text-[10px] sm:text-[11px] gap-1 px-1.5 py-0.5">
+                  <Check size={11} />
+                  {msg.actionExecuted.entity === "experience" ? "Expérience" : "Certification"}
                 </Badge>
                 <span className="font-bold text-xs sm:text-sm text-foreground truncate">
                   {msg.actionExecuted.title}
                 </span>
               </div>
               <div className="pt-1 flex items-center justify-end">
-                <Link to={msg.actionExecuted.editUrl as never}>
-                  <Button size="sm" variant="outline" className="h-8 gap-1.5 text-xs font-semibold rounded-lg">
+                <Link to={msg.actionExecuted.editUrl as never} className="w-full sm:w-auto">
+                  <Button size="sm" variant="outline" className="h-8 gap-1.5 text-xs font-semibold rounded-lg w-full sm:w-auto">
                     <ExternalLink size={13} />
                     Voir dans l'administration
                   </Button>
@@ -270,17 +291,17 @@ function MessageBubble({
 
         {/* Bouton d'action rapide si l'étude de cas n'a pas encore été enregistrée */}
         {hasSections && !msg.actionExecuted && (
-          <div className="pt-0.5 flex items-center gap-2">
+          <div className="pt-1 flex items-center gap-2 w-full">
             <Button
               type="button"
               size="sm"
               variant="outline"
               disabled={savingDraft}
               onClick={handleSaveQuickDraft}
-              className="h-7 px-2.5 text-[11px] font-semibold gap-1.5 border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
+              className="h-8 px-2.5 sm:px-3 text-xs font-semibold gap-1.5 border-amber-500/50 text-amber-600 dark:text-amber-400 bg-amber-500/5 hover:bg-amber-500/15 rounded-xl shadow-2xs active:scale-[0.98] transition-all w-full sm:w-auto justify-center"
             >
-              {savingDraft ? <Loader2 size={12} className="animate-spin" /> : <BookmarkPlus size={12} />}
-              Enregistrer comme Brouillon de Projet
+              {savingDraft ? <Loader2 size={13} className="animate-spin" /> : <BookmarkPlus size={13} />}
+              <span className="truncate">Enregistrer comme Brouillon</span>
             </Button>
           </div>
         )}
@@ -325,23 +346,27 @@ function TypingIndicator() {
 const QUICK_PROMPTS = [
   {
     icon: FileText,
-    label: "Rédiger une étude de cas",
-    prompt: "Aide-moi à rédiger une étude de cas détaillée pour un projet de mon portfolio. Quelles sont les informations clés dont tu as besoin ?",
+    label: "Étude de cas complète & sur-mesure",
+    prompt:
+      "Aide-moi à concevoir une étude de cas complète, percutante et sur-mesure pour un nouveau projet. De quelles informations as-tu besoin ?",
   },
   {
     icon: Code2,
-    label: "Vulgariser un choix technique",
-    prompt: "Explique de manière simple et accessible à un recruteur pourquoi j'ai choisi Docker et TypeScript sur mon projet.",
+    label: "Architecture réseau & Systèmes",
+    prompt:
+      "Rédige une présentation claire et accessible d'une infrastructure réseau Cisco avec VLANs, haute disponibilité et Active Directory pour une organisation.",
   },
   {
     icon: Layers,
-    label: "Améliorer mon pitch profil",
-    prompt: "Rédige un pitch percutant en 3 phrases pour présenter mon profil de Développeur Full-Stack & DevOps passionné.",
+    label: "Pitch profil : Systèmes, Réseaux & Web",
+    prompt:
+      "Rédige un pitch sobre et percutant qui valorise ma double compétence rare : Administrateur Systèmes & Réseaux diplômé et Développeur Web Full-Stack.",
   },
   {
     icon: UserCheck,
-    label: "Répondre à une proposition de mission",
-    prompt: "Rédige une proposition de réponse par email professionnelle et courtoise pour un client qui me sollicite pour une mission freelance.",
+    label: "Réponse professionnelle à un client",
+    prompt:
+      "Rédige une proposition de réponse par email ou WhatsApp professionnelle et courtoise pour un client qui me sollicite pour un audit réseau ou un projet web.",
   },
 ];
 
@@ -456,35 +481,35 @@ function AdminAssistantPage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-5.5rem)] sm:h-[calc(100vh-8rem)] max-w-5xl mx-auto space-y-2 sm:space-y-3">
-      {/* Navigation & En-tête */}
-      <div className="shrink-0 space-y-1.5">
+    <div className="flex flex-col h-[calc(100dvh-6.25rem)] sm:h-[calc(100vh-8rem)] lg:h-[calc(100vh-9rem)] max-w-5xl mx-auto space-y-1.5 sm:space-y-2 min-h-0">
+      {/* Navigation & En-tête compact */}
+      <div className="shrink-0 space-y-1">
         <IaSubNav />
 
-        <div className="flex items-center justify-between gap-2 pt-0.5">
-          <div className="flex items-center gap-2">
-            <h1 className="text-base sm:text-xl font-bold flex items-center gap-2 text-foreground">
-              <Bot size={18} className="text-primary" />
+        <div className="flex items-center justify-between gap-2 pt-0.5 px-0.5">
+          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+            <h1 className="text-sm sm:text-lg font-bold flex items-center gap-1.5 text-foreground truncate">
+              <Bot size={17} className="text-primary shrink-0" />
               <span>Assistant IA</span>
             </h1>
-            <span className="hidden sm:inline-block text-xs text-muted-foreground">
-              · Posez vos questions et préparez vos contenus
+            <span className="hidden sm:inline-block text-xs text-muted-foreground truncate">
+              · Rédaction soignée & aide au portfolio
             </span>
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-7 sm:h-8 gap-1.5 text-xs rounded-xl px-2.5">
+                <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs rounded-xl px-2 sm:px-2.5 shadow-2xs">
                   <SlidersHorizontal size={12} />
-                  <span className="hidden sm:inline">Skills</span>
+                  <span className="hidden xs:inline">Skills</span>
                   <Badge variant="secondary" className="px-1.5 py-0 text-[10px] font-semibold bg-primary/10 text-primary">
                     {selectedSlugs.length}
                   </Badge>
                   <ChevronDown size={10} className="text-muted-foreground" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64 max-h-72 overflow-y-auto p-1.5">
+              <DropdownMenuContent align="end" className="w-[calc(100vw-2rem)] max-w-xs max-h-72 overflow-y-auto p-1.5 shadow-lg">
                 <DropdownMenuLabel className="text-xs font-semibold">
                   Compétences actives
                 </DropdownMenuLabel>
@@ -516,34 +541,36 @@ function AdminAssistantPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setMessages([])}
-                className="h-7 sm:h-8 px-2 text-xs text-muted-foreground hover:text-destructive rounded-xl"
+                className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive rounded-xl"
                 title="Effacer la conversation"
+                aria-label="Effacer la conversation"
               >
-                <Trash2 size={13} />
+                <Trash2 size={14} />
               </Button>
             )}
           </div>
         </div>
       </div>
 
-      {/* Zone de discussion */}
+      {/* Zone de discussion principale avec ascenseur confiné */}
       <div className="flex-1 flex flex-col min-h-0 rounded-2xl border border-border bg-card shadow-xs overflow-hidden">
-        {/* Fil des messages */}
-        <div className="flex-1 overflow-y-auto p-3 sm:p-5 space-y-3 sm:space-y-4">
+        {/* Fil des messages avec overscroll-contain pour une sensation mobile native */}
+        <div className="flex-1 overflow-y-auto overscroll-contain p-2.5 sm:p-5 space-y-3 sm:space-y-4">
           {messages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center p-3 sm:p-4 max-w-lg mx-auto">
-              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-2.5 shadow-xs">
-                <Sparkles size={22} />
+            <div className="h-full flex flex-col items-center justify-center text-center p-2 sm:p-6 max-w-lg mx-auto">
+              <div className="h-9 w-9 sm:h-12 sm:w-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-2 sm:mb-3 shadow-xs">
+                <Sparkles size={18} className="sm:hidden" />
+                <Sparkles size={22} className="hidden sm:block" />
               </div>
               <h2 className="text-sm sm:text-lg font-bold text-foreground">
                 Assistant de Rédaction & Portfolio
               </h2>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 mb-4 max-w-md">
-                Connecté à vos compétences actives pour vous aider à rédiger des études de cas, formuler des réponses professionnelles ou clarifier des choix d'architecture.
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1 mb-2.5 sm:mb-4 leading-relaxed max-w-md line-clamp-2 sm:line-clamp-none">
+                Rédigez des études de cas captivantes, formulez vos architectures réseau et mettez en valeur vos compétences avec un français clair et soigné.
               </p>
 
-              {/* Suggestions rapides */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full text-left">
+              {/* Suggestions rapides tactiles */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 w-full text-left">
                 {QUICK_PROMPTS.map((qp, i) => {
                   const Icon = qp.icon;
                   return (
@@ -551,16 +578,16 @@ function AdminAssistantPage() {
                       key={i}
                       type="button"
                       onClick={() => void handleSend(qp.prompt)}
-                      className="group p-2.5 sm:p-3 rounded-xl border border-border/80 bg-background/50 hover:bg-muted/50 hover:border-primary/40 transition-all text-xs flex items-start gap-2"
+                      className="group p-2 sm:p-3 rounded-xl border border-border/80 bg-background/60 hover:bg-muted/60 hover:border-primary/40 active:scale-[0.99] transition-all text-xs flex items-center sm:items-start gap-2 sm:gap-2.5 min-h-[42px] sm:min-h-[48px]"
                     >
-                      <div className="h-6 w-6 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
-                        <Icon size={12} />
+                      <div className="h-6 w-6 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                        <Icon size={13} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <span className="font-semibold text-foreground group-hover:text-primary transition-colors block truncate">
+                        <span className="font-semibold text-foreground group-hover:text-primary transition-colors block truncate text-xs">
                           {qp.label}
                         </span>
-                        <span className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
+                        <span className="text-[10px] sm:text-[11px] text-muted-foreground line-clamp-1 mt-0.5 hidden xs:block">
                           {qp.prompt}
                         </span>
                       </div>
@@ -588,24 +615,25 @@ function AdminAssistantPage() {
           )}
         </div>
 
-        {/* Champ de saisie mobile ergonomique (sans ascenseur double, sans scrollbar disgracieuse) */}
-        <div className="border-t border-border/80 p-2 sm:p-3 bg-muted/15 shrink-0">
-          <div className="rounded-2xl border border-input/90 bg-background p-1.5 pl-3.5 flex items-end gap-2 focus-within:ring-2 focus-within:ring-primary/40 focus-within:border-primary transition-all shadow-2xs">
+        {/* Champ de saisie mobile ergonomique */}
+        <div className="border-t border-border/80 p-2 sm:p-3 bg-muted/20 shrink-0">
+          <div className="rounded-2xl border border-input/90 bg-background p-1.5 pl-3 sm:pl-3.5 flex items-end gap-1.5 sm:gap-2 focus-within:ring-2 focus-within:ring-primary/40 focus-within:border-primary transition-all shadow-2xs">
             <textarea
               ref={textareaRef}
               value={input}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              placeholder="Posez votre question ou demandez une rédaction… (Entrée pour envoyer)"
+              placeholder="Écrivez votre message…"
               rows={1}
               disabled={isLoading}
-              className="flex-1 min-h-[36px] max-h-[120px] resize-none border-0 bg-transparent p-0 py-1.5 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0 leading-relaxed [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+              className="flex-1 min-h-[38px] max-h-[120px] resize-none border-0 bg-transparent p-0 py-1.5 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0 leading-relaxed [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
             />
             <Button
               type="button"
               onClick={() => void handleSend()}
               disabled={!input.trim() || isLoading}
-              className="h-8 w-8 sm:h-9 sm:w-9 shrink-0 rounded-xl bg-gradient-primary text-primary-foreground shadow-xs p-0 flex items-center justify-center"
+              className="h-9 w-9 shrink-0 rounded-xl bg-primary text-primary-foreground shadow-xs p-0 flex items-center justify-center hover:bg-primary/90 transition-transform active:scale-95"
+              aria-label="Envoyer"
             >
               {isLoading ? (
                 <RefreshCw size={14} className="animate-spin" />
@@ -618,7 +646,7 @@ function AdminAssistantPage() {
             <span>
               {selectedSlugs.length > 0
                 ? `${selectedSlugs.length} skill(s) actif(s)`
-                : "Aucun skill actif"}
+                : "Standard portfolio"}
             </span>
             <span className="hidden sm:inline">Maj + Entrée pour un saut de ligne</span>
           </div>
@@ -627,3 +655,4 @@ function AdminAssistantPage() {
     </div>
   );
 }
+

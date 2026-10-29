@@ -212,7 +212,12 @@ function AdminParametresPage() {
     e.preventDefault();
     try {
       setIsSavingAiConfig(true);
-      await adminApi.updateAiConfig(aiConfig);
+      const sanitizedConfig = {
+        ...aiConfig,
+        daily_request_limit: Math.max(1, Math.min(10000, Number(aiConfig.daily_request_limit) || 100)),
+        max_prompt_chars: Math.max(500, Math.min(50000, Number(aiConfig.max_prompt_chars) || 8000)),
+      };
+      await adminApi.updateAiConfig(sanitizedConfig);
       toast.success("Configuration et plafonds de l'IA enregistrés.");
       await loadData();
     } catch (err) {
@@ -524,10 +529,11 @@ function AdminParametresPage() {
                     type="number"
                     min="1"
                     max="10000"
-                    value={aiConfig.daily_request_limit}
-                    onChange={(e) =>
-                      setAiConfig({ ...aiConfig, daily_request_limit: parseInt(e.target.value, 10) || 100 })
-                    }
+                    value={aiConfig.daily_request_limit || ""}
+                    onChange={(e) => {
+                      const val = e.target.value === "" ? 0 : parseInt(e.target.value, 10);
+                      setAiConfig({ ...aiConfig, daily_request_limit: isNaN(val) ? 0 : val });
+                    }}
                     className="h-8 text-xs font-mono"
                   />
                   <p className="text-[11px] text-muted-foreground">
@@ -544,10 +550,11 @@ function AdminParametresPage() {
                     type="number"
                     min="500"
                     max="50000"
-                    value={aiConfig.max_prompt_chars}
-                    onChange={(e) =>
-                      setAiConfig({ ...aiConfig, max_prompt_chars: parseInt(e.target.value, 10) || 8000 })
-                    }
+                    value={aiConfig.max_prompt_chars || ""}
+                    onChange={(e) => {
+                      const val = e.target.value === "" ? 0 : parseInt(e.target.value, 10);
+                      setAiConfig({ ...aiConfig, max_prompt_chars: isNaN(val) ? 0 : val });
+                    }}
                     className="h-8 text-xs font-mono"
                   />
                   <p className="text-[11px] text-muted-foreground">

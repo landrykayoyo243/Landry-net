@@ -120,11 +120,11 @@ function SkillFormModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border p-5 sm:p-6">
+      <DialogContent className="w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border p-4 sm:p-6">
         <DialogHeader>
-          <DialogTitle className="text-lg font-bold flex items-center gap-2">
-            <Zap size={18} className="text-primary" />
-            <span>{isNew ? "Créer un skill IA" : `Modifier « ${skill!.title} »`}</span>
+          <DialogTitle className="text-base sm:text-lg font-bold flex items-center gap-2">
+            <Zap size={18} className="text-primary shrink-0" />
+            <span className="truncate">{isNew ? "Créer un skill IA" : `Modifier « ${skill!.title} »`}</span>
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
             Les skills sont des consignes expertes stockées en base et injectées dynamiquement à l'IA.
@@ -237,11 +237,11 @@ function SkillHistoryModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl border border-border p-5">
+      <DialogContent className="w-[95vw] sm:max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl border border-border p-4 sm:p-5">
         <DialogHeader>
-          <DialogTitle className="text-base font-bold flex items-center gap-2">
-            <History size={16} className="text-primary" />
-            <span>Historique des versions — {skill?.title}</span>
+          <DialogTitle className="text-sm sm:text-base font-bold flex items-center gap-2">
+            <History size={16} className="text-primary shrink-0" />
+            <span className="truncate">Historique — {skill?.title}</span>
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
             Chaque modification crée un instantané immuable que vous pouvez restaurer.
@@ -255,10 +255,10 @@ function SkillHistoryModal({
             <div className="py-8 text-center text-xs text-muted-foreground">Aucune version archivée pour ce skill.</div>
           ) : (
             versions.map((v) => (
-              <div key={v.id} className="rounded-xl border border-border bg-card p-3.5 space-y-2 text-xs">
-                <div className="flex items-center justify-between">
+              <div key={v.id} className="rounded-xl border border-border bg-card p-3 sm:p-3.5 space-y-2 text-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                   <span className="font-semibold text-foreground">Version {v.version}</span>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between sm:justify-end gap-2">
                     <span className="text-[11px] text-muted-foreground">{formatDate(v.created_at)}</span>
                     {!skill?.is_system && (
                       <Button
@@ -273,7 +273,7 @@ function SkillHistoryModal({
                     )}
                   </div>
                 </div>
-                <pre className="p-2.5 rounded-lg bg-muted/60 text-[11px] font-mono whitespace-pre-wrap max-h-32 overflow-y-auto border border-border/40 text-muted-foreground">
+                <pre className="p-2.5 rounded-lg bg-muted/60 text-[11px] font-mono whitespace-pre-wrap max-h-32 overflow-y-auto border border-border/40 text-muted-foreground [overflow-wrap:anywhere] break-words">
                   {v.content}
                 </pre>
               </div>
@@ -332,19 +332,20 @@ function SkillCard({
         </div>
 
         {/* Ligne basse : slug & actions */}
-        <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/50 text-xs">
-          <span className="font-mono text-[11px] text-primary/80 truncate">
+        <div className="flex items-center justify-between gap-1.5 pt-2 border-t border-border/50 text-xs">
+          <span className="font-mono text-[11px] text-primary/80 truncate min-w-0 flex-1">
             /{skill.slug}
           </span>
 
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
             <Button
               type="button"
               variant="ghost"
               size="sm"
               onClick={() => setShowPreview(!showPreview)}
-              className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground shrink-0"
               title="Aperçu des consignes"
+              aria-label="Aperçu des consignes"
             >
               {showPreview ? <EyeOff size={14} /> : <Eye size={14} />}
             </Button>
@@ -353,8 +354,9 @@ function SkillCard({
               variant="ghost"
               size="sm"
               onClick={() => onHistory(skill)}
-              className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground shrink-0"
               title="Historique des versions"
+              aria-label="Historique des versions"
             >
               <History size={14} />
             </Button>
@@ -365,8 +367,9 @@ function SkillCard({
                   variant="ghost"
                   size="sm"
                   onClick={() => onEdit(skill)}
-                  className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
+                  className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground shrink-0"
                   title="Modifier"
+                  aria-label="Modifier le skill"
                 >
                   <Edit3 size={14} />
                 </Button>
@@ -375,8 +378,9 @@ function SkillCard({
                   variant="ghost"
                   size="sm"
                   onClick={() => onDelete(skill)}
-                  className="h-8 px-2 text-xs text-destructive hover:bg-destructive/10"
+                  className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 shrink-0"
                   title="Supprimer"
+                  aria-label="Supprimer le skill"
                 >
                   <Trash2 size={14} />
                 </Button>
@@ -392,7 +396,7 @@ function SkillCard({
               <Code2 size={12} />
               <span>Prompt système configuré en base</span>
             </div>
-            <pre className="text-[11px] font-mono leading-relaxed whitespace-pre-wrap text-muted-foreground max-h-48 overflow-y-auto">
+            <pre className="text-[11px] font-mono leading-relaxed whitespace-pre-wrap text-muted-foreground max-h-48 overflow-y-auto [overflow-wrap:anywhere] break-words">
               {skill.content}
             </pre>
           </div>
@@ -477,15 +481,16 @@ function AdminIaSkillsPage() {
   });
 
   return (
-    <div className="space-y-5 max-w-5xl mx-auto">
+    <div className="space-y-4 sm:space-y-5 max-w-5xl mx-auto">
       {/* En-tête */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pb-2 border-b border-border/60">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2 text-foreground">
-            <Zap size={22} className="text-primary" />
-            <span>Skills IA (Consignes dynamiques)</span>
+          <h1 className="text-lg sm:text-2xl font-bold flex items-center gap-2 text-foreground">
+            <Zap size={20} className="text-primary shrink-0 sm:hidden" />
+            <Zap size={22} className="text-primary shrink-0 hidden sm:block" />
+            <span className="truncate">Skills IA (Consignes)</span>
           </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 line-clamp-1 sm:line-clamp-none">
             Gérez les compétences de votre assistant stockées en base de données pour orienter la rédaction.
           </p>
         </div>
@@ -496,7 +501,7 @@ function AdminIaSkillsPage() {
             setShowForm(true);
           }}
           size="sm"
-          className="rounded-full bg-gradient-primary text-primary-foreground shadow-sm text-xs gap-1.5 h-9"
+          className="rounded-full bg-gradient-primary text-primary-foreground shadow-sm text-xs gap-1.5 h-9 w-full sm:w-auto justify-center"
         >
           <Plus size={15} />
           <span>Nouveau Skill</span>

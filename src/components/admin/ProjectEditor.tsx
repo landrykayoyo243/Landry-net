@@ -165,10 +165,9 @@ export function ProjectEditor({
         </div>
         <Field label="Introduction" hint="Texte sous le titre de la page projet."><Textarea rows={3} value={form.intro} onChange={(e) => update({ intro: e.target.value })} /></Field>
         <Field label="Résumé / problème" error={errors["summary"]} hint="Affiché sur la carte du projet et dans l'aperçu de partage."><Textarea rows={2} value={form.summary} onChange={(e) => update({ summary: e.target.value })} /></Field>
-        <div className="grid gap-3 sm:gap-5 sm:grid-cols-[180px_1fr]">
-          <ImagePicker url={form.image_url} onChange={(url) => update({ image_url: url })} label="Image de couverture" />
-          <Field label="Description de l'image" error={errors["image_alt"]}><Input className="h-11" value={form.image_alt} onChange={(e) => update({ image_alt: e.target.value })} /></Field>
-        </div>
+        {/* Champ image_alt conservé en base mais masqué de l'UI */}
+        <input type="hidden" value={form.image_alt} readOnly />
+        <ImagePicker url={form.image_url} onChange={(url) => update({ image_url: url, image_alt: url ? (form.image_alt || "Image du projet") : "" })} label="Image de couverture" />
         <Field label="Technologies">
           <div className="flex flex-wrap gap-1.5 sm:gap-2">
             {form.technologies.map((t) => (

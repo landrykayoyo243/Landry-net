@@ -57,19 +57,20 @@ function AdminIaIndexPage() {
     : 0;
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-4 sm:space-y-6 max-w-6xl mx-auto">
       {/* En-tête principal */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pb-2 border-b border-border/60">
         <div>
           <div className="flex items-center gap-2.5">
-            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-primary/20 to-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-xs">
-              <Sparkles size={20} />
+            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-2xl bg-gradient-to-tr from-primary/20 to-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-xs shrink-0">
+              <Sparkles size={18} className="sm:hidden" />
+              <Sparkles size={20} className="hidden sm:block" />
             </div>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-foreground truncate">
                 Assistant IA
               </h1>
-              <p className="text-xs sm:text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1 sm:line-clamp-none">
                 Génération de contenu, rédaction d'études de cas et assistance pour votre portfolio.
               </p>
             </div>
@@ -77,7 +78,7 @@ function AdminIaIndexPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button asChild size="sm" className="rounded-full bg-gradient-primary text-primary-foreground shadow-sm text-xs gap-1.5 h-9">
+          <Button asChild size="sm" className="rounded-full bg-gradient-primary text-primary-foreground shadow-sm text-xs gap-1.5 h-9 w-full sm:w-auto justify-center">
             <Link to="/admin/ia/assistant">
               <Bot size={15} />
               <span>Ouvrir le Chat IA</span>
@@ -89,8 +90,8 @@ function AdminIaIndexPage() {
       <IaSubNav />
 
       {/* Cartes métriques */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-        <div className="rounded-2xl border border-border bg-card p-4 shadow-xs space-y-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
+        <div className="rounded-2xl border border-border bg-card p-3.5 sm:p-4 shadow-xs space-y-2">
           <div className="flex items-center justify-between text-muted-foreground text-xs font-medium">
             <span className="flex items-center gap-1.5"><Gauge size={14} /> Quota Journalier</span>
             <span className="font-semibold text-foreground">{usagePercent}%</span>

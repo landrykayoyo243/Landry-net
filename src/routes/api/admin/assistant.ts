@@ -110,19 +110,29 @@ export const Route = createFileRoute("/api/admin/assistant")({
             skillSlugs.length > 0 ? skillSlugs : undefined,
           );
 
-          // Construire le prompt en intégrant l'historique de conversation
+          // Construire le prompt en intégrant l'historique de conversation et les directives éditoriales
           let fullPrompt = message.trim();
+          const rappelContextuel = `CONSIGNES SPÉCIFIQUES POUR CETTE RÉPONSE :
+- DATE ACTUELLE DU PORTFOLIO : Nous sommes en 2026. Pour toute expérience, poste ou formation actuel(le) ou en cours, utilise impérativement "2026 — En cours" ou "En cours" (ne jamais mettre 2024).
+- LIEN D'ACCÈS / DÉMO : Si Landry a mentionné un lien d'accès, une URL ou une démo (https://...), intègre-le impérativement sous la clé "external_url" si une action create_project_draft est générée, et écris clairement dans ton texte "Lien d'accès configuré : https://...".
+- CONSEIL ÉDITORIAL & STRUCTURE DES BLOCS : Explique avec élégance et clarté à Landry pourquoi telle section est idéale. Privilégie la belle prose fluide (style Word soigné) pour l'argumentation d'ingénieur. Réserve les listes à puces avec parcimonie pour les équipements techniques précis ou métriques chiffrées.
+- ACTIONS EXÉCUTABLES : Si Landry te demande d'ajouter ou créer un projet, un parcours ou une certification, génère le bloc d'action correspondant (\`\`\`action:create_project_draft, \`\`\`action:create_experience ou \`\`\`action:create_certification) à la fin de ta réponse pour l'enregistrer automatiquement.
+- ZÉRO ÉMOJI & ZÉRO GABARIT RÉPÉTITIF : 4 à 6 sections sur-mesure balisées avec [SECTION: Titre Personnalisé].`;
+
           if (history.length > 0) {
             const historyText = history
-              .map((h) => `${h.role === "user" ? "Utilisateur" : "Assistant"}: ${h.text}`)
-              .join("\n");
-            fullPrompt = `Historique de la conversation:\n${historyText}\n\nNouveau message de l'utilisateur: ${message.trim()}`;
+              .map((h) => `${h.role === "user" ? "Landry" : "Assistant"}: ${h.text}`)
+              .join("\n\n");
+            fullPrompt = `HISTORIQUE RÉCENT DES ÉCHANGES:\n${historyText}\n\nNOUVELLE DEMANDE DE LANDRY:\n${message.trim()}\n\n${rappelContextuel}`;
+          } else {
+            fullPrompt = `${message.trim()}\n\n${rappelContextuel}`;
           }
 
           const result = await executeAiGeneration({
             prompt: fullPrompt,
             systemInstruction: systemInstruction || undefined,
-            temperature: temperature ?? 0.7,
+            temperature: temperature ?? 0.65,
+
             userId: auth.user.id,
             userEmail: auth.user.email,
             requestHeaders: request.headers,
