@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { ArrowUpRight, CheckCircle2, ChevronLeft, ChevronRight, Globe, ZoomIn } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, ChevronLeft, ChevronRight, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { InlineItem, RichText } from "@/components/portfolio/RichText";
@@ -41,7 +41,7 @@ function toGroups(sections: Section[]): Group[] {
 
 const isPlainFull = (g: Group | undefined) => g?.kind === "full" && g.section.heading?.tone !== "muted";
 
-export interface ImageViewerItem {
+interface ImageViewerItem {
   url: string;
   alt?: string;
   title?: string;
@@ -49,7 +49,7 @@ export interface ImageViewerItem {
   note?: string;
 }
 
-export function ImageViewerDialog({
+function ImageViewerDialog({
   open,
   onOpenChange,
   items,
@@ -198,27 +198,7 @@ export function ImageViewerDialog({
   );
 }
 
-function ZoomButton({ image }: { image: ImageBlock }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => setOpen(true)}
-        className="rounded-full gap-1.5 shadow-2xs hover:bg-accent shrink-0 text-xs sm:text-sm"
-      >
-        <ZoomIn size={14} />
-        <span>Agrandir l'image</span>
-      </Button>
-      <ImageViewerDialog
-        open={open}
-        onOpenChange={setOpen}
-        items={[image]}
-      />
-    </>
-  );
-}
+
 
 function getCleanTitle(title?: string): string | undefined {
   if (!title) return undefined;
@@ -307,11 +287,6 @@ function MediaSectionBlock({ block }: { block: MediaBlock }) {
               </div>
             )}
 
-            {/* Badge Agrandir */}
-            <div className="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 inline-flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1 sm:px-3 sm:py-1.5 text-[11px] sm:text-xs font-semibold text-white shadow-sm backdrop-blur-xs hover:bg-black/80 transition-colors">
-              <ZoomIn size={12} className="sm:size-3.5" />
-              <span>Agrandir</span>
-            </div>
           </div>
 
           {/* Flèches de défilement responsives */}
@@ -367,55 +342,30 @@ function MediaSectionBlock({ block }: { block: MediaBlock }) {
 }
 
 function ImageFigureBlock({ block }: { block: ImageBlock }) {
-  const [open, setOpen] = useState(false);
   const src = safeUrl(block.url);
   if (!src) return null;
 
   return (
-    <>
-      <figure className="my-6 sm:my-8 max-w-4xl min-w-0">
-        <div
-          role="button"
-          tabIndex={0}
-          onClick={() => setOpen(true)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              setOpen(true);
-            }
-          }}
-          className="group relative cursor-pointer overflow-hidden rounded-2xl sm:rounded-3xl border border-border/80 bg-muted/20 shadow-xs select-none"
-          title="Cliquer pour agrandir"
-        >
-          <img
-            src={getOptimizedImageUrl(src, { width: 1100 })}
-            alt={block.alt}
-            width={1200}
-            height={800}
-            loading="lazy"
-            decoding="async"
-            className="aspect-[16/10] sm:aspect-[3/2] w-full object-cover transition-transform duration-300 group-hover:scale-[1.01]"
-          />
-          <div className="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 inline-flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1 sm:px-3 sm:py-1.5 text-[11px] sm:text-xs font-semibold text-white shadow-sm backdrop-blur-xs hover:bg-black/80 transition-colors">
-            <ZoomIn size={12} className="sm:size-3.5" />
-            <span>Agrandir</span>
-          </div>
-        </div>
-        {(block.title || block.caption || block.note) && (
-          <figcaption className="mt-2.5 sm:mt-3 space-y-1 min-w-0">
-            {block.title && <h4 className="text-base sm:text-lg font-bold text-foreground break-words">{block.title}</h4>}
-            {block.caption && <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed break-words">{block.caption}</p>}
-            {block.note && <p className="text-xs text-muted-foreground break-words">{block.note}</p>}
-          </figcaption>
-        )}
-      </figure>
-
-      <ImageViewerDialog
-        open={open}
-        onOpenChange={setOpen}
-        items={[block]}
-      />
-    </>
+    <figure className="my-6 sm:my-8 max-w-4xl min-w-0">
+      <div className="overflow-hidden rounded-2xl sm:rounded-3xl border border-border/80 bg-muted/20 shadow-xs">
+        <img
+          src={getOptimizedImageUrl(src, { width: 1100 })}
+          alt={block.alt}
+          width={1200}
+          height={800}
+          loading="lazy"
+          decoding="async"
+          className="aspect-[16/10] sm:aspect-[3/2] w-full object-cover"
+        />
+      </div>
+      {(block.title || block.caption || block.note) && (
+        <figcaption className="mt-2.5 sm:mt-3 space-y-1 min-w-0">
+          {block.title && <h4 className="text-base sm:text-lg font-bold text-foreground break-words">{block.title}</h4>}
+          {block.caption && <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed break-words">{block.caption}</p>}
+          {block.note && <p className="text-xs text-muted-foreground break-words">{block.note}</p>}
+        </figcaption>
+      )}
+    </figure>
   );
 }
 
@@ -528,7 +478,6 @@ function Steps({ blocks }: { blocks: Block[] }) {
 function FullSection({ section, pb }: { section: Section; pb: boolean }) {
   const h = section.heading;
   const muted = h?.tone === "muted";
-  const firstImage = section.children[0]?.type === "image" ? (section.children[0] as ImageBlock) : null;
   if (h?.variant === "result") {
     return (
       <section className={`${container} ${pb ? "pb-10 md:pb-16" : ""}`}>
@@ -544,9 +493,7 @@ function FullSection({ section, pb }: { section: Section; pb: boolean }) {
   }
   const inner = (
     <div className="max-w-4xl min-w-0">
-      {h && (firstImage
-        ? <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4 mb-3 sm:mb-4"><h2 className="text-xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground break-words">{h.text}</h2><ZoomButton image={firstImage} /></div>
-        : <h2 className="text-xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground mb-3 sm:mb-4 break-words">{h.text}</h2>)}
+      {h && <h2 className="text-xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground mb-3 sm:mb-4 break-words">{h.text}</h2>}
       {h?.variant === "steps" ? <Steps blocks={section.children} /> : <Children blocks={section.children} />}
     </div>
   );

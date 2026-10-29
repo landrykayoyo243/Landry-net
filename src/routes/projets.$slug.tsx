@@ -1,16 +1,16 @@
 import { createFileRoute, Link, notFound, type ErrorComponentProps } from "@tanstack/react-router";
 import { ErrorPage, ServerErrorPage, errorBtn } from "@/components/portfolio/ErrorPage";
-import { ArrowLeft, ArrowRight, ArrowUpRight, Globe, Mail, Sparkles, ZoomIn } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, Globe, Mail, Sparkles } from "lucide-react";
 import { Header } from "@/components/portfolio/Header";
 import { Footer } from "@/components/portfolio/Footer";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { ProjectBody, firstImage, ImageViewerDialog, type ImageViewerItem } from "@/components/portfolio/ProjectBody";
+import { ProjectBody, firstImage } from "@/components/portfolio/ProjectBody";
 import { parseBlocks } from "@/lib/blocks";
 import { projectQuery, projectsQuery } from "@/lib/content.queries";
 import { profile, projectPage as copy, shareImage } from "@/content/portfolio";
 import { absoluteUrl, getOptimizedImageUrl, getOptimizedOgImageUrl } from "@/lib/siteConfig";
+import { getRelatedProjects } from "@/lib/project-similarity";
 
 export const Route = createFileRoute("/projets/$slug")({
   loader: async ({ params, context }) => {
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/projets/$slug")({
   },
   head: ({ loaderData, params }) => {
     const isFound = Boolean(loaderData);
-    const title = isFound ? `${loaderData.title} — Landry Kayoyo` : "Projet introuvable — Landry Kayoyo";
+    const title = loaderData ? `${loaderData.title} — Landry Kayoyo` : "Projet introuvable — Landry Kayoyo";
     const description = (isFound && loaderData?.summary) ? loaderData.summary : copy.unavailableText;
     const projectUrl = absoluteUrl(`/projets/${params.slug}`);
 
@@ -85,64 +85,12 @@ function ProjectError({ error }: ErrorComponentProps) {
   return <ServerErrorPage />;
 }
 
-function CoverImageZoom({ src, alt }: { src: string; alt: string }) {
-  const [open, setOpen] = useState(false);
-  const viewerItem: ImageViewerItem = { url: src, alt };
-  return (
-    <>
-      <div className="mt-8 sm:mt-10 md:mt-12 overflow-hidden rounded-2xl sm:rounded-3xl border border-border/80 bg-card p-2 sm:p-4 shadow-sm">
-        <div
-          role="button"
-          tabIndex={0}
-          onClick={() => setOpen(true)}
-          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpen(true); } }}
-          className="group relative cursor-pointer overflow-hidden rounded-xl sm:rounded-2xl bg-muted select-none"
-          title="Cliquer pour agrandir"
-        >
-          <img
-            src={getOptimizedImageUrl(src, { width: 1200 })}
-            alt={alt}
-            width={1200}
-            height={800}
-            fetchPriority="high"
-            decoding="async"
-            className="aspect-[16/10] sm:aspect-[16/9] w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02]"
-          />
-          <div className="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 inline-flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1 sm:px-3 sm:py-1.5 text-[11px] sm:text-xs font-semibold text-white shadow-sm backdrop-blur-xs hover:bg-black/80 transition-colors">
-            <ZoomIn size={12} className="sm:size-3.5" />
-            <span>Agrandir</span>
-          </div>
-        </div>
-      </div>
-      <ImageViewerDialog open={open} onOpenChange={setOpen} items={[viewerItem]} />
-    </>
-  );
-}
-
 function ProjectDetail() {
   const p = Route.useLoaderData();
   const blocks = parseBlocks(p.content);
   const hero = firstImage(blocks);
   const all = useQuery(projectsQuery).data ?? [];
-  const scored = all
-    .map((project, index) => ({
-      project,
-      index,
-      score:
-        project.technologies.filter((t) => p.technologies.includes(t)).length +
-        (project.tag === p.tag ? 2 : 0),
-    }))
-    .filter(({ project, score }) => project.slug !== p.slug && score >= 1)
-    .sort((a, b) => b.score - a.score || a.index - b.index)
-    .slice(0, 3);
-
-  // Si aucun similaire trouvé par score, on affiche jusqu'à 3 autres projets
-  const related = scored.length > 0
-    ? scored
-    : all
-        .filter((project) => project.slug !== p.slug)
-        .slice(0, 3)
-        .map((project, index) => ({ project, index, score: 0 }));
+  const related = getRelatedProjects(p, all);
 
   return (
     <div id="top" className="bg-background text-foreground overflow-x-clip min-w-0">
@@ -215,12 +163,21 @@ function ProjectDetail() {
             </div>
           )}
 
-          {/* Image de couverture principale — cliquable pour agrandir */}
+          {/* Image de couverture principale */}
           {(p.image_url || hero?.url) && (
-            <CoverImageZoom
-              src={p.image_url || hero?.url || ""}
-              alt={p.image_alt || hero?.alt || p.title}
-            />
+            <div className="mt-8 sm:mt-10 md:mt-12 overflow-hidden rounded-2xl sm:rounded-3xl border border-border/80 bg-card p-2 sm:p-4 shadow-sm">
+              <div className="overflow-hidden rounded-xl sm:rounded-2xl bg-muted">
+                <img
+                  src={getOptimizedImageUrl(p.image_url || hero?.url || "", { width: 1200 })}
+                  alt={p.image_alt || hero?.alt || p.title}
+                  width={1200}
+                  height={800}
+                  fetchPriority="high"
+                  decoding="async"
+                  className="aspect-[16/10] sm:aspect-[16/9] w-full object-cover transition-transform duration-700 ease-out hover:scale-[1.02]"
+                />
+              </div>
+            </div>
           )}
           {hero?.note && <p className="mt-3 text-xs text-muted-foreground text-center">{hero.note}</p>}
         </section>
