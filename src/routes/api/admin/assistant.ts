@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+﻿import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { verifyAdminRequest, jsonResponse } from "@/lib/server-auth";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit.server";
@@ -113,11 +113,12 @@ export const Route = createFileRoute("/api/admin/assistant")({
           // Construire le prompt en intégrant l'historique de conversation et les directives éditoriales
           let fullPrompt = message.trim();
           const rappelContextuel = `CONSIGNES SPÉCIFIQUES POUR CETTE RÉPONSE :
-- DATE ACTUELLE DU PORTFOLIO : Nous sommes en 2026. Pour toute expérience, poste ou formation actuel(le) ou en cours, utilise impérativement "2026 — En cours" ou "En cours" (ne jamais mettre 2024).
-- LIEN D'ACCÈS / DÉMO : Si Landry a mentionné un lien d'accès, une URL ou une démo (https://...), intègre-le impérativement sous la clé "external_url" si une action create_project_draft est générée, et écris clairement dans ton texte "Lien d'accès configuré : https://...".
-- CONSEIL ÉDITORIAL & STRUCTURE DES BLOCS : Explique avec élégance et clarté à Landry pourquoi telle section est idéale. Privilégie la belle prose fluide (style Word soigné) pour l'argumentation d'ingénieur. Réserve les listes à puces avec parcimonie pour les équipements techniques précis ou métriques chiffrées.
-- ACTIONS EXÉCUTABLES : Si Landry te demande d'ajouter ou créer un projet, un parcours ou une certification, génère le bloc d'action correspondant (\`\`\`action:create_project_draft, \`\`\`action:create_experience ou \`\`\`action:create_certification) à la fin de ta réponse pour l'enregistrer automatiquement.
-- ZÉRO ÉMOJI & ZÉRO GABARIT RÉPÉTITIF : 4 à 6 sections sur-mesure balisées avec [SECTION: Titre Personnalisé].`;
+- AJOUT CIBLÉ — RÈGLE ABSOLUE : Si Landry demande d'ajouter ou créer une section précise (témoignages, résultats, approche mobile…), génère UNIQUEMENT cette section sous [SECTION: Titre]. Ne réécris JAMAIS les sections existantes. Ne régénère JAMAIS l'intégralité du projet.
+- DATE ACTUELLE DU PORTFOLIO : Nous sommes en 2026. Pour toute expérience, poste ou formation en cours, utilise impérativement "2026 — En cours" (ne jamais mettre 2024).
+- LIEN D'ACCÈS / DÉMO : Si Landry a mentionné une URL (https://...), intègre-le sous "external_url" si une action create_project_draft est générée, et écris "Lien d'accès configuré : https://..." dans ton texte.
+- CONSEIL ÉDITORIAL & STRUCTURE DES BLOCS : Privilégie la belle prose fluide (style Word soigné). Réserve les listes à puces aux équipements techniques précis ou métriques chiffrées uniquement.
+- ACTIONS EXÉCUTABLES : Si Landry demande de créer un projet, un parcours ou une certification, place le bloc d'action (```action:create_project_draft, create_experience ou create_certification) à la toute fin. Ce bloc est traité automatiquement et ne doit PAS apparaître dans le texte visible.
+- ZÉRO ÉMOJI & ZÉRO GABARIT RÉPÉTITIF : sections sur-mesure balisées avec [SECTION: Titre Personnalisé].`;
 
           if (history.length > 0) {
             const historyText = history

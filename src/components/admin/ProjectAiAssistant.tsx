@@ -68,13 +68,24 @@ interface ChatMessage {
   parsedTechs?: string[];
 }
 
-/** Nettoie le texte en retirant les symboles markdown bruts encombrants */
+/** Nettoie le texte en retirant les blocs action, JSON brut et artefacts markdown */
 function cleanProseText(text: string): string {
   return text
-    .replace(/```action:[a-z0-9_-]+\s*[\s\S]*?```/gi, "")
+    // Supprimer TOUS les blocs ```action:... ```
+    .replace(/```action:[\s\S]*?```/gi, "")
+    // Supprimer tout bloc ```json ... ``` ou ``` ... ``` contenant des accolades JSON
+    .replace(/```[\w]*\s*\{[\s\S]*?\}\s*```/gi, "")
+    // Supprimer les blocs de code ``` restants
+    .replace(/```[\s\S]*?```/gi, "")
+    // Supprimer les titres markdown
     .replace(/^#{1,6}\s+/gm, "")
+    // Supprimer le gras/italique markdown
     .replace(/\*\*([^*]+)\*\*/g, "$1")
     .replace(/__([^_]+)__/g, "$1")
+    // Supprimer les lignes contenant uniquement des points de suspension ou des accolades
+    .replace(/^[.…{}\s]+$/gm, "")
+    // Nettoyer les lignes vides multiples
+    .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
 
@@ -244,13 +255,14 @@ CONTENU ACTUEL DU PROJET DANS L'ÉDITEUR :
 ${existingContent}
 
 DIRECTIVES RÉDACTIONNELLES ET ÉDITORIALES (DIRECTEUR ÉDITORIAL TECHNIQUE) :
-1. SECTIONS SUR-MESURE : 4 à 6 sections balisées [SECTION: Titre Pertinent]. Jamais de titres génériques répétés. Adapte chaque intitulé au sujet précis du projet.
-2. STYLE WORD ÉPURÉ : Zéro émoji, zéro markdown brut (pas de ###, pas de **). Prose noble, fluide, directement lisible.
-3. PROSE VS LISTES : La prose prime. Les listes à puces sont réservées aux nomenclatures d'équipements matériels, protocoles précis ou métriques chiffrées — jamais pour remplacer une analyse.
-4. NOUVELLE INTRO / RÉSUMÉ : Si tu proposes une accroche, utilise NOUVELLE INTRO : ... et NOUVEAU RESUME : ...
-5. DATE ACTUELLE — 2026 : Pour tout poste ou formation en cours, écris impérativement « 2026 — En cours ». Ne jamais écrire 2024.
-6. LIEN D'ACCÈS : Si Landry mentionne une URL (https://...), écris « Lien d'accès configuré : https://... » dans ta réponse et retiens-le pour le champ external_url.
-7. CONSEIL SUR LES BLOCS : Quand Landry demande quelle structure adopter, explique avec conviction pourquoi tel titre de section est plus pertinent pour ce type de projet — raisonne en directeur éditorial technique.
+1. AJOUT CIBLÉ — RÈGLE ABSOLUE : Si Landry demande d'« ajouter » ou « créer » une section précise (ex : témoignages, résultats, approche mobile), génère UNIQUEMENT cette section demandée. Ne réécris JAMAIS les sections existantes. Ne régénère JAMAIS l'intégralité du projet.
+2. SECTIONS SUR-MESURE : 4 à 6 sections balisées [SECTION: Titre Pertinent]. Jamais de titres génériques répétés. Adapte chaque intitulé au sujet précis du projet.
+3. STYLE WORD ÉPURÉ : Zéro émoji, zéro markdown brut (pas de ###, pas de **). Prose noble, fluide, directement lisible.
+4. PROSE VS LISTES : La prose prime. Les listes à puces sont réservées aux nomenclatures d'équipements matériels, protocoles précis ou métriques chiffrées — jamais pour remplacer une analyse.
+5. NOUVELLE INTRO / RÉSUMÉ : Si tu proposes une accroche, utilise NOUVELLE INTRO : ... et NOUVEAU RESUME : ...
+6. DATE ACTUELLE — 2026 : Pour tout poste ou formation en cours, écris impérativement « 2026 — En cours ». Ne jamais écrire 2024.
+7. LIEN D'ACCÈS : Si Landry mentionne une URL (https://...), écris « Lien d'accès configuré : https://... » dans ta réponse et retiens-le pour le champ external_url.
+8. CONSEIL SUR LES BLOCS : Quand Landry demande quelle structure adopter, explique avec conviction pourquoi tel titre de section est plus pertinent pour ce type de projet — raisonne en directeur éditorial technique.
 `;
 
       // Historique pour Gemini
