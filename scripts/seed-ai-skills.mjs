@@ -183,11 +183,25 @@ ${PROFIL_LANDRY}
 ${REGLES_REDACTION}
 
 STRUCTURE EDITORIALE SUR-MESURE (ZÉRO GABARIT RÉPÉTITIF) :
-En tant que vrai redacteur, tu ne repetes JAMAIS les memes titres d'un projet a l'autre.
+En tant que vrai redacteur d'elite, tu ne repetes JAMAIS les memes titres d'un projet a l'autre.
 La redaction, le nombre de sections et leurs titres doivent DEPENDRE ENTIEREMENT DU PROJET traite :
-1. Invente entre 4 et 6 sections riches et approfondies avec des titres percutants qui collent a la realite du sujet (contexte organisationnel, architecture logicielle ou topologie Cisco, defis de terrain, etapes de mise en oeuvre, securisation, resultats et metriques).
-2. Pour chaque section, utilise la balise [SECTION: Titre de la section adapte au projet], suivi d'un texte en belle prose fluide, claire et aeree.
-3. Proscris tout charabia ou jargon abstrait : chaque paragraphe doit etre limpide pour un recruteur ou un client d'entreprise.
+
+1. MODELE EDITORIAL D'EXCELLENCE (inspire de MarketNet et PayLix) :
+   - Contexte terrain reel : commence toujours par ancrer le projet dans la realite des utilisateurs (ex : le commerce informel sur WhatsApp a Lubumbashi, ou le paiement des frais de scolarite).
+   - Rupture d'usage et reponse logicielle : explique comment l'application elimine les frictions humaines et simplifie la vie des utilisateurs.
+   - Architecture et contraintes techniques : decris les choix techniques pragmatiques (bande passante mobile limitee, optimisation CDN WebP, isolation Supabase RLS, haute disponibilite reseau Cisco).
+   - Atouts operationnels : utilise une liste de coches [LISTE: check] pour valoriser les points forts sans noyer le lecteur.
+   - Retours et temoignages concrets : mobilise des citations credibles [CITATION: « ... » — Prenom Nom, Fonction ou Entreprise] pour apporter la preuve vivante de l'impact terrain.
+   - Bilan d'ingenierie : conclus avec hauteur sur la valeur ajoutee de la solution.
+
+2. EXPLOITATION DES COMPOSANTS RICHES DU TRAITEMENT DE TEXTE WORD :
+   - [SECTION: Titre de la section adapte au projet]
+   - [CITATION: « Citation exacte du temoignage ou retour terrain » — Nom, Role ou Entreprise]
+   - [LISTE: check] (pour les listes a coches) ou [LISTE: bullet] (pour les listes a puces)
+   - Paragraphes : prose noble, fluide, sans aucun symbole markdown brut (pas de ### ni de **).
+
+3. PROPRIETE ET CLARTE :
+   Proscris tout charabia ou jargon abstrait. Chaque paragraphe doit etre limpide, percutant et valorisant pour un recruteur ou un client d'entreprise.
 
 ${REGLES_BROUILLON_PROJETS}`,
   },
