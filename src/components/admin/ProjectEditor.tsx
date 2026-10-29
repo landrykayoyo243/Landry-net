@@ -300,9 +300,32 @@ export function ProjectEditor({
           technologies: form.technologies,
           content: form.content,
         }}
-        onApplySummary={(intro, summary) => update({ intro, summary })}
-        onApplyTechnologies={(technologies) => update({ technologies })}
-        onApplyCaseStudyBlocks={(blocks) => update({ content: [...form.content, ...blocks] })}
+        onApplySummary={(intro, summary) => {
+          setForm((prev) => ({
+            ...prev,
+            ...(intro ? { intro: intro.trim() } : {}),
+            ...(summary ? { summary: summary.trim() } : {}),
+          }));
+          setDirty(true);
+        }}
+        onApplyTechnologies={(technologies) => {
+          setForm((prev) => ({ ...prev, technologies }));
+          setDirty(true);
+        }}
+        onApplyCaseStudyBlocks={(blocks, opts) => {
+          setForm((prev) => {
+            // Si le projet n'avait que le template par défaut "Contexte", on le remplace directement
+            const isStarter =
+              prev.content.length <= 8 &&
+              prev.content.some((b) => b.type === "heading" && (b.text === "Contexte" || b.text === "Problème"));
+            const shouldReplace = opts?.replace ?? isStarter;
+            return {
+              ...prev,
+              content: shouldReplace ? blocks : [...prev.content, ...blocks],
+            };
+          });
+          setDirty(true);
+        }}
         onAppendSingleSection={(secTitle, secContent) => {
           const heading = createBlock("heading") as HeadingBlock;
           heading.text = secTitle;
@@ -321,7 +344,17 @@ export function ProjectEditor({
             return b;
           });
 
-          update({ content: [...form.content, heading, ...paraBlocks] });
+          setForm((prev) => {
+            const isStarter =
+              prev.content.length === 7 &&
+              prev.content.some((b) => b.type === "heading" && b.text === "Contexte");
+            const baseContent = isStarter ? [] : prev.content;
+            return {
+              ...prev,
+              content: [...baseContent, heading, ...paraBlocks],
+            };
+          });
+          setDirty(true);
         }}
       />
     </>

@@ -16,6 +16,8 @@ import {
   ShieldCheck,
   Server,
   Layers,
+  Eye,
+  CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -51,7 +53,7 @@ interface ProjectAiAssistantProps {
   };
   onApplySummary: (intro: string, summary: string) => void;
   onApplyTechnologies: (technologies: string[]) => void;
-  onApplyCaseStudyBlocks: (blocks: Block[]) => void;
+  onApplyCaseStudyBlocks: (blocks: Block[], opts?: { replace?: boolean }) => void;
   onAppendSingleSection?: (title: string, content: string) => void;
 }
 
@@ -90,12 +92,33 @@ function parseAiResponse(text: string) {
   }
 
   // Détection d'intro
-  const introMatch = text.match(/(?:NOUVELLE INTRO|INTRO|ACCROCHE)\s*[:]\s*([^\n]+(?:\n[^\n]+)?)/i);
-  const parsedIntro = introMatch ? cleanProseText(introMatch[1].trim()) : undefined;
+  let parsedIntro: string | undefined = undefined;
+  const introMatch = text.match(/(?:NOUVELLE INTRO|ACCROCHE|PHRASE D['’]ACCROCHE|INTRO)\s*[:]\s*([^\n]+(?:\n[^\n]+)?)/i);
+  if (introMatch) {
+    parsedIntro = cleanProseText(introMatch[1].trim());
+  } else {
+    // Si pas de balise explicite, vérifier s'il y a un court texte introductif avant la première [SECTION:
+    const firstSectionIdx = text.search(/\[SECTION:/i);
+    if (firstSectionIdx > 0) {
+      const preamble = text.slice(0, firstSectionIdx).trim();
+      const lines = preamble
+        .split("\n")
+        .map((l) => cleanProseText(l))
+        .filter((l) => l && !l.toLowerCase().startsWith("étude de cas") && !l.toLowerCase().startsWith("titre"));
+      if (lines.length > 0) {
+        parsedIntro = lines.join(" ").slice(0, 300);
+      }
+    }
+  }
 
   // Détection de résumé
+  let parsedSummary: string | undefined = undefined;
   const summaryMatch = text.match(/(?:NOUVEAU R[EÉ]SUM[EÉ]|R[EÉ]SUM[EÉ]|SUMMARY)\s*[:]\s*([\s\S]*?)(?=\n\n|\[SECTION|$)/i);
-  const parsedSummary = summaryMatch ? cleanProseText(summaryMatch[1].trim().slice(0, 450)) : undefined;
+  if (summaryMatch) {
+    parsedSummary = cleanProseText(summaryMatch[1].trim().slice(0, 450));
+  } else if (parsedIntro && parsedIntro.length > 30) {
+    parsedSummary = parsedIntro.slice(0, 380);
+  }
 
   // Détection de technologies suggérées
   const techMatch = text.match(/(?:TECHNOLOGIES|STACK)\s*[:]\s*([^\n]+)/i);
@@ -124,6 +147,7 @@ export function ProjectAiAssistant({
   const [loading, setLoading] = useState(false);
   const [skills, setSkills] = useState<AiSkill[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [insertedTitles, setInsertedTitles] = useState<Set<string>>(new Set());
 
   // Pour le générateur express
   const [genMode, setGenMode] = useState<"case_study" | "summary" | "technologies">("case_study");
@@ -283,6 +307,7 @@ NOUVEAU RESUME : Le texte...
   function handleInsertSection(title: string, content: string) {
     if (onAppendSingleSection) {
       onAppendSingleSection(title, content);
+      setInsertedTitles((prev) => new Set([...prev, title]));
       toast.success(`Section « ${title} » insérée dans le projet !`);
     } else {
       const heading = createBlock("heading") as HeadingBlock;
@@ -303,12 +328,13 @@ NOUVEAU RESUME : Le texte...
         blocks.push(para);
       }
       onApplyCaseStudyBlocks(blocks);
+      setInsertedTitles((prev) => new Set([...prev, title]));
       toast.success(`Section « ${title} » insérée !`);
     }
   }
 
-  /** Insérer toutes les sections détectées */
-  function handleInsertAllSections(sections: Array<{ title: string; content: string }>) {
+  /** Insérer toutes les sections détectées et fermer pour voir le résultat */
+  function handleInsertAllSections(sections: Array<{ title: string; content: string }>, closeDialog = true) {
     const allBlocks: Block[] = [];
     for (const sec of sections) {
       const heading = createBlock("heading") as HeadingBlock;
@@ -330,8 +356,28 @@ NOUVEAU RESUME : Le texte...
       }
     }
 
-    onApplyCaseStudyBlocks(allBlocks);
+    onApplyCaseStudyBlocks(allBlocks, { replace: true });
+    setInsertedTitles(new Set(sections.map((s) => s.title)));
     toast.success(`${sections.length} sections insérées dans l'étude de cas !`);
+    if (closeDialog) {
+      onOpenChange(false);
+    }
+  }
+
+  /** Appliquer tout le contenu (Intro, Résumé, Techs et Sections) et fermer l'assistant */
+  function handleApplyAll(m: ChatMessage) {
+    if (m.parsedIntro || m.parsedSummary) {
+      onApplySummary(m.parsedIntro || projectData.intro, m.parsedSummary || projectData.summary);
+    }
+    if (m.parsedTechs && m.parsedTechs.length > 0) {
+      onApplyTechnologies(Array.from(new Set([...projectData.technologies, ...m.parsedTechs])));
+    }
+    if (m.parsedSections && m.parsedSections.length > 0) {
+      handleInsertAllSections(m.parsedSections, true);
+    } else {
+      onOpenChange(false);
+      toast.success("Modifications appliquées au projet !");
+    }
   }
 
   /** Générateur Express en 1 clic */
@@ -459,7 +505,7 @@ Réponds uniquement par la liste séparée par des virgules. Sans aucun émoji n
       }
     } else if (genMode === "case_study") {
       if (genParsedBlocks && genParsedBlocks.length > 0) {
-        onApplyCaseStudyBlocks(genParsedBlocks);
+        onApplyCaseStudyBlocks(genParsedBlocks, { replace: true });
         toast.success("Étude de cas insérée dans l'éditeur Word !");
         onOpenChange(false);
       }
@@ -480,11 +526,11 @@ Réponds uniquement par la liste séparée par des virgules. Sans aucun émoji n
                 <DialogTitle className="text-base sm:text-lg font-bold flex items-center gap-2 text-foreground">
                   <span>Assistant IA du Projet</span>
                   <Badge variant="outline" className="text-[10px] font-semibold border-primary/40 text-primary bg-primary/5 py-0 px-1.5">
-                    Mode Rédaction Directe
+                    Rédaction & Insertion Directe
                   </Badge>
                 </DialogTitle>
                 <DialogDescription className="text-xs text-muted-foreground line-clamp-1">
-                  Projet actif : <strong className="text-foreground">{projectData.title || "(Sans titre)"}</strong> — Rédigez, complétez et insérez directement dans l'éditeur Word.
+                  Projet : <strong className="text-foreground">{projectData.title || "(Sans titre)"}</strong> — Rédigez, appliquez et retrouvez directement vos sections dans l'éditeur Word.
                 </DialogDescription>
               </div>
             </div>
@@ -541,103 +587,164 @@ Réponds uniquement par la liste séparée par des virgules. Sans aucun émoji n
                       {isUser ? "LK" : <Bot size={15} className="text-primary" />}
                     </div>
 
-                    <div className={`space-y-2 max-w-[90%] sm:max-w-[85%] ${isUser ? "items-end" : "items-start"} flex flex-col`}>
+                    <div className={`space-y-2 max-w-[92%] sm:max-w-[88%] ${isUser ? "items-end" : "items-start"} flex flex-col`}>
                       <div
                         className={`rounded-2xl px-3.5 py-2.5 sm:px-4 sm:py-3 shadow-xs text-xs sm:text-sm leading-relaxed ${
                           isUser
                             ? "bg-primary text-primary-foreground rounded-tr-xs"
-                            : "bg-card border border-border/80 text-foreground rounded-tl-xs space-y-2.5"
+                            : "bg-card border border-border/80 text-foreground rounded-tl-xs space-y-3"
                         }`}
                       >
                         {/* Rendu du texte sans markdown brut */}
-                        <div className="whitespace-pre-wrap leading-relaxed">
+                        <div className="whitespace-pre-wrap leading-relaxed text-foreground">
                           {m.text}
                         </div>
 
                         {/* Cartes d'action si l'assistant a proposé des sections */}
                         {!isUser && m.parsedSections && m.parsedSections.length > 0 && (
-                          <div className="pt-2 border-t border-border/60 space-y-2">
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="text-[11px] font-bold uppercase tracking-wider text-primary flex items-center gap-1">
-                                <Layers size={13} />
-                                {m.parsedSections.length} section(s) détectée(s)
-                              </span>
+                          <div className="pt-2 border-t border-border/60 space-y-2.5">
+                            {/* Bannière principale de confirmation */}
+                            <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl bg-primary/10 border border-primary/30">
+                              <div className="flex items-center gap-1.5">
+                                <Layers size={15} className="text-primary shrink-0" />
+                                <span className="text-xs font-bold text-foreground">
+                                  {m.parsedSections.length} sections prêtes pour l'éditeur Word
+                                </span>
+                              </div>
                               <Button
                                 type="button"
                                 size="sm"
-                                onClick={() => handleInsertAllSections(m.parsedSections!)}
-                                className="h-7 text-xs font-semibold gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg shadow-xs"
+                                onClick={() => handleInsertAllSections(m.parsedSections!, true)}
+                                className="h-8 text-xs font-bold gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg shadow-sm"
                               >
-                                <PlusCircle size={13} />
-                                Tout insérer dans l'éditeur Word
+                                <Sparkles size={13} />
+                                Tout insérer & Voir le projet
                               </Button>
                             </div>
 
+                            {/* Liste détaillée des sections avec état d'insertion */}
                             <div className="space-y-1.5 pt-1">
-                              {m.parsedSections.map((sec, idx) => (
-                                <div
-                                  key={idx}
-                                  className="flex items-center justify-between gap-2 p-2 rounded-xl bg-muted/40 border border-border/60 text-xs"
+                              {m.parsedSections.map((sec, idx) => {
+                                const isInserted = insertedTitles.has(sec.title);
+                                return (
+                                  <div
+                                    key={idx}
+                                    className={`flex items-center justify-between gap-2 p-2.5 rounded-xl border text-xs transition-colors ${
+                                      isInserted
+                                        ? "bg-emerald-500/10 border-emerald-500/30 text-foreground"
+                                        : "bg-muted/40 border-border/60 text-foreground"
+                                    }`}
+                                  >
+                                    <div className="truncate flex-1 min-w-0 pr-2">
+                                      <span className="font-semibold text-foreground flex items-center gap-1.5">
+                                        {isInserted && <Check size={13} className="text-emerald-500 shrink-0" />}
+                                        <span>{sec.title}</span>
+                                      </span>
+                                      <p className="text-[11px] text-muted-foreground truncate max-w-[280px] sm:max-w-[420px] mt-0.5">
+                                        {sec.content.slice(0, 95)}...
+                                      </p>
+                                    </div>
+                                    <div className="flex items-center gap-1 shrink-0">
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleCopy(sec.content, `sec-${idx}`)}
+                                        className="h-7 w-7 p-0 rounded-md"
+                                        title="Copier le texte"
+                                      >
+                                        {copiedId === `sec-${idx}` ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
+                                      </Button>
+                                      <Button
+                                        type="button"
+                                        variant={isInserted ? "secondary" : "outline"}
+                                        size="sm"
+                                        onClick={() => handleInsertSection(sec.title, sec.content)}
+                                        className="h-7 px-2.5 text-[11px] font-semibold gap-1 rounded-md"
+                                      >
+                                        {isInserted ? (
+                                          <>
+                                            <Check size={11} className="text-emerald-500" />
+                                            <span>Inséré</span>
+                                          </>
+                                        ) : (
+                                          <>
+                                            <PlusCircle size={11} />
+                                            <span>Insérer</span>
+                                          </>
+                                        )}
+                                      </Button>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+
+                            {/* Barre inférieure : Tout appliquer et/ou fermer */}
+                            <div className="pt-2 flex flex-wrap items-center justify-between gap-2 border-t border-border/40">
+                              <span className="text-[11px] text-muted-foreground">
+                                Vous pouvez inspecter le projet dans l'éditeur Word à tout moment.
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => onOpenChange(false)}
+                                  className="h-7 text-xs rounded-lg gap-1"
                                 >
-                                  <div className="truncate">
-                                    <span className="font-semibold text-foreground">{sec.title}</span>
-                                    <p className="text-[11px] text-muted-foreground truncate max-w-[260px] sm:max-w-[360px]">
-                                      {sec.content.slice(0, 90)}...
-                                    </p>
-                                  </div>
-                                  <div className="flex items-center gap-1 shrink-0">
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => handleCopy(sec.content, `sec-${idx}`)}
-                                      className="h-6 w-6 p-0 rounded-md"
-                                      title="Copier le texte"
-                                    >
-                                      {copiedId === `sec-${idx}` ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
-                                    </Button>
-                                    <Button
-                                      type="button"
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => handleInsertSection(sec.title, sec.content)}
-                                      className="h-6 px-2 text-[11px] font-semibold gap-1 rounded-md"
-                                    >
-                                      <PlusCircle size={11} />
-                                      Insérer
-                                    </Button>
-                                  </div>
-                                </div>
-                              ))}
+                                  <Eye size={12} />
+                                  <span>Voir l'éditeur</span>
+                                </Button>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  onClick={() => handleApplyAll(m)}
+                                  className="h-7 text-xs font-semibold gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg shadow-xs"
+                                >
+                                  <Check size={12} />
+                                  <span>Tout appliquer & Fermer</span>
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         )}
 
                         {/* Carte d'action si l'assistant a proposé une nouvelle intro / résumé */}
                         {!isUser && (m.parsedIntro || m.parsedSummary) && (
-                          <div className="pt-2 border-t border-border/60 flex items-center justify-between gap-2">
-                            <span className="text-[11px] text-muted-foreground">
-                              Accroche & Résumé proposés prêts à être enregistrés
-                            </span>
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                onApplySummary(m.parsedIntro || projectData.intro, m.parsedSummary || projectData.summary);
-                                toast.success("Pitch et résumé appliqués au projet !");
-                              }}
-                              className="h-7 text-xs font-semibold gap-1.5 border-primary/40 text-primary hover:bg-primary/10 rounded-lg"
-                            >
-                              <Check size={12} />
-                              Appliquer au projet
-                            </Button>
+                          <div className="pt-2 border-t border-border/60 flex flex-wrap items-center justify-between gap-2 bg-muted/30 p-2.5 rounded-xl border border-border/60 text-xs">
+                            <div className="min-w-0 flex-1 pr-2">
+                              <span className="font-semibold text-foreground text-xs block">
+                                Accroche & Résumé prêts
+                              </span>
+                              {m.parsedIntro && (
+                                <p className="text-[11px] text-muted-foreground truncate mt-0.5">
+                                  <strong className="text-foreground">Accroche :</strong> {m.parsedIntro.slice(0, 90)}...
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  onApplySummary(m.parsedIntro || projectData.intro, m.parsedSummary || projectData.summary);
+                                  toast.success("Pitch et résumé appliqués au projet !");
+                                  onOpenChange(false);
+                                }}
+                                className="h-7 text-xs font-semibold gap-1.5 border-primary/40 text-primary hover:bg-primary/10 rounded-lg"
+                              >
+                                <Check size={12} />
+                                <span>Appliquer & Voir</span>
+                              </Button>
+                            </div>
                           </div>
                         )}
 
                         {/* Carte d'action si l'assistant a proposé des technologies */}
                         {!isUser && m.parsedTechs && m.parsedTechs.length > 0 && (
-                          <div className="pt-2 border-t border-border/60 flex items-center justify-between gap-2">
+                          <div className="pt-2 border-t border-border/60 flex items-center justify-between gap-2 bg-muted/30 p-2.5 rounded-xl border border-border/60 text-xs">
                             <span className="text-[11px] text-muted-foreground truncate">
                               Techs suggérées : {m.parsedTechs.join(", ")}
                             </span>
@@ -888,7 +995,7 @@ Réponds uniquement par la liste séparée par des virgules. Sans aucun émoji n
                     className="gap-1.5 rounded-xl bg-primary text-primary-foreground font-semibold text-xs shadow-xs"
                   >
                     <Check size={14} />
-                    <span>Appliquer directement au projet</span>
+                    <span>Appliquer directement au projet & Voir</span>
                   </Button>
                 </div>
               </div>
