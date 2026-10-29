@@ -34,6 +34,7 @@ import {
   createBlock,
   textDoc,
   nodeText,
+  sectionTextToRichBlocks,
   type Block,
   type HeadingBlock,
   type ParagraphBlock,
@@ -255,14 +256,27 @@ CONTENU ACTUEL DU PROJET DANS L'ÉDITEUR :
 ${existingContent}
 
 DIRECTIVES RÉDACTIONNELLES ET ÉDITORIALES (DIRECTEUR ÉDITORIAL TECHNIQUE) :
-1. AJOUT CIBLÉ — RÈGLE ABSOLUE : Si Landry demande d'« ajouter » ou « créer » une section précise (ex : témoignages, résultats, approche mobile), génère UNIQUEMENT cette section demandée. Ne réécris JAMAIS les sections existantes. Ne régénère JAMAIS l'intégralité du projet.
-2. SECTIONS SUR-MESURE : 4 à 6 sections balisées [SECTION: Titre Pertinent]. Jamais de titres génériques répétés. Adapte chaque intitulé au sujet précis du projet.
-3. STYLE WORD ÉPURÉ : Zéro émoji, zéro markdown brut (pas de ###, pas de **). Prose noble, fluide, directement lisible.
-4. PROSE VS LISTES : La prose prime. Les listes à puces sont réservées aux nomenclatures d'équipements matériels, protocoles précis ou métriques chiffrées — jamais pour remplacer une analyse.
-5. NOUVELLE INTRO / RÉSUMÉ : Si tu proposes une accroche, utilise NOUVELLE INTRO : ... et NOUVEAU RESUME : ...
-6. DATE ACTUELLE — 2026 : Pour tout poste ou formation en cours, écris impérativement « 2026 — En cours ». Ne jamais écrire 2024.
-7. LIEN D'ACCÈS : Si Landry mentionne une URL (https://...), écris « Lien d'accès configuré : https://... » dans ta réponse et retiens-le pour le champ external_url.
-8. CONSEIL SUR LES BLOCS : Quand Landry demande quelle structure adopter, explique avec conviction pourquoi tel titre de section est plus pertinent pour ce type de projet — raisonne en directeur éditorial technique.
+1. RÈGLE CRITIQUE D'ENVIRONNEMENT : Tu es DÉJÀ dans l'éditeur de ce projet (« ${projectData.title || "Projet"} »). Le projet existe déjà ! Ne génère JAMAIS de bloc \`\`\`action:create_project_draft ici. N'essaie JAMAIS de recréer un brouillon. Ton rôle est d'écrire ou enrichir le contenu directement insérable dans l'éditeur.
+2. AJOUT CIBLÉ — RÈGLE ABSOLUE : Si Landry demande d'« ajouter » ou « créer » une section précise (ex : témoignages, avis, résultats, architecture), rédige UNIQUEMENT cette section demandée avec sa balise [SECTION: Titre Pertinent]. Ne réécris JAMAIS les autres sections existantes. Ne régénère JAMAIS l'intégralité du projet.
+3. COMPOSANTS RICHES DE L'ÉDITEUR WORD À EXPLOITER :
+   L'éditeur Word de Landry n'est pas un simple traitement de texte brut. Il comporte plusieurs composants riches que tu dois mobiliser :
+   - TÉMOIGNAGE / CITATION : Si la section contient un avis client, commerçant ou partenaire, utilise impérativement la balise :
+     [CITATION: « Citation exacte du retour d'expérience... » — Prénom Nom, Rôle ou Entreprise]
+     Exemple : [CITATION: « Grâce à cette solution, nous traitons deux fois plus de commandes sans aucune erreur de colis. » — Commerçant de prêt-à-porter, Lubumbashi]
+     (L'éditeur Word créera automatiquement une vraie carte Citation stylisée avec l'auteur).
+   - TITRES ET VARIANTES WORD :
+     * Pour une section de résultats, bilan, impact ou témoignages : [SECTION: Retours du terrain et témoignages commerçants] (l'éditeur lui attribue automatiquement la coche verte de succès).
+     * Pour une section de méthode, étapes ou déploiement : [SECTION: Déploiement et étapes d'intégration] (l'éditeur lui attribue la variante étapes numérotées).
+     * Pour une section technique : [SECTION: Architecture et sécurisation des flux].
+   - LISTES TECHNIQUES : Si tu dois énumérer des équipements, des critères ou des métriques :
+     [LISTE: check] (liste avec coches vertes)
+     • Critère validé 1
+     • Critère validé 2
+     ou [LISTE: bullet] (liste à puces classique)
+   - PARAGRAPHES : Rédige le corps de texte en belle prose fluide, captivante, sans aucun symbole markdown brut (pas de ### ni de **).
+4. DATE ACTUELLE — 2026 : Pour tout poste ou formation en cours, écris impérativement « 2026 — En cours ». Ne jamais écrire 2024.
+5. LIEN D'ACCÈS : Si Landry mentionne une URL (https://...), écris « Lien d'accès configuré : https://... » dans ta réponse.
+6. CONSEIL ÉDITORIAL : Quand Landry demande quelle structure adopter, explique avec conviction pourquoi tel bloc ou titre est le plus percutant.
 `;
 
       // Historique pour Gemini
@@ -319,25 +333,9 @@ DIRECTIVES RÉDACTIONNELLES ET ÉDITORIALES (DIRECTEUR ÉDITORIAL TECHNIQUE) :
     if (onAppendSingleSection) {
       onAppendSingleSection(title, content);
       setInsertedTitles((prev) => new Set([...prev, title]));
-      toast.success(`Section « ${title} » insérée dans le projet !`);
+      toast.success(`Section « ${title} » insérée avec ses composants riches !`);
     } else {
-      const heading = createBlock("heading") as HeadingBlock;
-      heading.text = title;
-      heading.layout = "full";
-      heading.tone = "plain";
-      heading.variant = title.toLowerCase().includes("résultat") ? "result" : "default";
-
-      const paragraphs = content
-        .split(/\n\s*\n/)
-        .map((p) => cleanProseText(p))
-        .filter(Boolean);
-
-      const blocks: Block[] = [heading];
-      for (const p of paragraphs) {
-        const para = createBlock("paragraph") as ParagraphBlock;
-        para.doc = textDoc(p);
-        blocks.push(para);
-      }
+      const blocks = sectionTextToRichBlocks(title, cleanProseText(content));
       onApplyCaseStudyBlocks(blocks);
       setInsertedTitles((prev) => new Set([...prev, title]));
       toast.success(`Section « ${title} » insérée !`);
@@ -348,23 +346,8 @@ DIRECTIVES RÉDACTIONNELLES ET ÉDITORIALES (DIRECTEUR ÉDITORIAL TECHNIQUE) :
   function handleInsertAllSections(sections: Array<{ title: string; content: string }>, closeDialog = true) {
     const allBlocks: Block[] = [];
     for (const sec of sections) {
-      const heading = createBlock("heading") as HeadingBlock;
-      heading.text = sec.title;
-      heading.layout = "full";
-      heading.tone = "plain";
-      heading.variant = sec.title.toLowerCase().includes("résultat") ? "result" : "default";
-      allBlocks.push(heading);
-
-      const paragraphs = sec.content
-        .split(/\n\s*\n/)
-        .map((p) => cleanProseText(p))
-        .filter(Boolean);
-
-      for (const p of paragraphs) {
-        const para = createBlock("paragraph") as ParagraphBlock;
-        para.doc = textDoc(p);
-        allBlocks.push(para);
-      }
+      const richBlocks = sectionTextToRichBlocks(sec.title, cleanProseText(sec.content));
+      allBlocks.push(...richBlocks);
     }
 
     onApplyCaseStudyBlocks(allBlocks, { replace: true });
@@ -463,19 +446,8 @@ Réponds uniquement par la liste séparée par des virgules. Sans aucun émoji n
         if (parsed.sections.length > 0) {
           const blocks: Block[] = [];
           for (const s of parsed.sections) {
-            const heading = createBlock("heading") as HeadingBlock;
-            heading.text = s.title;
-            heading.layout = "full";
-            heading.tone = "plain";
-            heading.variant = s.title.toLowerCase().includes("résultat") ? "result" : "default";
-            blocks.push(heading);
-
-            const paras = s.content.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
-            for (const p of paras) {
-              const para = createBlock("paragraph") as ParagraphBlock;
-              para.doc = textDoc(p);
-              blocks.push(para);
-            }
+            const rich = sectionTextToRichBlocks(s.title, s.content);
+            blocks.push(...rich);
           }
           setGenParsedBlocks(blocks);
         }

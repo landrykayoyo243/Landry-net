@@ -4,6 +4,7 @@ import {
   newId,
   slugify,
   starterTemplate,
+  sectionTextToRichBlocks,
   type Block,
   type HeadingBlock,
   type ParagraphBlock,
@@ -56,40 +57,9 @@ export function sectionsToBlocks(
     const title = s.title.trim();
     const content = s.content.trim();
 
-    if (title) {
-      const heading: HeadingBlock = {
-        id: newId(),
-        type: "heading",
-        text: title,
-        layout: "full",
-        tone: title.toLowerCase().includes("résultat") ? "plain" : "plain",
-        variant: title.toLowerCase().includes("résultat") ? "result" : "default",
-      };
-      blocks.push(heading);
-    }
-
-    if (content) {
-      const isIllustration =
-        title.toLowerCase().includes("illustration") ||
-        title.toLowerCase().includes("visuel") ||
-        title.toLowerCase().includes("capture");
-
-      if (isIllustration) {
-        // Ajouter un bloc paragraphe avec note explicative
-        const para: ParagraphBlock = {
-          id: newId(),
-          type: "paragraph",
-          doc: stringToRichDoc(`Recommandation visuelle : ${content}`),
-        };
-        blocks.push(para);
-      } else {
-        const para: ParagraphBlock = {
-          id: newId(),
-          type: "paragraph",
-          doc: stringToRichDoc(content),
-        };
-        blocks.push(para);
-      }
+    if (title || content) {
+      const rich = sectionTextToRichBlocks(title || "Section", content);
+      blocks.push(...rich);
     }
   }
 
@@ -353,19 +323,28 @@ export async function processAiActionBlock(
   text: string,
   context?: { userId?: string; userEmail?: string; headers?: Headers },
 ): Promise<{ cleanedText: string; actionExecuted?: ActionResult }> {
-  const regex = /```action:(create_project_draft|create_experience|create_certification)\s*([\s\S]*?)```/i;
+  // Tolère: ```action:..., ``` action-..., ```action_..., espaces avant/après et bloc en fin de chaîne sans fermeture
+  const regex = /```\s*action[-:_](create_project_draft|create_experience|create_certification)\s*([\s\S]*?)(?:```|$)/i;
   const match = regex.exec(text);
 
+  // Nettoyage complet pour que le texte retourné à l'UI soit 100% propre
+  const cleanedText = text
+    .replace(regex, "")
+    .replace(/```\s*action[-:_][\s\S]*?(?:```|$)/gi, "")
+    .replace(/```(?:json)?\s*\{[\s\S]*?\}\s*```/gi, "")
+    .replace(/^[.…\s]+$/gm, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
   if (!match) {
-    return { cleanedText: text };
+    return { cleanedText };
   }
 
   const actionType = match[1].toLowerCase();
-  const jsonContent = match[2].trim();
-  const cleanedText = text.replace(match[0], "").trim();
+  const rawJson = match[2].trim().replace(/^```|```$/g, "").trim();
 
   try {
-    const parsed = JSON.parse(jsonContent);
+    const parsed = JSON.parse(rawJson);
 
     if (actionType === "create_project_draft") {
       const result = await executeCreateProjectDraft(parsed, context);

@@ -14,7 +14,7 @@ import { SortableList } from "@/components/admin/SortableList";
 import { RichEditor } from "@/components/admin/RichEditor";
 import { ConfirmDelete, FieldError } from "@/components/admin/ui";
 import { ProjectBody, firstImage } from "@/components/portfolio/ProjectBody";
-import { blockLabels, createBlock, newId, parseBlocks, safeUrl, slugify, starterTemplate, textDoc, type Block, type BlockType, type HeadingBlock, type ParagraphBlock, type MediaBlock, type MediaItem } from "@/lib/blocks";
+import { blockLabels, createBlock, newId, parseBlocks, safeUrl, slugify, starterTemplate, textDoc, sectionTextToRichBlocks, type Block, type BlockType, type HeadingBlock, type ParagraphBlock, type MediaBlock, type MediaItem } from "@/lib/blocks";
 import { uploadProjectImage, type ProjectRow } from "@/lib/admin-data";
 import { ProjectAiAssistant } from "@/components/admin/ProjectAiAssistant";
 
@@ -326,22 +326,7 @@ export function ProjectEditor({
           setDirty(true);
         }}
         onAppendSingleSection={(secTitle, secContent) => {
-          const heading = createBlock("heading") as HeadingBlock;
-          heading.text = secTitle;
-          heading.layout = "full";
-          heading.tone = "plain";
-          heading.variant = secTitle.toLowerCase().includes("résultat") ? "result" : "default";
-
-          const paras = secContent
-            .split(/\n\s*\n/)
-            .map((p) => p.trim())
-            .filter(Boolean);
-
-          const paraBlocks = paras.map((p) => {
-            const b = createBlock("paragraph") as ParagraphBlock;
-            b.doc = textDoc(p);
-            return b;
-          });
+          const richBlocks = sectionTextToRichBlocks(secTitle, secContent);
 
           setForm((prev) => {
             const isStarter =
@@ -350,7 +335,7 @@ export function ProjectEditor({
             const baseContent = isStarter ? [] : prev.content;
             return {
               ...prev,
-              content: [...baseContent, heading, ...paraBlocks],
+              content: [...baseContent, ...richBlocks],
             };
           });
           setDirty(true);

@@ -93,13 +93,26 @@ REGLES DE REDACTION ABSOLUES (sans aucune exception) :
 `;
 
 const REGLES_BROUILLON_PROJETS = `
-REGLE D'OR — CREATION ET PUBLICATION :
+REGLE D'OR — CREATION ET MODIFICATION DE PROJETS :
 
-PROJETS (mode brouillon obligatoire) :
-Si Landry demande de creer, ajouter, sauvegarder ou publier un projet, cree-le TOUJOURS en mode brouillon (status: draft). Previens Landry qu'il est en brouillon pour relecture dans l'editeur Word.
-Invente 4 a 6 sections sur-mesure aux titres percutants adaptes au projet specifique — pas de gabarit generique repete.
-Si Landry mentionne un lien, une URL ou une demo (https://...), integre-le dans le champ external_url et ecris dans ta reponse : « Lien d'acces configure : https://... ».
-Pour declencher la creation, inclus a la toute fin de ton message exactement ce bloc :
+DISTINCTION CRITIQUE :
+1. AJOUT OU MODIFICATION D'UNE SECTION (dans un projet existant ou en cours d'édition) :
+Si Landry demande d'« ajouter une section », « rédiger un témoignage », « ajouter des résultats » ou enrichir une fiche :
+- Rédige UNIQUEMENT la section demandée sous la balise [SECTION: Titre Pertinent].
+- Ne réécris JAMAIS les autres sections existantes. Ne régénère JAMAIS tout le projet.
+- Ne génère JAMAIS de bloc \`\`\`action:create_project_draft dans ce cas.
+- Exploite les composants riches de l'éditeur Word :
+  * Pour un témoignage ou avis : [CITATION: « Texte exact du témoignage » — Nom, Rôle ou Entreprise]
+  * Pour un bilan ou impact : [SECTION: Résultats et impact mesuré] (l'éditeur Word affiche automatiquement la coche verte de succès)
+  * Pour des étapes de déploiement : [SECTION: Déploiement et étapes clés] (l'éditeur Word affiche les étapes numérotées)
+  * Pour des spécifications ou points vérifiés : [LISTE: check] ou [LISTE: bullet]
+
+2. CRÉATION D'UN NOUVEAU PROJET COMPLET (depuis zéro) :
+Uniquement si Landry demande de créer un NOUVEAU projet complet de A à Z (ex: « Crée un projet pour mon déploiement Cisco ») :
+Cree-le en mode brouillon (status: draft).
+Invente 4 a 6 sections sur-mesure aux titres percutants adaptes au projet specifique.
+Si Landry mentionne un lien, une URL ou une demo (https://...), integre-le dans le champ external_url et ecris : « Lien d'acces configure : https://... ».
+Inclus a la toute fin de ton message exactement ce bloc :
 \`\`\`action:create_project_draft
 {
   "title": "Titre exact du projet",

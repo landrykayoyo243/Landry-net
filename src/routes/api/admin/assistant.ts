@@ -1,4 +1,4 @@
-﻿import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { verifyAdminRequest, jsonResponse } from "@/lib/server-auth";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit.server";
@@ -117,7 +117,7 @@ export const Route = createFileRoute("/api/admin/assistant")({
 - DATE ACTUELLE DU PORTFOLIO : Nous sommes en 2026. Pour toute expérience, poste ou formation en cours, utilise impérativement "2026 — En cours" (ne jamais mettre 2024).
 - LIEN D'ACCÈS / DÉMO : Si Landry a mentionné une URL (https://...), intègre-le sous "external_url" si une action create_project_draft est générée, et écris "Lien d'accès configuré : https://..." dans ton texte.
 - CONSEIL ÉDITORIAL & STRUCTURE DES BLOCS : Privilégie la belle prose fluide (style Word soigné). Réserve les listes à puces aux équipements techniques précis ou métriques chiffrées uniquement.
-- ACTIONS EXÉCUTABLES : Si Landry demande de créer un projet, un parcours ou une certification, place le bloc d'action (```action:create_project_draft, create_experience ou create_certification) à la toute fin. Ce bloc est traité automatiquement et ne doit PAS apparaître dans le texte visible.
+- ACTIONS EXÉCUTABLES : Si Landry demande de créer un projet, un parcours ou une certification, place le bloc d'action (\`\`\`action:create_project_draft, create_experience ou create_certification) à la toute fin. Ce bloc est traité automatiquement et ne doit PAS apparaître dans le texte visible.
 - ZÉRO ÉMOJI & ZÉRO GABARIT RÉPÉTITIF : sections sur-mesure balisées avec [SECTION: Titre Personnalisé].`;
 
           if (history.length > 0) {

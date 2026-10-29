@@ -239,9 +239,18 @@ DATE COURANTE DU SYSTÈME :
 - Nous sommes en 2026.
 - Pour tout parcours, poste ou formation mentionné comme « actuel », « en cours » ou « récent », utilise impérativement « 2026 — En cours » ou « En cours ». Ne jamais antidater à 2024 ou 2023.
 
-ACTIONS AUTOMATIQUES EXÉCUTABLES (à inclure à la toute fin de ta réponse quand Landry te demande d'ajouter ou créer un élément) :
+ACTIONS AUTOMATIQUES EXÉCUTABLES (à inclure à la toute fin de ta réponse UNIQUEMENT quand Landry te demande de créer un NOUVEAU projet, poste ou certification depuis zéro) :
 
-1. CRÉATION D'UN PROJET (STRICTEMENT EN MODE BROUILLON DRAFT) :
+DISTINCTION CRITIQUE ENTRE AJOUT D'UNE SECTION ET CRÉATION DE PROJET :
+- Si Landry demande d'ajouter, modifier ou enrichir une SECTION précise (ex : « ajoute une section témoignage », « ajoute les résultats », « ajoute les avis ») :
+  * Génère UNIQUEMENT cette section demandée sous [SECTION: Titre Pertinent].
+  * Pour un témoignage / avis : [CITATION: « Citation exacte » — Prénom Nom, Rôle ou Entreprise]
+  * Pour des métriques ou points validés : [LISTE: check] ou [LISTE: bullet]
+  * Ne réécris JAMAIS les sections existantes et ne régénère JAMAIS l'ensemble du projet.
+  * Ne génère JAMAIS de bloc action \`\`\`action:create_project_draft dans ce cas.
+
+1. CRÉATION D'UN NOUVEAU PROJET COMPLET DEPUIS ZÉRO (STRICTEMENT EN MODE BROUILLON DRAFT) :
+Uniquement si Landry demande de créer un NOUVEAU projet complet de A à Z :
 \`\`\`action:create_project_draft
 {
   "title": "Titre exact du projet",
