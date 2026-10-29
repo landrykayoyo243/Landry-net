@@ -32,6 +32,7 @@ import {
 import { toast } from "sonner";
 import { adminApi, type AiSkill, type AdminActionExecuted } from "@/lib/admin-api-client";
 import { IaSubNav } from "@/components/admin/IaSubNav";
+import { copyToClipboard } from "@/lib/clipboard";
 
 export const Route = createFileRoute("/admin/ia/assistant")({
   component: AdminAssistantPage,
@@ -88,24 +89,33 @@ function formatTime(d: Date) {
 }
 
 function FormattedMessageText({ text }: { text: string }) {
-  const lines = text.split("\n");
+  // Retirer les blocs action s'il y en a
+  const cleaned = text.replace(/```action:[a-z0-9_-]+\s*[\s\S]*?```/gi, "").trim();
+  const lines = cleaned.split("\n");
 
   return (
     <div className="space-y-1.5 text-xs sm:text-sm leading-relaxed">
       {lines.map((line, idx) => {
-        if (!line.trim()) return <div key={idx} className="h-1.5" />;
+        const trimmed = line.trim();
+        if (!trimmed) return <div key={idx} className="h-1.5" />;
 
-        if (line.startsWith("[SECTION:") || line.startsWith("###") || line.startsWith("##")) {
-          const cleanTitle = line.replace(/^[#\[\]\s:]+|[\]]+$/g, "").replace(/^SECTION:\s*/i, "");
+        // Titre de section ou en-tête
+        if (trimmed.startsWith("[SECTION:") || trimmed.startsWith("###") || trimmed.startsWith("##") || trimmed.startsWith("#")) {
+          const cleanTitle = trimmed
+            .replace(/^[#\[\]\s:]+|[\]]+$/g, "")
+            .replace(/^SECTION:\s*/i, "")
+            .replace(/^\*\*|\*\*$/g, "")
+            .trim();
           return (
-            <h4 key={idx} className="font-bold text-foreground pt-1.5 pb-0.5 text-xs sm:text-sm text-primary flex items-center gap-1.5">
+            <h4 key={idx} className="font-bold text-foreground pt-2 pb-0.5 text-xs sm:text-sm text-primary flex items-center gap-1.5">
               <span>{cleanTitle}</span>
             </h4>
           );
         }
 
-        if (/^[-*•]\s+/.test(line)) {
-          const content = line.replace(/^[-*•]\s+/, "");
+        // Puces de listes
+        if (/^[-*•]\s+/.test(trimmed)) {
+          const content = trimmed.replace(/^[-*•]\s+/, "");
           return (
             <div key={idx} className="flex items-start gap-2 pl-1">
               <span className="text-primary mt-1 text-[8px] shrink-0">•</span>
@@ -114,7 +124,7 @@ function FormattedMessageText({ text }: { text: string }) {
           );
         }
 
-        return <p key={idx}>{renderBoldParts(line)}</p>;
+        return <p key={idx}>{renderBoldParts(trimmed)}</p>;
       })}
     </div>
   );
@@ -142,10 +152,14 @@ function MessageBubble({
   const isUser = msg.role === "user";
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(msg.text);
-    setCopied(true);
-    toast.success("Texte copié !");
-    setTimeout(() => setCopied(false), 2000);
+    const ok = await copyToClipboard(msg.text);
+    if (ok) {
+      setCopied(true);
+      toast.success("Texte copié dans le presse-papiers !");
+      setTimeout(() => setCopied(false), 2000);
+    } else {
+      toast.error("Impossible de copier automatiquement le texte.");
+    }
   };
 
   const handleSaveQuickDraft = async () => {

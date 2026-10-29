@@ -14,7 +14,7 @@ import { SortableList } from "@/components/admin/SortableList";
 import { RichEditor } from "@/components/admin/RichEditor";
 import { ConfirmDelete, FieldError } from "@/components/admin/ui";
 import { ProjectBody, firstImage } from "@/components/portfolio/ProjectBody";
-import { blockLabels, createBlock, newId, parseBlocks, safeUrl, slugify, starterTemplate, type Block, type BlockType, type HeadingBlock, type MediaBlock, type MediaItem } from "@/lib/blocks";
+import { blockLabels, createBlock, newId, parseBlocks, safeUrl, slugify, starterTemplate, textDoc, type Block, type BlockType, type HeadingBlock, type ParagraphBlock, type MediaBlock, type MediaItem } from "@/lib/blocks";
 import { uploadProjectImage, type ProjectRow } from "@/lib/admin-data";
 import { ProjectAiAssistant } from "@/components/admin/ProjectAiAssistant";
 
@@ -298,10 +298,31 @@ export function ProjectEditor({
           intro: form.intro,
           summary: form.summary,
           technologies: form.technologies,
+          content: form.content,
         }}
         onApplySummary={(intro, summary) => update({ intro, summary })}
         onApplyTechnologies={(technologies) => update({ technologies })}
         onApplyCaseStudyBlocks={(blocks) => update({ content: [...form.content, ...blocks] })}
+        onAppendSingleSection={(secTitle, secContent) => {
+          const heading = createBlock("heading") as HeadingBlock;
+          heading.text = secTitle;
+          heading.layout = "full";
+          heading.tone = "plain";
+          heading.variant = secTitle.toLowerCase().includes("résultat") ? "result" : "default";
+
+          const paras = secContent
+            .split(/\n\s*\n/)
+            .map((p) => p.trim())
+            .filter(Boolean);
+
+          const paraBlocks = paras.map((p) => {
+            const b = createBlock("paragraph") as ParagraphBlock;
+            b.doc = textDoc(p);
+            return b;
+          });
+
+          update({ content: [...form.content, heading, ...paraBlocks] });
+        }}
       />
     </>
   );

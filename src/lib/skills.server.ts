@@ -218,8 +218,33 @@ export async function getSkillVersions(skillId: string): Promise<AiSkillVersion[
   return (data ?? []) as AiSkillVersion[];
 }
 
+const CONNAISSANCE_PORTFOLIO_LANDRY = `
+BASE DE CONNAISSANCES CENTRALE DU PORTFOLIO DE LANDRY KAYOYO :
+- Nom complet : Ngoy Bahati Kayoyo Landry
+- Titre professionnel : Administrateur Systèmes et Réseaux — Développeur Web Full-Stack
+- Localisation : Lubumbashi, République Démocratique du Congo
+- Coordonnées : Kayoyolandry@gmail.com | Téléphone & WhatsApp : +243 906 619 747
+- Formation supérieure : Diplômé en Administration des Systèmes et Réseaux à l'Université Don Bosco de Lubumbashi
+- Certifications : Cisco Networking Academy (routage, commutation, VLANs, Cisco Packet Tracer, protocoles réseau)
+- Expériences professionnelles et terrains d'intervention :
+  1. XSECURITY (Lubumbashi) : Membre actif de l'équipe technique, administration d'infrastructures réseau, sécurisation des serveurs et postes, assistance aux utilisateurs et développement d'applications web utiles pour les clients PME.
+  2. INPP (Institut National de Préparation Professionnelle) : Immersion sur des infrastructures critiques et continuité de service.
+  3. CNSS (Caisse Nationale de Sécurité Sociale) : Immersion sur des systèmes de production sensibles et gestion rigoureuse des accès.
+  4. PayLix : Conception et développement d'une plateforme web Fintech Full-Stack.
+- Atout concurrentiel distinctif :
+  Landry combine la maîtrise matérielle et logicielle des systèmes et réseaux (Windows Server, Linux, virtualisation VMware, Cisco, VLANs, VPN, pare-feux) avec le développement web moderne de haut niveau (React, TypeScript, Node.js, Tailwind CSS, Supabase, intégration IA Gemini).
+- Conviction professionnelle :
+  « Une infrastructure solide ne se remarque pas : elle fonctionne en continu et en silence. Le code moderne ne vaut que s'il est fiable, sécurisé et immédiatement utile. »
+
+RÈGLES DE FORME OBLIGATOIRES POUR TOUTES TES RÉPONSES :
+1. N'utilise JAMAIS d'émojis ou d'émoticônes. Le style doit être strictement sobre, professionnel et élégant.
+2. N'utilise JAMAIS de symboles markdown bruts encombrants comme des séries de ### ou de ** inutiles qui polluent le texte. Rédige en prose fluide, limpide et propre, prête à être lue ou insérée dans un document de type Word.
+3. Pour les projets générés, respecte impérativement le mode brouillon (draft) afin que Landry valide et mette en forme dans l'éditeur de texte avant toute diffusion publique.
+`;
+
 /**
- * Construit le system instruction complet en combinant tous les skills actifs.
+ * Construit le system instruction complet en combinant le socle de connaissances
+ * du portfolio et tous les skills actifs.
  * Les skills système sont toujours inclus en premier.
  */
 export async function buildSystemInstruction(slugs?: string[]): Promise<string> {
@@ -229,14 +254,15 @@ export async function buildSystemInstruction(slugs?: string[]): Promise<string> 
     .eq("is_active", true)
     .order("is_system", { ascending: false });
 
-  if (!data || data.length === 0) return "";
-
-  const skills = data as Pick<AiSkill, "slug" | "content" | "is_system">[];
+  const skills = (data ?? []) as Pick<AiSkill, "slug" | "content" | "is_system">[];
 
   // Si slugs fournis, filtrer (mais toujours inclure les skills système)
   const filtered = slugs
     ? skills.filter((s) => s.is_system || slugs.includes(s.slug))
     : skills;
 
-  return filtered.map((s) => s.content.trim()).filter(Boolean).join("\n\n---\n\n");
+  const skillsContent = filtered.map((s) => s.content.trim()).filter(Boolean).join("\n\n---\n\n");
+
+  return [CONNAISSANCE_PORTFOLIO_LANDRY.trim(), skillsContent].filter(Boolean).join("\n\n---\n\n");
 }
+
