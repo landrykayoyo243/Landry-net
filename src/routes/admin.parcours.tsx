@@ -14,7 +14,6 @@ const fields: Field[] = [
   { name: "title", label: "Titre", type: "text", required: true, max: 160, placeholder: "Ex. Stagiaire académique" },
   { name: "organization", label: "Organisation", type: "text", required: true, max: 160 },
   { name: "period", label: "Période", type: "text", required: true, max: 60, placeholder: "Ex. 2026, Stage · 2 mois" },
-  { name: "description", label: "Description", type: "textarea", max: 600 },
 ];
 
 function Page() {

@@ -41,7 +41,7 @@ export const getPublishedProject = createServerFn({ method: "GET" })
 
 export const listPublishedExperiences = createServerFn({ method: "GET" }).handler(async () => {
   const { data, error } = await publicClient()
-    .from("experiences").select("id, kind, period, title, organization, description, sort_order")
+    .from("experiences").select("id, kind, period, title, organization, sort_order")
     .eq("published", true).order("sort_order").order("created_at");
   if (error) throw new Error("Impossible de charger le parcours.");
   return data;

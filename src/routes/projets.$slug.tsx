@@ -1,3 +1,4 @@
+
 import { createFileRoute, Link, notFound, type ErrorComponentProps } from "@tanstack/react-router";
 import { ErrorPage, ServerErrorPage, errorBtn } from "@/components/portfolio/ErrorPage";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Globe, Mail, Sparkles } from "lucide-react";

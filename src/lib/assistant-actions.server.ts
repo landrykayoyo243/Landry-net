@@ -82,7 +82,7 @@ export interface ExperienceInput {
   organization: string;
   period: string;
   kind?: "emploi" | "stage" | "formation" | string;
-  description: string;
+  description?: string;
 }
 
 export interface CertificationInput {
@@ -228,7 +228,6 @@ export async function executeCreateExperience(
           : input.kind === "stage"
           ? "stage"
           : "emploi",
-      description: input.description?.trim() || "",
       published: true, // Publication directe autorisée pour le parcours
       sort_order: nextOrder,
     })

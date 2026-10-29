@@ -92,7 +92,6 @@ describe("Assistant IA - Publication & Mode Brouillon Projets", () => {
       organization: "Entreprise Test SA",
       period: "2024 - 2025",
       kind: "emploi",
-      description: "Conception d'architectures résilientes et sécurisées.",
     });
 
     expect(res.success).toBe(true);

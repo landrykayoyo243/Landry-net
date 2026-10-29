@@ -68,7 +68,6 @@ export type Database = {
       experiences: {
         Row: {
           created_at: string
-          description: string
           id: string
           kind: string
           organization: string
@@ -80,7 +79,6 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          description?: string
           id?: string
           kind?: string
           organization?: string
@@ -92,7 +90,6 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          description?: string
           id?: string
           kind?: string
           organization?: string

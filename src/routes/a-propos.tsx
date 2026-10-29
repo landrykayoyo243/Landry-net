@@ -299,19 +299,18 @@ function APropos() {
                         <Icon size={16} />
                       </span>
                       <Reveal className="pillar-card rounded-[24px] border border-border/70 bg-card p-5 sm:p-6 shadow-sm">
-                        <div className="flex items-center justify-between gap-2">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
                           <span className="text-xs font-semibold uppercase tracking-wider text-primary">
                             {t.period}
                           </span>
-                          <span className="rounded-full bg-secondary px-2.5 py-0.5 text-[11px] font-medium text-secondary-foreground">
-                            {t.kind === "formation" ? "Formation" : "Expérience"}
+                          <span className="rounded-full bg-secondary/80 border border-border/60 px-2.5 py-0.5 text-[11px] font-semibold text-secondary-foreground">
+                            {t.kind === "formation" ? "Formation" : t.kind === "stage" ? "Stage" : "Emploi"}
                           </span>
                         </div>
                         <h3 className="mt-2 font-serif text-lg sm:text-xl font-medium tracking-tight text-foreground">
                           {t.title}
                         </h3>
-                        <p className="text-sm font-semibold text-foreground/80">{t.organization}</p>
-                        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t.description}</p>
+                        <p className="text-sm font-semibold text-muted-foreground">{t.organization}</p>
                       </Reveal>
                     </li>
                   );

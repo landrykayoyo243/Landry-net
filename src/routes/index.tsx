@@ -510,7 +510,8 @@ function Index() {
 
         {/* 05 · Parcours & Formations */}
         <section id="parcours" className="border-y border-border bg-muted/40 py-20 md:py-28">
-          <div className={`${container} grid gap-14 lg:grid-cols-[1.2fr_0.8fr]`}>
+          <div className={`${container} grid gap-12 lg:grid-cols-[1.15fr_0.85fr]`}>
+            {/* Timeline gauche — Expériences & Formations épurées */}
             <div>
               <Reveal>
                 <SectionHeading
@@ -526,32 +527,45 @@ function Index() {
               ) : timelineQ.isError ? (
                 <ContentError label="le parcours" onRetry={() => timelineQ.refetch()} />
               ) : (
-                <ol className="relative ml-5 border-l-2 border-border/80">
+                <ol className="relative ml-4 sm:ml-5 border-l-2 border-border/80 mt-8 space-y-4">
                   {(timelineQ.data ?? []).map((t) => {
-                    const Icon = t.kind === "formation" ? GraduationCap : Briefcase;
+                    const isFormation = t.kind === "formation";
+                    const isCurrent = /actuel|présent|present|en cours/i.test(t.period);
+                    const Icon = isFormation ? GraduationCap : Briefcase;
                     return (
-                      <li key={t.id} className="relative mb-8 pl-10 last:mb-0">
+                      <li key={t.id} className="relative pl-7 sm:pl-9">
                         <span
-                          className="absolute -left-[21px] grid h-10 w-10 place-items-center rounded-full border-4 border-muted/80 bg-gradient-primary text-primary-foreground shadow-sm"
+                          className={`absolute -left-[17px] sm:-left-[21px] grid h-8 w-8 sm:h-10 sm:w-10 place-items-center rounded-full border-4 border-muted/80 ${
+                            isCurrent
+                              ? "bg-primary text-primary-foreground shadow-sm"
+                              : "bg-card border-border text-muted-foreground shadow-2xs"
+                          }`}
                           aria-hidden
                         >
-                          <Icon size={16} />
+                          <Icon size={15} />
                         </span>
-                        <Reveal className="pillar-card rounded-[24px] border border-border/70 bg-card p-5 sm:p-6 shadow-sm">
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="text-xs font-semibold uppercase tracking-wider text-primary">
-                              {t.period}
-                            </span>
-                            <span className="rounded-full bg-secondary px-2.5 py-0.5 text-[11px] font-medium text-secondary-foreground">
-                              {t.kind === "formation" ? "Formation" : "Expérience"}
+                        <Reveal className="pillar-card rounded-2xl border border-border/70 bg-card p-4 sm:p-5 shadow-xs transition-all duration-300 hover:border-primary/40">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold uppercase tracking-wider text-primary">
+                                {t.period}
+                              </span>
+                              {isCurrent && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                  Actuel
+                                </span>
+                              )}
+                            </div>
+                            <span className="rounded-full bg-secondary/80 border border-border/60 px-2.5 py-0.5 text-[11px] font-semibold text-secondary-foreground">
+                              {isFormation ? "Formation" : t.kind === "stage" ? "Stage" : "Emploi"}
                             </span>
                           </div>
-                          <h3 className="mt-2 font-serif text-lg sm:text-xl font-medium tracking-tight text-foreground">
+                          <h3 className="mt-2 font-serif text-base sm:text-lg font-medium tracking-tight text-foreground">
                             {t.title}
                           </h3>
-                          <p className="text-sm font-semibold text-foreground/80">{t.organization}</p>
-                          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                            {t.description}
+                          <p className="mt-1 text-xs sm:text-sm font-semibold text-muted-foreground">
+                            {t.organization}
                           </p>
                         </Reveal>
                       </li>
@@ -561,34 +575,70 @@ function Index() {
               )}
             </div>
 
-            <div className="space-y-6 lg:pt-28">
-              <Reveal className="pillar-card rounded-[28px] border border-border/70 bg-card p-7 shadow-sm">
-                <h3 className="flex items-center gap-2.5 font-serif text-xl font-medium text-foreground">
-                  <Award size={20} className="text-primary" /> Formations & Certifications
-                </h3>
-                {certsQ.isPending ? (
-                  <div className="mt-5">
-                    <ContentLoading rows={3} className="h-12" />
+            {/* Colonne droite — Certifications & Accréditations officielles */}
+            <div className="space-y-6">
+              <Reveal>
+                <div className="rounded-[28px] border border-border/80 bg-card p-6 sm:p-7 shadow-sm">
+                  <div className="flex items-center justify-between border-b border-border/70 pb-4 mb-5">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+                        Accréditations
+                      </p>
+                      <h3 className="flex items-center gap-2 font-serif text-xl sm:text-2xl font-medium text-foreground mt-0.5">
+                        <Award size={22} className="text-primary" /> Certifications officielles
+                      </h3>
+                    </div>
+                    <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                      Validées
+                    </span>
                   </div>
-                ) : certsQ.isError ? (
-                  <div className="mt-5">
-                    <ContentError label="les formations" onRetry={() => certsQ.refetch()} />
+
+                  {certsQ.isPending ? (
+                    <ContentLoading rows={3} className="h-16" />
+                  ) : certsQ.isError ? (
+                    <ContentError label="les certifications" onRetry={() => certsQ.refetch()} />
+                  ) : (
+                    <div className="space-y-3">
+                      {(certsQ.data ?? []).map((c) => (
+                        <div
+                          key={c.id}
+                          className="group flex items-start gap-3.5 rounded-2xl border border-border/70 bg-muted/30 p-3.5 sm:p-4 transition-all duration-300 hover:border-primary/40 hover:bg-muted/50"
+                        >
+                          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary transition-transform group-hover:scale-105">
+                            <ShieldCheck size={20} />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h4 className="font-semibold text-sm sm:text-base text-foreground leading-snug">
+                              {c.title}
+                            </h4>
+                            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                              <span className="font-medium text-primary">{c.issuer}</span>
+                              <span>·</span>
+                              <span>{c.date_label}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Compétences académiques validées */}
+                  <div className="mt-6 pt-5 border-t border-border/60">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2.5">
+                      Compétences techniques certifiées
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                      {["Cisco Packet Tracer", "Topologies & Réseaux LAN", "Dépannage matériel", "Adressage & Protocoles"].map((skill) => (
+                        <span
+                          key={skill}
+                          className="rounded-full border border-border/60 bg-secondary/70 px-2.5 py-1 text-[11px] font-medium text-secondary-foreground"
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                ) : (
-                  <ul className="mt-5 space-y-4">
-                    {(certsQ.data ?? []).map((c) => (
-                      <li
-                        key={c.id}
-                        className="border-b border-border/50 pb-4 last:border-0 last:pb-0"
-                      >
-                        <p className="font-semibold text-foreground">{c.title}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {c.issuer} · {c.date_label}
-                        </p>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                </div>
               </Reveal>
             </div>
           </div>
