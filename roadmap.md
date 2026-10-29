@@ -10,28 +10,34 @@
   - Rédaction d'études de cas techniques et suggestions d'illustrations, sans émoji, professionnelle et claire.
   - Système d'alertes instantanées Telegram lors de la réception d'un message de contact.
 
+- [x] **Publication intelligente & Mode Brouillon via l'Assistant IA** :
+  - **Règle d'or projets** : L'assistant ne peut jamais publier un projet directement. Tout projet issu de l'IA est forcé en `status: 'draft'` côté serveur.
+  - `assistant-actions.server.ts` : module serveur d'actions (créer brouillon projet, créer expérience, créer certification).
+  - `sectionsToBlocks` & `stringToRichDoc` : conversion parfaite des sections `[SECTION:...]` vers les blocs TipTap compatibles avec l'éditeur Word (RichEditor).
+  - Détection automatique des blocs `action:create_project_draft` dans les réponses IA et exécution côté serveur.
+  - Expériences et certifications : publication directe autorisée.
+  - Route `/api/admin/assistant` enrichie avec `directAction` pour exécution sans génération IA.
+  - **Widget chat** : badge **Brouillon** (ambre) + bouton « Ouvrir dans l'éditeur Word » après création ; badge **Publié** (vert) pour expériences/certifications.
+  - Bouton rapide « Enregistrer comme Brouillon de Projet » si des sections `[SECTION:]` sont détectées dans la réponse.
+  - Skills IA mis à jour avec la règle de brouillon strict inscrite dans les instructions.
+  - Audit `project.create_draft_ai` enregistré à chaque création via l'assistant.
+  - 39/39 tests Vitest valides.
+
 ---
 
-## Prochaine étape : Gestion et publication en mode Brouillon (Prévu pour demain)
+## Prochaine étape : Badges et filtres dans les listes admin
 
 ### Objectifs
-Mettre en place un système robuste de cycle de vie des contenus permettant à Landry de préparer ses publications (projets, parcours, certifications, immersions) sous forme de brouillons confidentiels avant de les rendre publics en un clic.
+Compléter le cycle de vie des contenus avec des indicateurs visuels clairs dans les panneaux d'administration.
 
 ### Tâches planifiées
-- [ ] **Gestion des Projets en mode Brouillon** :
-  - Vérifier et harmoniser le champ `status: 'draft' | 'published'` sur la table `projects`.
-  - Assurer l'étanchéité des requêtes publiques : les visiteurs et moteurs de recherche ne doivent voir que les projets au statut `published`.
-  - Permettre un mode aperçu privé pour l'administrateur permettant de visualiser le rendu exact du projet brouillon avant mise en ligne.
+- [ ] **Interface d'administration (UI/UX) projets** :
+  - Filtre rapide par statut dans le tableau de bord projets (Tous / Publiés / Brouillons).
+  - Sauvegarde automatique transparente lors de la rédaction d'un brouillon.
 - [ ] **Extension du mode Brouillon aux autres contenus** :
   - Expériences professionnelles & formations (`experiences.published`).
   - Certifications (`certifications.published`).
-  - Témoignages & immersions terrain (`immersion.published`).
-  - Organisations partenaires (`organizations.published`).
-- [ ] **Interface d'administration (UI/UX)** :
-  - Badges visuels distincts dans les listes : `Publié` (vert) vs `Brouillon` (ambre/gris).
-  - Filtre rapide par statut dans les tableaux de bord administratifs (Tous / Publiés / Brouillons).
-  - Bascule (Switch/Toggle) instantanée de statut avec toast de confirmation.
-  - Sauvegarde automatique transparente lors de la rédaction d'un brouillon.
+  - Toggle rapide dans les listes admin pour publier/dépublier en un clic.
 - [ ] **Journal d'audit & Traçabilité** :
   - Enregistrer dans le journal d'audit toute action de publication ou de dépublication avec horodatage et métadonnées.
 - [ ] **Validation & Tests** :
