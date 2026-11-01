@@ -148,7 +148,19 @@ export function Header() {
                   {n.label}
                 </Link>
               ) : (
-                <Link key={n.label} to="/" hash={n.href.slice(1)} className={desktopLink}>
+                <Link
+                  key={n.label}
+                  to="/"
+                  hash={n.href.slice(1)}
+                  className={desktopLink}
+                  onClick={() => {
+                    const id = n.href.slice(1);
+                    const el = document.getElementById(id);
+                    if (el) {
+                      el.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }}
+                >
                   {n.label}
                 </Link>
               ),
@@ -255,7 +267,14 @@ export function Header() {
                   key={n.label}
                   to="/"
                   hash={n.href.slice(1)}
-                  onClick={() => setOpen(false)}
+                  onClick={() => {
+                    setOpen(false);
+                    const id = n.href.slice(1);
+                    const el = document.getElementById(id);
+                    if (el) {
+                      el.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }}
                   className={linkClasses}
                 >
                   {content}

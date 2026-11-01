@@ -50,7 +50,7 @@ export const profile = {
 export const nav = [
   { to: "/a-propos", label: "À propos" },
   { href: "#competences", label: "Compétences" },
-  { to: "/projets", label: "Projets" },
+  { href: "#projets", label: "Projets" },
   { href: "#parcours", label: "Parcours" },
   { to: "/contact", label: "Contact" },
 ];
@@ -78,74 +78,99 @@ export const conviction = {
   highlight: "Le code moderne ne vaut que s'il est fiable, sécurisé et immédiatement utile.",
 };
 
-// Contenu de la page dédiée /a-propos.
+// Contenu de la page dédiée /a-propos inspiré d'une narration fluide et percutante.
 export const aboutPage = {
   back: "Retour à l'accueil",
-  readStory: "Lire mon histoire",
-  eyebrow: "Mon histoire · Ma vision",
-  title: "Derrière les réseaux et le code, une exigence de fiabilité.",
+  eyebrow: "Mon histoire · Ma mission",
+  titleLead: "Bâtir des infrastructures fiables et du code moderne",
+  titleAccent: "au service des organisations.",
+  title: "Bâtir des infrastructures fiables et du code moderne au service des organisations.",
   intro:
-    "Administrateur systèmes & réseaux et développeur web à Lubumbashi — j'interviens de bout en bout pour concevoir des architectures résilientes et des outils numériques immédiatement utiles.",
-  storyTitle: "Mon parcours",
-  storySubtitle: "Des bancs de l'Université Don Bosco aux interventions critiques chez XSECURITY, l'INPP et la CNSS.",
-  chapters: [
-    {
-      number: "01",
-      tag: "Vocation & Rigueur académique",
-      title: "Les fondations à l'Université Don Bosco",
-      text: "Diplômé en Administration des Systèmes et Réseaux à l'Université Don Bosco de Lubumbashi, j'ai forgé mes bases autour de principes stricts : la haute disponibilité par cluster, la documentation claire et l'analyse rigoureuse du besoin.",
-    },
-    {
-      number: "02",
-      tag: "Épreuve du terrain critique",
-      title: "L'apprentissage opérationnel : INPP & CNSS",
-      text: "Mes immersions au sein de l'INPP (Institut National de Préparation Professionnelle) et de la CNSS (Caisse Nationale de Sécurité Sociale) m'ont confronté aux réalités du terrain : infrastructures sensibles, maintenance critique et continuité de service.",
-    },
-    {
-      number: "03",
-      tag: "Pratique en production",
-      title: "XSECURITY & Le développement web utile",
-      text: "Aujourd'hui membre de l'équipe technique de XSECURITY à Lubumbashi, j'accompagne les entreprises locales dans la sécurisation de leurs réseaux, l'administration de leurs serveurs et la création d'applications utiles.",
-    },
-    {
-      number: "04",
-      tag: "Engagement & Vision",
-      title: "Construire des outils qui durent",
-      text: "En République Démocratique du Congo, les défis d'infrastructure exigent du pragmatisme : des réseaux tolérants aux pannes, des données protégées et des applications rapides mais robustes.",
-    },
+    "Je suis administrateur systèmes & réseaux et développeur web à Lubumbashi. J'accompagne les organisations dans la sécurisation de leurs infrastructures, la gestion de leurs parcs informatiques et la réalisation de plateformes logicielles pérennes.",
+
+  storyParagraphs: [
+    "Diplômé en Administration des Systèmes et Réseaux à l'Université Don Bosco et membre technique de l'équipe XSECURITY à Lubumbashi, j'ai développé mes compétences au contact direct du terrain et des impératifs réels des entreprises.",
+    "Mon approche associe la rigueur de l'administration réseau et l'agilité du développement moderne. Je conçois des systèmes stables, sécurisés et pérennes, avec une priorité constante : garantir la continuité de service et la protection absolue des données.",
+    "Aujourd'hui, j'accompagne les entreprises et porteurs de projets dans la modernisation de leur parc informatique, la mise en place d'architectures réseau résilientes et le déploiement d'applications web sur mesure.",
   ],
-  story: [
-    "Administrateur systèmes & réseaux et développeur web à Lubumbashi, j'interviens au cœur des infrastructures numériques pour garantir leur continuité, leur sécurité et leur efficacité.",
-    "Diplômé en administration des systèmes et réseaux de l'Université Don Bosco de Lubumbashi, j'ai forgé mes compétences autour des architectures résilientes et de la haute disponibilité.",
-    "Aujourd'hui membre de l'équipe technique de XSECURITY, j'accompagne les entreprises dans l'installation de réseaux fiables, la sécurisation de leurs données et la création d'applications utiles.",
-    "Mon engagement est simple : transformer la complexité technique en outils stables, clairs et immédiatement utiles à votre organisation.",
-  ],
-  valuesTitle: "Ce qui guide chacune de mes missions",
-  valuesIntro:
-    "Quatre principes non négociables, du sertissage d'un câble RJ45 jusqu'au déploiement d'une application web en ligne.",
-  values: [
-    {
-      title: "Fiabilité absolue",
-      text: "Un système qui tombe, c'est une activité qui s'arrête et des pertes financières. Je conçois des architectures conçues pour durer et tolérer les pannes sans interruption de service.",
-    },
-    {
-      title: "Sécurité native",
-      text: "Les données de l'entreprise sont son bien le plus précieux. J'intègre le contrôle d'accès strict, la redondance et les sauvegardes dès le premier jour, jamais après coup.",
-    },
-    {
-      title: "Clarté & Pédagogie",
-      text: "Un bon travail technique est un travail documenté et compréhensible. J'explique chaque choix en langage simple pour que le client reste maître de ses outils.",
-    },
-    {
-      title: "Exigence continue",
-      text: "Les technologies et menaces évoluent rapidement. Veille quotidienne, certifications Cisco et perfectionnement constant sur le web font partie de ma routine.",
-    },
-  ],
-  milestonesTitle: "Les étapes clés de mon parcours",
-  ctaTitle: "Écrivons ensemble le prochain chapitre",
-  ctaText:
-    "Un réseau à déployer, un serveur à sécuriser ou une application web à développer ? Discutons de vos enjeux techniques et trouvons la solution la plus adaptée.",
-  cta: "Me contacter directement",
+
+  quote: {
+    lead: "C'est cette vision qui me guide :",
+    accent: "concevoir des solutions robustes, utiles et immédiatement opérationnelles.",
+  },
+
+  pillars: {
+    eyebrow: "Domaines d'intervention",
+    title: "Trois expertises complémentaires,",
+    accent: "une même exigence.",
+    lead: "Accompagner les entreprises et les équipes dans la fiabilité et la sécurité de leur écosystème numérique.",
+    items: [
+      {
+        tag: "Infrastructures",
+        title: "Systèmes & Réseaux",
+        description:
+          "Conception, déploiement et maintenance d'infrastructures informatiques résilientes : serveurs Linux & Windows, virtualisation et routage Cisco.",
+        subtext: "Des réseaux configurés pour fonctionner en continu sans temps d'arrêt imprévu.",
+        linkText: "Voir mes réalisations →",
+        linkHref: "/#projets",
+      },
+      {
+        tag: "Protection",
+        title: "Cybersécurité & Données",
+        description:
+          "Politiques strictes de contrôle d'accès, segmentation réseau, sauvegardes automatisées et stratégies de reprise après sinistre.",
+        subtext: "Garantir l'intégrité et la confidentialité des données stratégiques de l'organisation.",
+        linkText: "Échanger sur vos systèmes →",
+        linkHref: "/contact",
+      },
+      {
+        tag: "Ingénierie",
+        title: "Développement Web",
+        description:
+          "Création d'applications web modernes, bases de données structurées et plateformes adaptées aux besoins locaux (telle que PayLix).",
+        subtext: "Des outils conçus pour automatiser vos tâches et propulser vos services en ligne.",
+        linkText: "Découvrir les projets →",
+        linkHref: "/#projets",
+      },
+    ],
+  },
+
+  timeline: {
+    eyebrow: "Mon parcours",
+    title: "Les étapes",
+    accent: "clés.",
+    items: [
+      {
+        year: "2022",
+        title: "Formation académique",
+        text: "Formation approfondie en Administration des Systèmes & Réseaux à l'Université Don Bosco de Lubumbashi, axée sur les réseaux Cisco, la virtualisation et la sécurité.",
+      },
+      {
+        year: "2025",
+        title: "Immersion terrain",
+        text: "Déploiement et maintenance d'infrastructures d'entreprises, diagnostic réseau, administration de serveurs et assistance technique aux utilisateurs.",
+      },
+      {
+        year: "2026",
+        title: "XSECURITY & Applications Web",
+        text: "Intégration de l'équipe technique de XSECURITY à Lubumbashi : sécurisation des parcs informatiques et conception de plateformes web comme PayLix.",
+      },
+      {
+        year: "Aujourd'hui",
+        title: "Contribuer aux grands défis",
+        text: "Poursuite de mon engagement auprès des organisations : sécuriser leurs systèmes d'information, moderniser leurs outils et concevoir des applications fiables.",
+      },
+    ],
+  },
+
+  cta: {
+    eyebrow: "Me contacter",
+    title: "Le prochain projet commence",
+    accent: "peut-être aujourd'hui.",
+    lead: "Que vous ayez besoin de moderniser votre infrastructure réseau, de sécuriser vos postes de travail ou de concevoir une application web sur mesure, je serais ravi d'échanger avec vous.",
+    primary: "Me contacter →",
+    secondary: "Voir mes réalisations →",
+  },
 };
 
 export const skills = [

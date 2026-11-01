@@ -207,14 +207,6 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
                   />
                 </picture>
               </div>
-
-              {/* Bulle discrète */}
-              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 rounded-full md:rounded-2xl border border-border/70 bg-card/95 px-3.5 py-1.5 md:px-4 md:py-2.5 text-card-foreground shadow-card backdrop-blur-md whitespace-nowrap">
-                <p className="flex items-center gap-2 text-xs font-semibold">
-                  <GraduationCap size={14} className="text-primary" />
-                  Licence · Université Don Bosco 2026
-                </p>
-              </div>
             </div>
           </div>
         </div>
@@ -265,7 +257,7 @@ function Index() {
         </section>
 
         {/* 01 · À propos — résumé court & métriques d'impact */}
-        <section id="apropos" className="py-20 md:py-28">
+        <section id="apropos" className="scroll-mt-24 py-20 md:py-28">
           <div className={container}>
             <Reveal>
               <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
@@ -360,7 +352,7 @@ function Index() {
         </section>
 
         {/* 02 · Compétences — Piliers d'expertise */}
-        <section id="competences" className="content-auto border-y border-border bg-muted/40 py-20 md:py-28">
+        <section id="competences" className="scroll-mt-24 border-y border-border bg-muted/40 py-20 md:py-28">
           <div className={container}>
             <Reveal>
               <SectionHeading
@@ -415,7 +407,7 @@ function Index() {
         </section>
 
         {/* 03 · Projets clés */}
-        <section id="projets" className="py-20 md:py-28">
+        <section id="projets" className="scroll-mt-24 py-20 md:py-28">
           <div className={container}>
             <Reveal>
               <SectionHeading
@@ -462,7 +454,7 @@ function Index() {
 
         {/* 04 · Immersion & Coulisses de terrain */}
         {immersionItems.length > 0 && (
-          <section className="content-auto border-t border-border bg-card py-20 md:py-28">
+          <section className="border-t border-border bg-card py-20 md:py-28">
             <div className={container}>
               <Reveal>
                 <SectionHeading
@@ -509,7 +501,7 @@ function Index() {
         <BrandsMarquee />
 
         {/* 05 · Parcours & Formations */}
-        <section id="parcours" className="border-y border-border bg-muted/40 py-20 md:py-28">
+        <section id="parcours" className="scroll-mt-24 border-y border-border bg-muted/40 py-20 md:py-28">
           <div className={`${container} grid gap-12 lg:grid-cols-[1.15fr_0.85fr]`}>
             {/* Timeline gauche — Expériences & Formations épurées */}
             <div>
@@ -519,7 +511,7 @@ function Index() {
                   eyebrow="Parcours"
                   title="Une trajectoire forgée sur le terrain,"
                   accent="pas héritée."
-                  description="Des débuts universitaires à Don Bosco jusqu'aux interventions pratiques en production chez XSECURITY, l'INPP et la CNSS."
+                  description="Des fondations universitaires à Don Bosco jusqu'aux interventions concrètes en production chez XSECURITY et en entreprise."
                 />
               </Reveal>
               {timelineQ.isPending ? (
@@ -622,22 +614,6 @@ function Index() {
                     </div>
                   )}
 
-                  {/* Compétences académiques validées */}
-                  <div className="mt-6 pt-5 border-t border-border/60">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2.5">
-                      Compétences techniques certifiées
-                    </p>
-                    <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                      {["Cisco Packet Tracer", "Topologies & Réseaux LAN", "Dépannage matériel", "Adressage & Protocoles"].map((skill) => (
-                        <span
-                          key={skill}
-                          className="rounded-full border border-border/60 bg-secondary/70 px-2.5 py-1 text-[11px] font-medium text-secondary-foreground"
-                        >
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
                 </div>
               </Reveal>
             </div>

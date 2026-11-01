@@ -107,6 +107,9 @@ SMTP_USER="votre.email@gmail.com"
 SMTP_PASSWORD="xxxx xxxx xxxx xxxx"
 SMTP_FROM="votre.email@gmail.com"
 CONTACT_EMAIL="votre.email@gmail.com"
+# --- Chiffrement maître AES-256-GCM (32 octets aléatoires) ---
+APP_ENCRYPTION_KEY="c6170e4efefnwry"
+
 ```
 
 ### Notes importantes
