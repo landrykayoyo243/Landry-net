@@ -3,7 +3,7 @@ import { Award, Briefcase, FolderGit2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { certificationsQuery, experiencesQuery, projectsQuery } from "@/lib/content.queries";
 
-function AnimatedCounter({ end, duration = 1200 }: { end: number; duration?: number }) {
+export function AnimatedCounter({ end, duration = 1200 }: { end: number; duration?: number }) {
   // Valeur réelle affichée immédiatement par défaut (SSR, JS en chargement ou désactivé)
   const [count, setCount] = useState(end);
   const ref = useRef<HTMLSpanElement>(null);

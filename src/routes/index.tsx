@@ -4,24 +4,17 @@ import {
   ArrowRight,
   Award,
   Briefcase,
-  Camera,
-  CheckCircle2,
   Code2,
   FileText,
   GraduationCap,
   HelpCircle,
-  Layers,
-  Linkedin,
   Mail,
-  MapPin,
   MessageSquare,
   Network,
-  Phone,
   Server,
   ShieldCheck,
   Sparkles,
   Wrench,
-  Zap,
 } from "lucide-react";
 import { Header } from "@/components/portfolio/Header";
 import { Footer } from "@/components/portfolio/Footer";
@@ -38,7 +31,7 @@ import {
   projectsQuery,
 } from "@/lib/content.queries";
 import { about, conviction, profile, shareImage, skills } from "@/content/portfolio";
-import { AnimatedStats } from "@/components/portfolio/AnimatedStats";
+import { AnimatedCounter } from "@/components/portfolio/AnimatedStats";
 import { BrandsMarquee } from "@/components/portfolio/BrandsMarquee";
 import { absoluteUrl, getOptimizedImageUrl } from "@/lib/siteConfig";
 import {
@@ -94,6 +87,7 @@ const focus =
 const btnPrimary = `inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-glow transition duration-300 hover:brightness-110 ${focus}`;
 const btnGhostDark = `inline-flex items-center justify-center gap-2 rounded-full border border-ink-foreground/20 bg-ink-foreground/5 px-6 py-3.5 text-sm font-semibold text-ink-foreground backdrop-blur-sm transition duration-300 hover:bg-ink-foreground/15 hover:border-ink-foreground/35 ${focus}`;
 const container = "mx-auto w-full max-w-6xl px-5 md:px-8";
+
 const skillIcons = {
   server: Server,
   network: Network,
@@ -179,7 +173,7 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
             </div>
           </div>
 
-          {/* Photo avec badge */}
+          {/* Photo ronde sur smartphone, rectangulaire arrondie sur desktop */}
           <div className="order-1 flex justify-center md:order-2">
             <div className="relative w-[210px] sm:w-[250px] md:w-full md:max-w-[380px]">
               {/* Halo lumineux */}
@@ -188,7 +182,7 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
                 style={{ background: "var(--gradient-primary)" }}
                 aria-hidden
               />
-              {/* Cadre dégradé */}
+              {/* Cadre dégradé : rond sur mobile, coins arrondis sur desktop */}
               <div
                 className="relative rounded-full md:rounded-[2.2rem] p-[3px] shadow-2xl"
                 style={{ background: "var(--gradient-primary)" }}
@@ -236,6 +230,7 @@ function Index() {
       </a>
       <Header />
       <main id="main">
+        {/* Hero d'accueil */}
         <Hero cvUrl={cvUrl} />
 
         {/* Conviction & Philosophie */}
@@ -256,111 +251,15 @@ function Index() {
           </div>
         </section>
 
-        {/* 01 · À propos — résumé court & métriques d'impact */}
-        <section id="apropos" className="scroll-mt-24 py-20 md:py-28">
-          <div className={container}>
-            <Reveal>
-              <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-                <div>
-                  <SectionHeading
-                    number="01"
-                    eyebrow="À propos"
-                    title="Avant de sécuriser et développer,"
-                    accent="je construisais les fondations."
-                    description="Administrateur systèmes & réseaux et développeur web à Lubumbashi, j'interviens de bout en bout pour garantir la stabilité et la performance de vos outils numériques."
-                  />
-                  <div className="space-y-4 text-base sm:text-lg leading-relaxed text-muted-foreground">
-                    {about.map((p, i) => (
-                      <p
-                        key={i}
-                        className={i === 0 ? "text-lg sm:text-xl font-medium text-foreground" : ""}
-                      >
-                        {p}
-                      </p>
-                    ))}
-                  </div>
-
-                  <div className="mt-8 flex flex-wrap gap-4">
-                    <Button asChild size="lg" className="rounded-full bg-gradient-primary">
-                      <Link to="/a-propos">
-                        Lire mon histoire <ArrowRight size={16} />
-                      </Link>
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="lg:pl-6">
-                  <div className="rounded-[32px] border border-border/80 bg-card p-6 sm:p-8 shadow-sm">
-                    <div className="mb-6 flex items-center justify-between border-b border-border/70 pb-4">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-wider text-primary">
-                          Repères clés
-                        </p>
-                        <h3 className="font-serif text-xl font-medium text-foreground">
-                          Impact & qualifications
-                        </h3>
-                      </div>
-                      <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                        Expérience terrain
-                      </span>
-                    </div>
-
-                    <AnimatedStats />
-
-                    <div className="mt-6 space-y-2.5">
-                      <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-muted/40 p-3 text-xs sm:text-sm">
-                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary font-bold">
-                          1
-                        </span>
-                        <div>
-                          <p className="font-semibold text-foreground">
-                            Université Don Bosco de Lubumbashi
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Licence en Administration des Systèmes & Réseaux
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-muted/40 p-3 text-xs sm:text-sm">
-                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary font-bold">
-                          2
-                        </span>
-                        <div>
-                          <p className="font-semibold text-foreground">XSECURITY — Lubumbashi</p>
-                          <p className="text-xs text-muted-foreground">
-                            Membre de l'équipe technique, sécurité & maintenance
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-muted/40 p-3 text-xs sm:text-sm">
-                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary font-bold">
-                          3
-                        </span>
-                        <div>
-                          <p className="font-semibold text-foreground">INPP & CNSS</p>
-                          <p className="text-xs text-muted-foreground">
-                            Maintien en condition opérationnelle d'infrastructures critiques
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Reveal>
-          </div>
-        </section>
-
-        {/* 02 · Compétences — Piliers d'expertise */}
-        <section id="competences" className="scroll-mt-24 border-y border-border bg-muted/40 py-20 md:py-28">
+        {/* 01 · Compétences — Piliers d'expertise */}
+        <section id="competences" className="scroll-mt-24 border-b border-border bg-muted/30 py-20 md:py-28">
           <div className={container}>
             <Reveal>
               <SectionHeading
-                number="02"
-                eyebrow="Compétences"
+                eyebrow="Explorer"
                 title="Cinq univers d'intervention,"
                 accent="une expertise intégrée."
-                description="Une vision 360° du numérique : du câblage physique et du routage réseau jusqu'à l'expérience utilisateur finale."
+                description="Une approche 360° des technologies : du câblage physique et du routage réseau jusqu'à l'expérience utilisateur finale."
               />
             </Reveal>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -368,7 +267,7 @@ function Index() {
                 const Icon = skillIcons[g.icon as keyof typeof skillIcons];
                 return (
                   <Reveal key={g.category} className={i === 0 ? "sm:col-span-2 lg:col-span-1" : ""}>
-                    <div className="pillar-card flex h-full flex-col justify-between rounded-[28px] border border-border/70 bg-card p-7 sm:p-8 shadow-sm">
+                    <div className="pillar-card flex h-full flex-col justify-between rounded-[28px] border border-border/70 bg-card p-7 sm:p-8 shadow-xs">
                       <div>
                         <div className="flex items-center justify-between">
                           <div className="grid h-12 w-12 place-items-center rounded-2xl bg-primary/10 text-primary">
@@ -406,13 +305,154 @@ function Index() {
           </div>
         </section>
 
-        {/* 03 · Projets clés */}
-        <section id="projets" className="scroll-mt-24 py-20 md:py-28">
+        {/* 02 · Quelques chiffres — Repères d'impact & engagement terrain */}
+        <section className="scroll-mt-24 border-b border-border bg-card py-16 md:py-24">
           <div className={container}>
             <Reveal>
               <SectionHeading
-                number="03"
-                eyebrow="Projets"
+                eyebrow="Quelques chiffres"
+                title="L'exigence du terrain mesurée"
+                accent="en résultats concrets."
+                description="Des indicateurs vérifiables sur les réalisations déployées, les certifications acquises et l'engagement opérationnel."
+              />
+            </Reveal>
+            <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
+              {/* Stat 1: Projets */}
+              <Reveal>
+                <div className="pillar-card flex h-full flex-col justify-between rounded-[26px] border border-border/70 bg-card p-5 sm:p-7 shadow-xs">
+                  <div>
+                    <div className="font-serif text-3xl sm:text-4xl lg:text-5xl font-medium tracking-tight text-foreground">
+                      <AnimatedCounter end={projects.length} />
+                    </div>
+                    <p className="mt-3 text-sm sm:text-base font-semibold text-foreground">
+                      Projets & livrables
+                    </p>
+                  </div>
+                  <p className="mt-2 text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                    Infrastructures réseaux déployées et applications web en production.
+                  </p>
+                </div>
+              </Reveal>
+
+              {/* Stat 2: Certifications */}
+              <Reveal className="d1">
+                <div className="pillar-card flex h-full flex-col justify-between rounded-[26px] border border-border/70 bg-card p-5 sm:p-7 shadow-xs">
+                  <div>
+                    <div className="font-serif text-3xl sm:text-4xl lg:text-5xl font-medium tracking-tight text-foreground">
+                      <AnimatedCounter end={(certsQ.data ?? []).length} />
+                    </div>
+                    <p className="mt-3 text-sm sm:text-base font-semibold text-foreground">
+                      Certifications officielles
+                    </p>
+                  </div>
+                  <p className="mt-2 text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                    Accréditations validées en réseaux Cisco, systèmes et cybersécurité.
+                  </p>
+                </div>
+              </Reveal>
+
+              {/* Stat 3: Expériences */}
+              <Reveal className="d2">
+                <div className="pillar-card flex h-full flex-col justify-between rounded-[26px] border border-border/70 bg-card p-5 sm:p-7 shadow-xs">
+                  <div>
+                    <div className="font-serif text-3xl sm:text-4xl lg:text-5xl font-medium tracking-tight text-foreground">
+                      <AnimatedCounter end={(timelineQ.data ?? []).length} />
+                    </div>
+                    <p className="mt-3 text-sm sm:text-base font-semibold text-foreground">
+                      Expériences clés
+                    </p>
+                  </div>
+                  <p className="mt-2 text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                    Interventions terrain en entreprises et institutions (Don Bosco, XSECURITY, INPP, CNSS).
+                  </p>
+                </div>
+              </Reveal>
+
+              {/* Stat 4: Continuité */}
+              <Reveal className="d3">
+                <div className="pillar-card flex h-full flex-col justify-between rounded-[26px] border border-border/70 bg-card p-5 sm:p-7 shadow-xs">
+                  <div>
+                    <div className="font-serif text-3xl sm:text-4xl lg:text-5xl font-medium tracking-tight text-foreground">
+                      99.9<span className="text-primary font-serif font-normal">%</span>
+                    </div>
+                    <p className="mt-3 text-sm sm:text-base font-semibold text-foreground">
+                      Disponibilité & rigueur
+                    </p>
+                  </div>
+                  <p className="mt-2 text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                    Tolérance aux pannes, sauvegardes 3-2-1 et procédures de rollback systématiques.
+                  </p>
+                </div>
+              </Reveal>
+            </div>
+          </div>
+        </section>
+
+        {/* 03 · Mon histoire — Split éditorial avec portrait */}
+        <section id="apropos" className="scroll-mt-24 py-20 md:py-28 border-b border-border bg-background">
+          <div className={container}>
+            <Reveal>
+              <div className="grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+                {/* Colonne gauche : Portrait éditorial */}
+                <div className="relative mx-auto w-full max-w-[340px] sm:max-w-[400px] lg:max-w-none">
+                  <div className="relative overflow-hidden rounded-[30px] border border-border/80 bg-muted/40 shadow-lg">
+                    <img
+                      src="/Profil%20%26%20Conviction.JPG"
+                      alt="Landry Kayoyo — Mon histoire"
+                      width={700}
+                      height={800}
+                      loading="lazy"
+                      decoding="async"
+                      className="aspect-[4/5] w-full object-cover object-[50%_25%]"
+                    />
+                  </div>
+                </div>
+
+                {/* Colonne droite : Narration & Action */}
+                <div>
+                  <SectionHeading
+                    eyebrow="Mon histoire"
+                    title="Avant de sécuriser et développer,"
+                    accent="je construisais les fondations."
+                    description="Administrateur systèmes & réseaux et développeur web à Lubumbashi, j'interviens de bout en bout pour garantir la stabilité et la performance de vos outils numériques."
+                  />
+                  <div className="space-y-4 text-base sm:text-lg leading-relaxed text-muted-foreground">
+                    {about.map((p, i) => (
+                      <p
+                        key={i}
+                        className={i === 0 ? "text-lg sm:text-xl font-medium text-foreground" : ""}
+                      >
+                        {p}
+                      </p>
+                    ))}
+                  </div>
+
+                  <div className="mt-8 flex flex-wrap items-center gap-4">
+                    <Button asChild size="lg" className="rounded-full bg-gradient-primary">
+                      <Link to="/a-propos">
+                        Lire mon histoire complète <ArrowRight size={16} />
+                      </Link>
+                    </Button>
+                    {cvUrl && (
+                      <Button asChild size="lg" variant="outline" className="rounded-full hover:bg-card">
+                        <a href={cvUrl} target="_blank" rel="noopener noreferrer">
+                          <FileText size={16} /> Télécharger mon CV
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* 04 · Projets clés */}
+        <section id="projets" className="scroll-mt-24 py-20 md:py-28 border-b border-border bg-card">
+          <div className={container}>
+            <Reveal>
+              <SectionHeading
+                eyebrow="Réalisations"
                 title="Des problèmes réels,"
                 accent="des solutions concrètes."
                 description="Études de cas sélectionnées : architectures réseaux déployées, plateformes web complètes et solutions de haute disponibilité."
@@ -439,7 +479,7 @@ function Index() {
                     asChild
                     size="lg"
                     variant="outline"
-                    className="rounded-full px-8 hover:bg-card"
+                    className="rounded-full px-8 hover:bg-muted/50"
                   >
                     <Link to="/projets" className="flex items-center gap-2">
                       Voir tous les projets
@@ -452,13 +492,12 @@ function Index() {
           </div>
         </section>
 
-        {/* 04 · Immersion & Coulisses de terrain */}
+        {/* 05 · Immersion & Coulisses de terrain */}
         {immersionItems.length > 0 && (
-          <section className="border-t border-border bg-card py-20 md:py-28">
+          <section className="border-b border-border bg-muted/30 py-20 md:py-28">
             <div className={container}>
               <Reveal>
                 <SectionHeading
-                  number="04"
                   eyebrow="Immersion"
                   title="Au cœur des infrastructures,"
                   accent="en images."
@@ -477,10 +516,7 @@ function Index() {
                         decoding="async"
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
-                      {/* Dégradé cinématique pour lisibilité */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent transition-opacity duration-300 group-hover:from-black/90" />
-
-                      {/* Étiquette et titre */}
                       <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 text-white">
                         <span className="inline-block rounded-full bg-primary/90 px-2.5 py-0.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-primary-foreground backdrop-blur-sm">
                           {item.tag}
@@ -497,17 +533,16 @@ function Index() {
           </section>
         )}
 
-        {/* 05 · Partenaires & Références — bandeau marquee avec zoom tactile mobile */}
+        {/* 06 · Partenaires & Références — Bandeau défilant */}
         <BrandsMarquee />
 
-        {/* 05 · Parcours & Formations */}
-        <section id="parcours" className="scroll-mt-24 border-y border-border bg-muted/40 py-20 md:py-28">
+        {/* 07 · Parcours & Formations */}
+        <section id="parcours" className="scroll-mt-24 border-y border-border bg-muted/30 py-20 md:py-28">
           <div className={`${container} grid gap-12 lg:grid-cols-[1.15fr_0.85fr]`}>
             {/* Timeline gauche — Expériences & Formations épurées */}
             <div>
               <Reveal>
                 <SectionHeading
-                  number="05"
                   eyebrow="Parcours"
                   title="Une trajectoire forgée sur le terrain,"
                   accent="pas héritée."
@@ -613,15 +648,14 @@ function Index() {
                       ))}
                     </div>
                   )}
-
                 </div>
               </Reveal>
             </div>
           </div>
         </section>
 
-        {/* 08 · Questions fréquentes (FAQ) — Inspiré des meilleures pratiques internationales */}
-        <section className="content-auto py-20 md:py-28">
+        {/* 08 · Questions fréquentes (FAQ) */}
+        <section className="content-auto border-b border-border bg-card py-20 md:py-28">
           <div className={`${container} max-w-4xl`}>
             <Reveal className="text-center mb-12">
               <div className="mb-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
@@ -655,8 +689,8 @@ function Index() {
           </div>
         </section>
 
-        {/* 09 · Appel à l'action invitant vers la page /contact dédiée ou WhatsApp */}
-        <section className="relative overflow-hidden bg-hero py-20 text-ink-foreground md:py-28">
+        {/* 09 · Appel à l'action / Contact */}
+        <section id="contact" className="relative overflow-hidden bg-hero py-20 text-ink-foreground md:py-28">
           <div className="bg-grid pointer-events-none absolute inset-0" aria-hidden />
           <div className={`${container} relative text-center`}>
             <Reveal className="mx-auto max-w-3xl">
