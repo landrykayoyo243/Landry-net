@@ -38,6 +38,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "google-site-verification", content: "7i407FtKGpD5q2BAf_JbE73Wc2niO1tXYjZ5n8sxq1I" },
       ...(isPreviewDeployment ? [{ name: "robots", content: "noindex, nofollow" }] : []),
     ],
+    scripts: [
+      {
+        src: "https://analytics.ahrefs.com/analytics.js",
+        async: true,
+        "data-key": "dy7AI+FC4h3S3XcX41F1QQ",
+      },
+    ],
     links: [
       {
         rel: "stylesheet",
