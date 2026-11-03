@@ -219,25 +219,6 @@
 }
 .loading-bar { animation: loading-slide 1.1s ease-in-out infinite; }
 
-/* ─── Marquee (bandeau marques défilant) ──────────────────────────────────── */
-@keyframes marquee-scroll {
-  0%   { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(-50%, 0, 0); }
-}
-@utility marquee-track {
-  display: flex;
-  width: max-content;
-  animation: marquee-scroll 28s linear infinite;
-  will-change: transform;
-  transform: translateZ(0);
-}
-@utility marquee-pause {
-  &:hover .marquee-track { animation-play-state: paused; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .marquee-track { animation: none; }
-}
-
 /* Image qui ne charge pas : logo sur fond neutre */
 img.img-fallback {
   object-fit: contain !important;

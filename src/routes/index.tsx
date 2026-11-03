@@ -1,20 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  ArrowDown,
   ArrowRight,
-  Award,
-  Briefcase,
   Code2,
   FileText,
-  GraduationCap,
-  HelpCircle,
+  Github,
+  Linkedin,
   Mail,
   MessageSquare,
   Network,
-  Server,
-  ShieldCheck,
   Sparkles,
-  Wrench,
+  ShieldCheck,
+  Youtube,
 } from "lucide-react";
 import { Header } from "@/components/portfolio/Header";
 import { Footer } from "@/components/portfolio/Footer";
@@ -24,22 +20,13 @@ import { ProjectCard } from "@/components/portfolio/ProjectCard";
 import { useQuery } from "@tanstack/react-query";
 import { ContentError, ContentLoading } from "@/components/portfolio/ContentState";
 import {
-  certificationsQuery,
   cvUrlQuery,
-  experiencesQuery,
   immersionQuery,
   projectsQuery,
 } from "@/lib/content.queries";
-import { about, conviction, profile, shareImage, skills } from "@/content/portfolio";
-import { AnimatedCounter } from "@/components/portfolio/AnimatedStats";
+import { about, aboutPage, conviction, heroSection, profile, shareImage } from "@/content/portfolio";
 import { BrandsMarquee } from "@/components/portfolio/BrandsMarquee";
 import { absoluteUrl, getOptimizedImageUrl } from "@/lib/siteConfig";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 
 const photo = {
   webp: "/landry-a-propos.webp",
@@ -74,8 +61,6 @@ export const Route = createFileRoute("/")({
   loader: ({ context }) =>
     Promise.all([
       context.queryClient.prefetchQuery(projectsQuery),
-      context.queryClient.prefetchQuery(experiencesQuery),
-      context.queryClient.prefetchQuery(certificationsQuery),
       context.queryClient.prefetchQuery(immersionQuery),
       context.queryClient.prefetchQuery(cvUrlQuery),
     ]),
@@ -88,116 +73,99 @@ const btnPrimary = `inline-flex items-center justify-center gap-2 rounded-full b
 const btnGhostDark = `inline-flex items-center justify-center gap-2 rounded-full border border-ink-foreground/20 bg-ink-foreground/5 px-6 py-3.5 text-sm font-semibold text-ink-foreground backdrop-blur-sm transition duration-300 hover:bg-ink-foreground/15 hover:border-ink-foreground/35 ${focus}`;
 const container = "mx-auto w-full max-w-6xl px-5 md:px-8";
 
-const skillIcons = {
-  server: Server,
-  network: Network,
-  shield: ShieldCheck,
-  code: Code2,
-  wrench: Wrench,
-} as const;
-
-/** Questions fréquentes des décideurs et clients */
-const FAQS = [
-  {
-    q: "Quels types d'entreprises ou structures accompagnez-vous ?",
-    a: "J'accompagne les PME, institutions, établissements scolaires et entreprises commerciales à Lubumbashi et dans tout le Haut-Katanga pour leurs besoins en réseaux, sécurité et serveurs, ainsi que des clients à distance pour la conception d'applications web modernes.",
-  },
-  {
-    q: "Comment garantissez-vous la continuité de service pendant vos interventions ?",
-    a: "Chaque opération critique (mise à jour de serveurs, bascule de switchs, recâblage de baie) est planifiée en dehors des heures de forte activité (heures creuses ou week-end). Une procédure stricte de retour arrière (rollback) est systématiquement prête avant toute manipulation.",
-  },
-  {
-    q: "Assurez-vous le support et la maintenance après la livraison ?",
-    a: "Oui. Chaque installation s'accompagne d'une période de garantie et de support technique. Je propose également des contrats de maintenance préventive et d'infogérance pour veiller en continu sur la santé de vos systèmes.",
-  },
-  {
-    q: "Développez-vous également des applications web sur-mesure ?",
-    a: "Absolument. En plus de l'administration réseau, je conçois des applications web complètes (comme PayLix pour les écoles ou MarketNet pour le commerce sur WhatsApp), alliant rapidité, sécurité des données et interface mobile moderne.",
-  },
-] as const;
-
 function Hero({ cvUrl }: { cvUrl: string | null }) {
   return (
     <section className="relative overflow-hidden bg-hero text-ink-foreground">
-      <div className="bg-grid pointer-events-none absolute inset-0" aria-hidden />
+      {/* Légère grille d'infrastructure discrète */}
+      <div className="bg-grid pointer-events-none absolute inset-0 opacity-30" aria-hidden />
 
-      <div className={`${container} relative pb-24 pt-32 sm:pt-40 md:pb-36 md:pt-52`}>
-        <div className="grid items-center gap-10 md:grid-cols-[1fr_420px] md:gap-16 lg:gap-20">
-          {/* Colonne texte */}
-          <div className="order-2 md:order-1">
-            {/* Badge de disponibilité */}
-            <div className="mb-7 inline-flex items-center gap-2.5 rounded-full border border-ink-foreground/15 bg-ink-foreground/5 px-4 py-1.5 text-xs font-semibold text-ink-foreground/85 backdrop-blur-md">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary-glow opacity-75" />
-                <span className="relative h-2 w-2 rounded-full bg-primary-glow" />
+      {/* Aura lumineuse subtile en fond */}
+      <div
+        className="pointer-events-none absolute -top-36 right-0 h-[500px] w-[500px] rounded-full bg-primary/10 blur-[140px]"
+        aria-hidden
+      />
+
+      <div className={`${container} relative pb-16 pt-28 sm:pb-20 sm:pt-36 md:pb-24 md:pt-42`}>
+        <div className="grid items-center gap-10 md:grid-cols-[1.15fr_0.85fr] lg:gap-16">
+          {/* Colonne texte (Ordre 2 sur mobile, 1 sur desktop) */}
+          <div className="order-2 md:order-1 text-center md:text-left">
+            {/* Surtitre sobre et aéré */}
+            <p className="mb-4 inline-flex items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.22em] text-primary-glow sm:text-sm justify-center md:justify-start">
+              <span className="h-px w-6 sm:w-8 bg-primary-glow/70 inline-block" aria-hidden />
+              <span>{heroSection.badge}</span>
+            </p>
+
+            {/* Grand titre noble et aéré */}
+            <h1 className="max-w-3xl font-serif text-3xl sm:text-4xl md:text-5xl lg:text-[3.35rem] font-normal leading-[1.12] tracking-tight text-white">
+              {heroSection.titleLead}{" "}
+              <span className="italic font-serif text-primary-glow block sm:inline">
+                {heroSection.titleAccent}
               </span>
-              Disponible pour un poste ou une mission
-            </div>
-
-            {/* Nom */}
-            <h1 className="font-serif text-5xl font-normal leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
-              Landry{" "}
-              <span className="italic font-serif text-primary-glow">Kayoyo</span>
             </h1>
 
-            {/* Rôle compact */}
-            <p className="mt-3 text-sm font-semibold uppercase tracking-[0.18em] text-ink-foreground/55">
-              Administrateur systèmes & réseaux · Développeur web · Lubumbashi
+            {/* Description claire et découpée */}
+            <p className="mt-5 max-w-xl text-base sm:text-lg leading-[1.8] text-ink-foreground/80 mx-auto md:mx-0">
+              {heroSection.description}
             </p>
 
-            {/* Accroche éditoriale */}
-            <p className="mt-7 max-w-lg font-serif text-xl sm:text-2xl font-normal leading-snug text-ink-foreground/90 lg:text-[1.65rem]">
-              Je conçois des infrastructures résilientes et des applications web{" "}
-              <span className="italic font-serif text-primary-glow">immédiatement utiles.</span>
-            </p>
-
-            {/* 2 CTAs */}
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <a href="#projets" className={btnPrimary}>
-                Voir mes réalisations <ArrowDown size={16} />
-              </a>
-              {cvUrl ? (
+            {/* Boutons d'action aérés et équilibrés */}
+            <div className="mt-8 flex flex-wrap items-center justify-center md:justify-start gap-3.5 sm:gap-4">
+              <Link to="/projets" className={btnPrimary}>
+                {heroSection.ctaPrimary} <ArrowRight size={16} />
+              </Link>
+              {cvUrl && (
                 <a
                   href={cvUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={btnGhostDark}
                 >
-                  <FileText size={16} /> Télécharger mon CV
+                  <FileText size={16} /> {heroSection.ctaSecondary}
                 </a>
-              ) : (
-                <Link to="/contact" className={btnGhostDark}>
-                  <Mail size={16} /> Me contacter
-                </Link>
               )}
+              <Link
+                to="/contact"
+                className={`inline-flex items-center gap-1.5 rounded-full px-4 py-3 text-sm font-medium text-white/75 hover:text-white transition hover:bg-white/10 ${focus}`}
+              >
+                <Mail size={15} /> {heroSection.ctaContact}
+              </Link>
             </div>
           </div>
 
-          {/* Photo ronde sur smartphone, rectangulaire arrondie sur desktop */}
-          <div className="order-1 flex justify-center md:order-2">
-            <div className="relative w-[210px] sm:w-[250px] md:w-full md:max-w-[380px]">
-              {/* Halo lumineux */}
-              <div
-                className="absolute -inset-3 rounded-full md:rounded-[2.5rem] opacity-45 blur-2xl"
-                style={{ background: "var(--gradient-primary)" }}
-                aria-hidden
-              />
-              {/* Cadre dégradé : rond sur mobile, coins arrondis sur desktop */}
-              <div
-                className="relative rounded-full md:rounded-[2.2rem] p-[3px] shadow-2xl"
-                style={{ background: "var(--gradient-primary)" }}
-              >
+          {/* Colonne photo Mobile : Ronde épurée, agrandie et sans bordure épaisse (style Natacha) */}
+          <div className="order-1 mx-auto block md:hidden mb-2">
+            <div className="relative mx-auto h-52 w-52 sm:h-60 sm:w-60 rounded-full overflow-hidden shadow-2xl">
+              <picture>
+                <source srcSet={photo.webp} type="image/webp" />
+                <img
+                  src={photo.fallback}
+                  alt="Portrait de Landry Kayoyo"
+                  width={800}
+                  height={800}
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                  className="h-full w-full rounded-full object-cover object-[52%_15%] scale-125"
+                />
+              </picture>
+            </div>
+          </div>
+
+          {/* Colonne photo Desktop : Rectangulaire avec bords arrondis préservée */}
+          <div className="order-1 mx-auto hidden w-full md:order-2 md:block md:max-w-[370px] lg:max-w-[400px]">
+            <div className="relative">
+              <div className="relative overflow-hidden rounded-[2.2rem] sm:rounded-[2.6rem] border border-white/15 bg-white/5 p-2 sm:p-2.5 shadow-2xl backdrop-blur-md">
                 <picture>
                   <source srcSet={photo.webp} type="image/webp" />
                   <img
                     src={photo.fallback}
-                    alt="Landry Kayoyo en costume, assis à son poste de travail"
+                    alt="Portrait de Landry Kayoyo — Administrateur systèmes & réseaux et développeur web"
                     width={800}
                     height={800}
                     loading="eager"
                     fetchPriority="high"
                     decoding="async"
-                    className="aspect-square md:aspect-[4/5] w-full rounded-full md:rounded-[2rem] object-cover object-[55%_20%]"
+                    className="aspect-[4/5] w-full rounded-[1.8rem] sm:rounded-[2.2rem] object-cover object-[55%_22%]"
                   />
                 </picture>
               </div>
@@ -211,8 +179,6 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
 
 function Index() {
   const projectsQ = useQuery(projectsQuery);
-  const timelineQ = useQuery(experiencesQuery);
-  const certsQ = useQuery(certificationsQuery);
   const immersionQ = useQuery(immersionQuery);
   const cvUrlQ = useQuery(cvUrlQuery);
   const projects = projectsQ.data ?? [];
@@ -251,23 +217,23 @@ function Index() {
           </div>
         </section>
 
-        {/* 01 · Compétences — Piliers d'expertise */}
+        {/* Expertise — trois domaines complémentaires */}
         <section id="competences" className="scroll-mt-24 border-b border-border bg-muted/30 py-20 md:py-28">
           <div className={container}>
             <Reveal>
               <SectionHeading
-                eyebrow="Explorer"
-                title="Cinq univers d'intervention,"
-                accent="une expertise intégrée."
-                description="Une approche 360° des technologies : du câblage physique et du routage réseau jusqu'à l'expérience utilisateur finale."
+                eyebrow="Domaines d’intervention"
+                title="Du réseau à l’application,"
+                accent="une vision cohérente."
+                description="J’interviens sur les fondations numériques et les outils qui font avancer votre activité, avec une même exigence de fiabilité et de simplicité."
               />
             </Reveal>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {skills.map((g, i) => {
-                const Icon = skillIcons[g.icon as keyof typeof skillIcons];
+            <div className="grid gap-5 md:grid-cols-3">
+              {aboutPage.pillars.items.map((item, i) => {
+                const Icon = [Network, ShieldCheck, Code2][i];
                 return (
-                  <Reveal key={g.category} className={i === 0 ? "sm:col-span-2 lg:col-span-1" : ""}>
-                    <div className="pillar-card flex h-full flex-col justify-between rounded-[28px] border border-border/70 bg-card p-7 sm:p-8 shadow-xs">
+                  <Reveal key={item.title}>
+                    <div className="pillar-card flex h-full flex-col rounded-[28px] border border-border/70 bg-card p-7 sm:p-8 shadow-xs">
                       <div>
                         <div className="flex items-center justify-between">
                           <div className="grid h-12 w-12 place-items-center rounded-2xl bg-primary/10 text-primary">
@@ -277,26 +243,19 @@ function Index() {
                             0{i + 1}
                           </span>
                         </div>
-                        <h3 className="mt-5 font-serif text-xl sm:text-2xl font-medium text-foreground">
-                          {g.category}
+                        <p className="mt-6 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+                          {item.tag}
+                        </p>
+                        <h3 className="mt-2 font-serif text-xl sm:text-2xl font-medium text-foreground">
+                          {item.title}
                         </h3>
                         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                          {g.description}
+                          {item.description}
                         </p>
                       </div>
-                      <ul
-                        className="mt-6 flex flex-wrap gap-1.5 border-t border-border/50 pt-4"
-                        aria-label={`Technologies pour ${g.category}`}
-                      >
-                        {g.items.map((s) => (
-                          <li
-                            key={s}
-                            className="rounded-full border border-border/40 bg-secondary/80 px-2.5 py-0.5 text-xs font-medium text-secondary-foreground"
-                          >
-                            {s}
-                          </li>
-                        ))}
-                      </ul>
+                      <p className="mt-6 border-t border-border/50 pt-4 text-xs leading-relaxed text-muted-foreground">
+                        {item.subtext}
+                      </p>
                     </div>
                   </Reveal>
                 );
@@ -305,141 +264,53 @@ function Index() {
           </div>
         </section>
 
-        {/* 02 · Quelques chiffres — Repères d'impact & engagement terrain */}
-        <section className="scroll-mt-24 border-b border-border bg-card py-16 md:py-24">
-          <div className={container}>
-            <Reveal>
-              <SectionHeading
-                eyebrow="Quelques chiffres"
-                title="L'exigence du terrain mesurée"
-                accent="en résultats concrets."
-                description="Des indicateurs vérifiables sur les réalisations déployées, les certifications acquises et l'engagement opérationnel."
-              />
-            </Reveal>
-            <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
-              {/* Stat 1: Projets */}
-              <Reveal>
-                <div className="pillar-card flex h-full flex-col justify-between rounded-[26px] border border-border/70 bg-card p-5 sm:p-7 shadow-xs">
-                  <div>
-                    <div className="font-serif text-3xl sm:text-4xl lg:text-5xl font-medium tracking-tight text-foreground">
-                      <AnimatedCounter end={projects.length} />
-                    </div>
-                    <p className="mt-3 text-sm sm:text-base font-semibold text-foreground">
-                      Projets & livrables
-                    </p>
-                  </div>
-                  <p className="mt-2 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                    Infrastructures réseaux déployées et applications web en production.
-                  </p>
-                </div>
-              </Reveal>
-
-              {/* Stat 2: Certifications */}
-              <Reveal className="d1">
-                <div className="pillar-card flex h-full flex-col justify-between rounded-[26px] border border-border/70 bg-card p-5 sm:p-7 shadow-xs">
-                  <div>
-                    <div className="font-serif text-3xl sm:text-4xl lg:text-5xl font-medium tracking-tight text-foreground">
-                      <AnimatedCounter end={(certsQ.data ?? []).length} />
-                    </div>
-                    <p className="mt-3 text-sm sm:text-base font-semibold text-foreground">
-                      Certifications officielles
-                    </p>
-                  </div>
-                  <p className="mt-2 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                    Accréditations validées en réseaux Cisco, systèmes et cybersécurité.
-                  </p>
-                </div>
-              </Reveal>
-
-              {/* Stat 3: Expériences */}
-              <Reveal className="d2">
-                <div className="pillar-card flex h-full flex-col justify-between rounded-[26px] border border-border/70 bg-card p-5 sm:p-7 shadow-xs">
-                  <div>
-                    <div className="font-serif text-3xl sm:text-4xl lg:text-5xl font-medium tracking-tight text-foreground">
-                      <AnimatedCounter end={(timelineQ.data ?? []).length} />
-                    </div>
-                    <p className="mt-3 text-sm sm:text-base font-semibold text-foreground">
-                      Expériences clés
-                    </p>
-                  </div>
-                  <p className="mt-2 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                    Interventions terrain en entreprises et institutions (Don Bosco, XSECURITY, INPP, CNSS).
-                  </p>
-                </div>
-              </Reveal>
-
-              {/* Stat 4: Continuité */}
-              <Reveal className="d3">
-                <div className="pillar-card flex h-full flex-col justify-between rounded-[26px] border border-border/70 bg-card p-5 sm:p-7 shadow-xs">
-                  <div>
-                    <div className="font-serif text-3xl sm:text-4xl lg:text-5xl font-medium tracking-tight text-foreground">
-                      99.9<span className="text-primary font-serif font-normal">%</span>
-                    </div>
-                    <p className="mt-3 text-sm sm:text-base font-semibold text-foreground">
-                      Disponibilité & rigueur
-                    </p>
-                  </div>
-                  <p className="mt-2 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                    Tolérance aux pannes, sauvegardes 3-2-1 et procédures de rollback systématiques.
-                  </p>
-                </div>
-              </Reveal>
-            </div>
-          </div>
-        </section>
-
-        {/* 03 · Mon histoire — Split éditorial avec portrait */}
+        {/* Mon histoire — introduction, le parcours détaillé reste sur À propos */}
         <section id="apropos" className="scroll-mt-24 py-20 md:py-28 border-b border-border bg-background">
           <div className={container}>
             <Reveal>
               <div className="grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
                 {/* Colonne gauche : Portrait éditorial */}
                 <div className="relative mx-auto w-full max-w-[340px] sm:max-w-[400px] lg:max-w-none">
-                  <div className="relative overflow-hidden rounded-[30px] border border-border/80 bg-muted/40 shadow-lg">
+                  <div className="relative aspect-[4/5] overflow-hidden rounded-[28px] border border-border/80 bg-muted/40 shadow-md">
                     <img
-                      src="/Profil%20%26%20Conviction.JPG"
+                      src="/Profil & Conviction.jpg"
                       alt="Landry Kayoyo — Mon histoire"
                       width={700}
                       height={800}
                       loading="lazy"
                       decoding="async"
-                      className="aspect-[4/5] w-full object-cover object-[50%_25%]"
+                      className="absolute inset-0 h-full w-full object-cover object-[50%_25%]"
                     />
                   </div>
                 </div>
 
-                {/* Colonne droite : Narration & Action */}
-                <div>
-                  <SectionHeading
-                    eyebrow="Mon histoire"
-                    title="Avant de sécuriser et développer,"
-                    accent="je construisais les fondations."
-                    description="Administrateur systèmes & réseaux et développeur web à Lubumbashi, j'interviens de bout en bout pour garantir la stabilité et la performance de vos outils numériques."
-                  />
-                  <div className="space-y-4 text-base sm:text-lg leading-relaxed text-muted-foreground">
-                    {about.map((p, i) => (
+                {/* Colonne droite : récit concis et lien vers la page dédiée */}
+                <div className="mx-auto w-full max-w-2xl lg:mx-0">
+                  <div className="mb-5 inline-flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">
+                    <span className="h-px w-7 rounded-full bg-primary/80" aria-hidden="true" />
+                    <span>Mon histoire</span>
+                  </div>
+                  <h2 className="font-serif text-3xl font-medium leading-[1.14] tracking-tight text-foreground sm:text-4xl lg:text-[2.65rem]">
+                    Du réseau au web,{" "}
+                    <span className="italic font-serif text-primary">des solutions fiables.</span>
+                  </h2>
+                  <div className="mt-6 space-y-4 text-base leading-relaxed text-muted-foreground sm:text-lg sm:leading-relaxed">
+                    {about.map((paragraph, index) => (
                       <p
-                        key={i}
-                        className={i === 0 ? "text-lg sm:text-xl font-medium text-foreground" : ""}
+                        key={paragraph}
+                        className={index === 0 ? "font-medium text-foreground" : ""}
                       >
-                        {p}
+                        {paragraph}
                       </p>
                     ))}
                   </div>
 
-                  <div className="mt-8 flex flex-wrap items-center gap-4">
+                  <div className="mt-8">
                     <Button asChild size="lg" className="rounded-full bg-gradient-primary">
                       <Link to="/a-propos">
-                        Lire mon histoire complète <ArrowRight size={16} />
+                        Découvrir mon histoire <ArrowRight size={16} />
                       </Link>
                     </Button>
-                    {cvUrl && (
-                      <Button asChild size="lg" variant="outline" className="rounded-full hover:bg-card">
-                        <a href={cvUrl} target="_blank" rel="noopener noreferrer">
-                          <FileText size={16} /> Télécharger mon CV
-                        </a>
-                      </Button>
-                    )}
                   </div>
                 </div>
               </div>
@@ -455,7 +326,7 @@ function Index() {
                 eyebrow="Réalisations"
                 title="Des problèmes réels,"
                 accent="des solutions concrètes."
-                description="Études de cas sélectionnées : architectures réseaux déployées, plateformes web complètes et solutions de haute disponibilité."
+                description="Une sélection de projets conçus pour répondre à des besoins concrets, du réseau aux applications web."
               />
             </Reveal>
             {projectsQ.isPending ? (
@@ -465,12 +336,9 @@ function Index() {
             ) : (
               <>
                 <div className="grid gap-7 lg:gap-8 md:grid-cols-2">
-                  {featured.map((p, i) => (
-                    <Reveal
-                      key={p.slug}
-                      className={i === 3 ? "hidden md:block" : i > 3 ? "hidden" : ""}
-                    >
-                      <ProjectCard p={p} index={i} />
+                  {featured.slice(0, 3).map((p) => (
+                    <Reveal key={p.slug}>
+                      <ProjectCard p={p} />
                     </Reveal>
                   ))}
                 </div>
@@ -492,40 +360,39 @@ function Index() {
           </div>
         </section>
 
-        {/* 05 · Immersion & Coulisses de terrain */}
+        {/* Immersion — aperçus du travail et des projets sur le terrain */}
         {immersionItems.length > 0 && (
-          <section className="border-b border-border bg-muted/30 py-20 md:py-28">
+          <section id="immersion" className="scroll-mt-24 border-b border-border bg-muted/30 py-20 md:py-28">
             <div className={container}>
               <Reveal>
                 <SectionHeading
-                  eyebrow="Immersion"
-                  title="Au cœur des infrastructures,"
-                  accent="en images."
-                  description="Aperçu visuel de nos interventions concrètes : baies de brassage ordonnées, monitoring en temps réel, cybersécurité et applications web en production."
+                  eyebrow="En images"
+                  title="Le numérique,"
+                  accent="sur le terrain."
+                  description="Quelques aperçus des interventions, des environnements techniques et des réalisations qui prennent vie au quotidien."
                 />
               </Reveal>
-
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {immersionItems.map((item) => (
                   <Reveal key={item.id} className="group">
-                    <div className="relative aspect-[4/3] sm:aspect-[16/11] overflow-hidden rounded-[26px] border border-border/80 bg-muted/40 shadow-sm transition-all duration-300 hover:border-primary/40 hover:shadow-lg">
+                    <figure className="relative aspect-[4/3] overflow-hidden rounded-[26px] border border-border/80 bg-muted shadow-sm transition-all duration-300 hover:border-primary/40 hover:shadow-lg">
                       <img
-                        src={getOptimizedImageUrl(item.image_url, { width: 600 })}
+                        src={getOptimizedImageUrl(item.image_url, { width: 720 })}
                         alt={item.image_alt ?? item.title}
                         loading="lazy"
                         decoding="async"
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent transition-opacity duration-300 group-hover:from-black/90" />
-                      <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 text-white">
-                        <span className="inline-block rounded-full bg-primary/90 px-2.5 py-0.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-primary-foreground backdrop-blur-sm">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" aria-hidden />
+                      <figcaption className="absolute inset-x-0 bottom-0 p-5 text-white sm:p-6">
+                        <span className="inline-flex rounded-full bg-primary/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground">
                           {item.tag}
                         </span>
-                        <h4 className="mt-2 font-serif text-base sm:text-lg font-medium leading-snug tracking-tight text-white drop-shadow-sm">
+                        <h3 className="mt-2 font-serif text-lg font-medium leading-snug drop-shadow-sm">
                           {item.title}
-                        </h4>
-                      </div>
-                    </div>
+                        </h3>
+                      </figcaption>
+                    </figure>
                   </Reveal>
                 ))}
               </div>
@@ -533,161 +400,8 @@ function Index() {
           </section>
         )}
 
-        {/* 06 · Partenaires & Références — Bandeau défilant */}
+        {/* Partenaires & références — bandeau discret */}
         <BrandsMarquee />
-
-        {/* 07 · Parcours & Formations */}
-        <section id="parcours" className="scroll-mt-24 border-y border-border bg-muted/30 py-20 md:py-28">
-          <div className={`${container} grid gap-12 lg:grid-cols-[1.15fr_0.85fr]`}>
-            {/* Timeline gauche — Expériences & Formations épurées */}
-            <div>
-              <Reveal>
-                <SectionHeading
-                  eyebrow="Parcours"
-                  title="Une trajectoire forgée sur le terrain,"
-                  accent="pas héritée."
-                  description="Des fondations universitaires à Don Bosco jusqu'aux interventions concrètes en production chez XSECURITY et en entreprise."
-                />
-              </Reveal>
-              {timelineQ.isPending ? (
-                <ContentLoading rows={4} />
-              ) : timelineQ.isError ? (
-                <ContentError label="le parcours" onRetry={() => timelineQ.refetch()} />
-              ) : (
-                <ol className="relative ml-4 sm:ml-5 border-l-2 border-border/80 mt-8 space-y-4">
-                  {(timelineQ.data ?? []).map((t) => {
-                    const isFormation = t.kind === "formation";
-                    const isCurrent = /actuel|présent|present|en cours/i.test(t.period);
-                    const Icon = isFormation ? GraduationCap : Briefcase;
-                    return (
-                      <li key={t.id} className="relative pl-7 sm:pl-9">
-                        <span
-                          className={`absolute -left-[17px] sm:-left-[21px] grid h-8 w-8 sm:h-10 sm:w-10 place-items-center rounded-full border-4 border-muted/80 ${
-                            isCurrent
-                              ? "bg-primary text-primary-foreground shadow-sm"
-                              : "bg-card border-border text-muted-foreground shadow-2xs"
-                          }`}
-                          aria-hidden
-                        >
-                          <Icon size={15} />
-                        </span>
-                        <Reveal className="pillar-card rounded-2xl border border-border/70 bg-card p-4 sm:p-5 shadow-xs transition-all duration-300 hover:border-primary/40">
-                          <div className="flex flex-wrap items-center justify-between gap-2">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                                {t.period}
-                              </span>
-                              {isCurrent && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                  Actuel
-                                </span>
-                              )}
-                            </div>
-                            <span className="rounded-full bg-secondary/80 border border-border/60 px-2.5 py-0.5 text-[11px] font-semibold text-secondary-foreground">
-                              {isFormation ? "Formation" : t.kind === "stage" ? "Stage" : "Emploi"}
-                            </span>
-                          </div>
-                          <h3 className="mt-2 font-serif text-base sm:text-lg font-medium tracking-tight text-foreground">
-                            {t.title}
-                          </h3>
-                          <p className="mt-1 text-xs sm:text-sm font-semibold text-muted-foreground">
-                            {t.organization}
-                          </p>
-                        </Reveal>
-                      </li>
-                    );
-                  })}
-                </ol>
-              )}
-            </div>
-
-            {/* Colonne droite — Certifications & Accréditations officielles */}
-            <div className="space-y-6">
-              <Reveal>
-                <div className="rounded-[28px] border border-border/80 bg-card p-6 sm:p-7 shadow-sm">
-                  <div className="flex items-center justify-between border-b border-border/70 pb-4 mb-5">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-primary">
-                        Accréditations
-                      </p>
-                      <h3 className="flex items-center gap-2 font-serif text-xl sm:text-2xl font-medium text-foreground mt-0.5">
-                        <Award size={22} className="text-primary" /> Certifications officielles
-                      </h3>
-                    </div>
-                    <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                      Validées
-                    </span>
-                  </div>
-
-                  {certsQ.isPending ? (
-                    <ContentLoading rows={3} className="h-16" />
-                  ) : certsQ.isError ? (
-                    <ContentError label="les certifications" onRetry={() => certsQ.refetch()} />
-                  ) : (
-                    <div className="space-y-3">
-                      {(certsQ.data ?? []).map((c) => (
-                        <div
-                          key={c.id}
-                          className="group flex items-start gap-3.5 rounded-2xl border border-border/70 bg-muted/30 p-3.5 sm:p-4 transition-all duration-300 hover:border-primary/40 hover:bg-muted/50"
-                        >
-                          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary transition-transform group-hover:scale-105">
-                            <ShieldCheck size={20} />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <h4 className="font-semibold text-sm sm:text-base text-foreground leading-snug">
-                              {c.title}
-                            </h4>
-                            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                              <span className="font-medium text-primary">{c.issuer}</span>
-                              <span>·</span>
-                              <span>{c.date_label}</span>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </Reveal>
-            </div>
-          </div>
-        </section>
-
-        {/* 08 · Questions fréquentes (FAQ) */}
-        <section className="content-auto border-b border-border bg-card py-20 md:py-28">
-          <div className={`${container} max-w-4xl`}>
-            <Reveal className="text-center mb-12">
-              <div className="mb-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-                <HelpCircle size={15} /> Questions fréquentes
-              </div>
-              <h2 className="font-serif text-3xl sm:text-4xl font-normal leading-tight text-foreground">
-                Tout ce que vous devez savoir avant de{" "}
-                <span className="italic font-serif text-primary">démarrer</span>.
-              </h2>
-              <p className="mt-3 text-sm sm:text-base text-muted-foreground">
-                Des réponses transparentes sur nos interventions, nos garanties et notre méthode de travail.
-              </p>
-            </Reveal>
-
-            <Reveal>
-              <div className="rounded-[32px] border border-border/80 bg-card p-6 sm:p-10 shadow-sm">
-                <Accordion type="single" collapsible className="w-full">
-                  {FAQS.map((faq, i) => (
-                    <AccordionItem key={i} value={`faq-${i}`} className="border-border/60 py-2">
-                      <AccordionTrigger className="text-base sm:text-lg font-medium text-foreground hover:no-underline hover:text-primary">
-                        {faq.q}
-                      </AccordionTrigger>
-                      <AccordionContent className="text-sm sm:text-base text-muted-foreground leading-relaxed pt-2">
-                        {faq.a}
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              </div>
-            </Reveal>
-          </div>
-        </section>
 
         {/* 09 · Appel à l'action / Contact */}
         <section id="contact" className="relative overflow-hidden bg-hero py-20 text-ink-foreground md:py-28">
@@ -702,7 +416,7 @@ function Index() {
                 <span className="italic font-serif text-primary-glow">durable</span>.
               </h2>
               <p className="mt-5 text-base sm:text-lg leading-relaxed text-ink-foreground/75 max-w-xl mx-auto">
-                Que vous ayez un réseau à installer, des données à sécuriser ou une application web moderne à développer, échangeons sur votre besoin. Réponse garantie sous 24h.
+                Que vous ayez un réseau à installer, des données à sécuriser ou une application web à développer, échangeons sur votre besoin. Basé à Lubumbashi, j’accompagne les organisations sur leurs projets numériques.
               </p>
               <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link to="/contact" className={btnPrimary}>

@@ -132,8 +132,8 @@ function ProjectsPage() {
           </div>
         ) : (
           <section className={`${container} grid gap-7 lg:gap-8 pb-24 md:grid-cols-2 md:pb-32`}>
-            {filteredProjects.map((p, i) => (
-              <ProjectCard key={p.slug} p={p} index={i} />
+            {filteredProjects.map((p) => (
+              <ProjectCard key={p.slug} p={p} />
             ))}
           </section>
         )}

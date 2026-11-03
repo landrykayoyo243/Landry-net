@@ -1,115 +1,344 @@
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { brandsQuery } from "@/lib/content.queries";
+import { brandsQuery, type PublicBrand } from "@/lib/content.queries";
 import { getOptimizedImageUrl } from "@/lib/siteConfig";
+import { brandsSection } from "@/content/portfolio";
+import { Reveal } from "@/components/portfolio/Reveal";
 
-/** Bandeau de marques / partenaires à défilement infini.
- *  Géré dynamiquement depuis l'espace admin.
- *  Affiche les logos avec taille harmonisée, agrandie et révélation de couleur au survol ou toucher mobile. */
+/** Typographies logo sur-mesure pour les institutions (effet épuré monochrome & lisible). */
+function TypographicLogo({
+  name,
+  isActive,
+  isHero = false,
+}: {
+  name: string;
+  isActive: boolean;
+  isHero?: boolean;
+}) {
+  const n = name.trim().toLowerCase();
+  const baseClass = `transition-colors duration-300 ${
+    isActive ? "text-foreground" : "text-foreground/80 group-hover:text-foreground"
+  }`;
+
+  if (n === "xsecurity") {
+    return (
+      <span
+        className={`font-sans ${
+          isHero ? "text-3xl sm:text-4xl" : "text-2xl sm:text-3xl md:text-[2rem]"
+        } font-black tracking-[0.16em] ${baseClass}`}
+      >
+        XSECURITY
+      </span>
+    );
+  }
+  if (n === "inpp") {
+    return (
+      <span
+        className={`font-sans ${
+          isHero ? "text-4xl sm:text-5xl" : "text-3xl sm:text-4xl md:text-5xl"
+        } font-black tracking-wider ${baseClass}`}
+      >
+        INPP
+      </span>
+    );
+  }
+  if (n === "cnss") {
+    return (
+      <span
+        className={`font-sans ${
+          isHero ? "text-3xl sm:text-4xl" : "text-2xl sm:text-3xl md:text-4xl"
+        } font-bold tracking-[0.22em] ${baseClass}`}
+      >
+        CNSS
+      </span>
+    );
+  }
+  if (n.includes("don bosco")) {
+    return (
+      <div className={`text-center leading-tight ${baseClass}`}>
+        <span
+          className={`block font-serif ${
+            isHero ? "text-lg sm:text-xl" : "text-base sm:text-lg md:text-xl"
+          } font-semibold tracking-wide`}
+        >
+          UNIVERSITÉ
+        </span>
+        <span
+          className={`block font-sans ${
+            isHero ? "text-xs sm:text-sm" : "text-xs sm:text-sm"
+          } font-bold tracking-[0.2em] text-foreground/70`}
+        >
+          DON BOSCO
+        </span>
+      </div>
+    );
+  }
+  if (n === "paylix") {
+    return (
+      <span
+        className={`font-sans ${
+          isHero ? "text-4xl sm:text-5xl" : "text-3xl sm:text-4xl md:text-5xl"
+        } font-black tracking-tight ${baseClass}`}
+      >
+        Pay<span className="text-primary font-bold">Lix</span>
+      </span>
+    );
+  }
+  if (n.includes("cisco")) {
+    return (
+      <div className={`flex items-baseline gap-2 ${baseClass}`}>
+        <span
+          className={`font-sans ${
+            isHero ? "text-3xl sm:text-4xl" : "text-2xl sm:text-3xl md:text-4xl"
+          } font-black tracking-tight`}
+        >
+          CISCO
+        </span>
+        <span className="font-sans text-[11px] sm:text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          Networking
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <span
+      className={`font-sans ${
+        isHero ? "text-2xl sm:text-3xl" : "text-xl sm:text-2xl md:text-3xl"
+      } font-bold tracking-tight ${baseClass}`}
+    >
+      {name}
+    </span>
+  );
+}
+
+function BrandLogo({
+  brand,
+  isActive,
+  onToggle,
+  size = "normal",
+}: {
+  brand: PublicBrand;
+  isActive: boolean;
+  onToggle: () => void;
+  size?: "normal" | "hero";
+}) {
+  const isHero = size === "hero";
+
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-label={`${brand.name} — ${isActive ? "actif" : "afficher"}`}
+      aria-pressed={isActive}
+      className="group relative flex items-center justify-center p-1.5 transition-transform duration-300 hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg"
+    >
+      {brand.logo_url ? (
+        <img
+          src={getOptimizedImageUrl(brand.logo_url, { width: isHero ? 500 : 440 })}
+          alt={brand.name}
+          loading="lazy"
+          decoding="async"
+          className={`${
+            isHero
+              ? "h-13 sm:h-16 md:h-16 max-w-[170px] sm:max-w-[210px] md:max-w-[230px]"
+              : "h-9 sm:h-11 md:h-13 lg:h-15 max-w-[140px] sm:max-w-[170px] md:max-w-[200px]"
+          } w-auto object-contain transition-all duration-300 ${
+            isActive
+              ? "grayscale-0 opacity-100 scale-105"
+              : "grayscale opacity-85 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105"
+          }`}
+        />
+      ) : (
+        <TypographicLogo name={brand.name} isActive={isActive} isHero={isHero} />
+      )}
+    </button>
+  );
+}
+
+type MobileGroup =
+  | { type: "hero"; item: PublicBrand }
+  | { type: "duo"; items: [PublicBrand, PublicBrand] }
+  | { type: "single"; item: PublicBrand };
+
+/**
+ * Réorganisation mobile intelligente :
+ * - Les marques en haut sont mises en valeur en taille "hero" (plus grandes et imposantes).
+ * - Aucun logo n'est laissé orphelin au bas : répartition parfaite en duos.
+ */
+function buildSmartMobileGroups(items: PublicBrand[]): MobileGroup[] {
+  if (items.length === 0) return [];
+
+  const groups: MobileGroup[] = [];
+
+  // Si le nombre total est impair (ex: 7 ou 5 ou 9) :
+  // Le tout premier logo est le GRAND HERO en haut (ex: XSECURITY), puis uniquement des duos équilibrés !
+  if (items.length % 2 === 1) {
+    groups.push({ type: "hero", item: items[0] });
+    for (let i = 1; i < items.length; i += 2) {
+      if (i + 1 < items.length) {
+        groups.push({ type: "duo", items: [items[i], items[i + 1]] });
+      } else {
+        groups.push({ type: "single", item: items[i] });
+      }
+    }
+    return groups;
+  }
+
+  // Si le nombre total est pair (ex: 8 ou 10) :
+  // Les 2 premiers logos sont en haut en taille Hero (grands et centrés), puis des duos équilibrés !
+  if (items.length >= 8) {
+    groups.push({ type: "hero", item: items[0] });
+    groups.push({ type: "hero", item: items[1] });
+    for (let i = 2; i < items.length; i += 2) {
+      if (i + 1 < items.length) {
+        groups.push({ type: "duo", items: [items[i], items[i + 1]] });
+      }
+    }
+    return groups;
+  }
+
+  // Si 6 : 1 grand hero en haut, 2 duos, et 1 hero de fermeture en bas (harmonie diamant)
+  if (items.length === 6) {
+    groups.push({ type: "hero", item: items[0] });
+    groups.push({ type: "duo", items: [items[1], items[2]] });
+    groups.push({ type: "duo", items: [items[3], items[4]] });
+    groups.push({ type: "hero", item: items[5] });
+    return groups;
+  }
+
+  // Fallback duos
+  for (let i = 0; i < items.length; i += 2) {
+    if (i + 1 < items.length) {
+      groups.push({ type: "duo", items: [items[i], items[i + 1]] });
+    } else {
+      groups.push({ type: "hero", item: items[i] });
+    }
+  }
+  return groups;
+}
+
+/**
+ * Grille organique de logos :
+ * - Sur Desktop : 2 rangées en quinconce centrées, contenues dans max-w-[860px].
+ * - Sur Mobile : réorganisation intelligente avec logos du haut plus grands (Hero) et duos équilibrés sans orphelin.
+ */
 export function BrandsMarquee() {
   const { data: list = [] } = useQuery(brandsQuery);
   const [activeBrandId, setActiveBrandId] = useState<string | null>(null);
 
-  // Réinitialise la marque active après 4 secondes pour reprendre le défilement
-  useEffect(() => {
-    if (!activeBrandId) return;
-    const timer = window.setTimeout(() => setActiveBrandId(null), 4000);
-    return () => clearTimeout(timer);
-  }, [activeBrandId]);
-
-  if (list.length === 0) return null;
-
-  // On duplique la liste pour que le défilement soit sans fin
-  const doubled = [...list, ...list];
-
-  const handleToggleBrand = (id: string) => {
+  const toggle = (id: string) => {
     setActiveBrandId((prev) => (prev === id ? null : id));
   };
+
+  // Répartition Desktop en 2 rangées décalées (quinconce) dans un bloc centré
+  const { desktopRow1, desktopRow2 } = useMemo(() => {
+    if (list.length === 0) return { desktopRow1: [], desktopRow2: [] };
+    const splitAt = list.length <= 6 ? Math.ceil(list.length / 2) : Math.ceil(list.length * 0.6);
+    return {
+      desktopRow1: list.slice(0, splitAt),
+      desktopRow2: list.slice(splitAt),
+    };
+  }, [list]);
+
+  // Répartition Mobile intelligente
+  const mobileGroups = useMemo(() => buildSmartMobileGroups(list), [list]);
+
+  if (list.length === 0) return null;
 
   return (
     <section
       aria-label="Institutions et partenaires de confiance"
-      className="border-y border-border bg-card py-10 md:py-16 overflow-hidden"
+      className="border-y border-border/60 bg-background py-10 sm:py-14 md:py-16 overflow-hidden"
     >
-      {/* En-tête épuré */}
-      <div className="mx-auto mb-8 w-full max-w-6xl px-5 text-center md:px-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-          Ils m'ont fait confiance
-        </p>
-      </div>
+      <div className="mx-auto w-full max-w-4xl px-5 sm:px-8">
+        {/* En-tête compact et fidèle */}
+        <Reveal>
+          <div className="mx-auto mb-8 sm:mb-10 max-w-2xl text-center">
+            <div className="mb-2.5 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary sm:text-sm">
+              <span className="h-[1.5px] w-5 sm:w-6 bg-primary inline-block" aria-hidden />
+              <span>{brandsSection.eyebrow}</span>
+            </div>
+            <h2 className="font-serif text-3xl sm:text-4xl md:text-[2.75rem] font-normal leading-[1.15] tracking-tight text-foreground">
+              {brandsSection.titleLead}{" "}
+              <span className="italic font-serif text-primary block sm:inline">
+                {brandsSection.titleAccent}
+              </span>
+            </h2>
+          </div>
+        </Reveal>
 
-      {/* Piste de défilement avec pause au survol ou au toucher actif */}
-      <div
-        className={`marquee-pause relative ${
-          activeBrandId ? "[&_.marquee-track]:[animation-play-state:paused]" : ""
-        }`}
-      >
-        {/* Dégradés masquant les bords pour un rendu cinématique */}
-        <div
-          className="pointer-events-none absolute inset-y-0 left-0 z-10 w-20 sm:w-36"
-          style={{ background: "linear-gradient(to right, var(--color-card), transparent)" }}
-          aria-hidden
-        />
-        <div
-          className="pointer-events-none absolute inset-y-0 right-0 z-10 w-20 sm:w-36"
-          style={{ background: "linear-gradient(to left, var(--color-card), transparent)" }}
-          aria-hidden
-        />
+        {/* ── DESKTOP (Bloc centré, logos en quinconce préservé) ── */}
+        <Reveal className="hidden md:block">
+          <div className="mx-auto max-w-[860px] space-y-7 lg:space-y-9">
+            {/* Rangée 1 : centrée avec bon espacement */}
+            <div className="flex items-center justify-center gap-8 lg:gap-14">
+              {desktopRow1.map((brand) => (
+                <BrandLogo
+                  key={brand.id}
+                  brand={brand}
+                  isActive={activeBrandId === brand.id}
+                  onToggle={() => toggle(brand.id)}
+                />
+              ))}
+            </div>
 
-        <ul className="marquee-track gap-0 items-center" role="list" aria-label="Partenaires">
-          {doubled.map((b, i) => {
-            const isHighlighted = activeBrandId === b.id;
-            return (
-              <li
-                key={`${b.id}-${i}`}
-                className="flex shrink-0 items-center gap-6 sm:gap-10 px-6 sm:px-10"
-                aria-hidden={i >= list.length}
-              >
-                {/* Séparateur discret */}
-                <span className="h-8 sm:h-10 w-[1.5px] rounded-full bg-border/60 shrink-0" aria-hidden />
+            {/* Rangée 2 : décalée en quinconce dans les intervalles */}
+            {desktopRow2.length > 0 && (
+              <div className="flex items-center justify-center gap-10 lg:gap-16">
+                {desktopRow2.map((brand) => (
+                  <BrandLogo
+                    key={brand.id}
+                    brand={brand}
+                    isActive={activeBrandId === brand.id}
+                    onToggle={() => toggle(brand.id)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </Reveal>
 
-                <button
-                  type="button"
-                  onClick={() => handleToggleBrand(b.id)}
-                  className="group relative flex items-center justify-center min-w-[110px] sm:min-w-[150px] md:min-w-[170px] h-16 sm:h-20 px-2 rounded-2xl bg-transparent border-0 cursor-pointer transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
-                  aria-label={`${b.name} - toucher ou survoler pour afficher la couleur`}
-                  title={b.name}
-                >
-                  {b.logo_url ? (
-                    <img
-                      src={getOptimizedImageUrl(b.logo_url, { width: 240 })}
-                      alt={b.name}
-                      loading="lazy"
-                      decoding="async"
-                      className={`h-11 sm:h-14 md:h-16 max-h-12 sm:max-h-16 md:max-h-20 w-auto max-w-[150px] sm:max-w-[200px] md:max-w-[230px] object-contain transition-all duration-300 select-none ${
-                        isHighlighted
-                          ? "opacity-100 grayscale-0 scale-110 drop-shadow-md"
-                          : "opacity-75 grayscale contrast-125 group-hover:opacity-100 group-hover:grayscale-0 group-hover:scale-105 group-active:opacity-100 group-active:grayscale-0 group-focus-visible:opacity-100 group-focus-visible:grayscale-0 dark:brightness-125 dark:contrast-100"
-                      }`}
+        {/* ── MOBILE (Réorganisation intelligente, logos du haut plus grands, zéro orphelin) ── */}
+        <Reveal className="block md:hidden">
+          <div className="mx-auto max-w-[340px] space-y-4 sm:space-y-5">
+            {mobileGroups.map((group, idx) => {
+              if (group.type === "hero" || group.type === "single") {
+                const item = "item" in group ? group.item : group.items[0];
+                const isHero = group.type === "hero";
+                return (
+                  <div
+                    key={`hero-${idx}`}
+                    className={`flex justify-center ${isHero ? "py-1.5" : "py-1"}`}
+                  >
+                    <BrandLogo
+                      brand={item}
+                      size={isHero ? "hero" : "normal"}
+                      isActive={activeBrandId === item.id}
+                      onToggle={() => toggle(item.id)}
                     />
-                  ) : (
-                    <span
-                      className={`font-serif text-lg sm:text-2xl font-medium tracking-tight whitespace-nowrap transition-all duration-300 ${
-                        isHighlighted
-                          ? "text-primary scale-105"
-                          : "text-foreground/80 group-hover:text-foreground group-hover:scale-105"
-                      }`}
-                    >
-                      {b.name}
-                    </span>
-                  )}
-
-                  {/* Badge infobulle discret au toucher mobile */}
-                  {isHighlighted && (
-                    <span className="pointer-events-none absolute -bottom-3 left-1/2 -translate-x-1/2 z-20 whitespace-nowrap rounded-full bg-foreground px-2.5 py-0.5 text-[10px] font-semibold text-background shadow-lg">
-                      {b.name}
-                    </span>
-                  )}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+                  </div>
+                );
+              }
+              return (
+                <div
+                  key={`duo-${idx}`}
+                  className="grid grid-cols-2 items-center justify-items-center gap-x-8 gap-y-2"
+                >
+                  {group.items.map((brand) => (
+                    <BrandLogo
+                      key={brand.id}
+                      brand={brand}
+                      size="normal"
+                      isActive={activeBrandId === brand.id}
+                      onToggle={() => toggle(brand.id)}
+                    />
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        </Reveal>
       </div>
     </section>
   );

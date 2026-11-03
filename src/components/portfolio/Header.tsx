@@ -2,14 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Briefcase,
-  ChevronRight,
-  Cpu,
-  FileText,
-  GraduationCap,
-  Mail,
   Menu,
-  User,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,14 +13,6 @@ const logo = { url: "/landry-net-logo.jpg" };
 
 const desktopLink =
   "rounded-md text-sm font-medium text-muted-foreground transition hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring";
-
-const navIcons: Record<string, typeof User> = {
-  "À propos": User,
-  "Compétences": Cpu,
-  "Projets": Briefcase,
-  "Parcours": GraduationCap,
-  "Contact": Mail,
-};
 
 export function Header() {
   const [open, setOpen] = useState(false);
@@ -173,7 +158,6 @@ export function Header() {
             <span className="hidden md:inline-flex">
               <Button asChild variant="outline" size="sm" className="rounded-full px-3.5 gap-1.5 border-border hover:border-primary/50 text-foreground">
                 <a href={cvUrl} target="_blank" rel="noopener noreferrer">
-                  <FileText size={14} className="text-primary" />
                   <span>Mon CV</span>
                 </a>
               </Button>
@@ -229,29 +213,11 @@ export function Header() {
             : "-translate-y-3 opacity-0 pointer-events-none"
         }`}
       >
-        <div className="mx-auto flex max-w-lg flex-col px-4 py-4 sm:px-6">
-          <nav aria-label="Navigation mobile" className="flex flex-col gap-1.5">
+        <div className="mx-auto flex max-w-lg flex-col px-5 py-3 sm:px-6">
+          <nav aria-label="Navigation mobile" className="flex flex-col divide-y divide-border/60">
             {nav.map((n) => {
-              const Icon = navIcons[n.label] ?? ChevronRight;
-              const content = (
-                <>
-                  <div className="flex items-center gap-3.5">
-                    <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                      <Icon size={19} />
-                    </div>
-                    <span className="font-semibold text-base text-foreground transition-colors group-hover:text-primary">
-                      {n.label}
-                    </span>
-                  </div>
-                  <ChevronRight
-                    size={16}
-                    className="text-muted-foreground transition-transform duration-200 group-hover:translate-x-1 group-hover:text-primary"
-                  />
-                </>
-              );
-
               const linkClasses =
-                "group flex items-center justify-between rounded-2xl px-4 py-3.5 transition-all duration-150 hover:bg-accent border border-transparent hover:border-border/60 active:scale-[0.99]";
+                "group flex min-h-14 items-center rounded-lg px-3 text-[15px] font-medium text-foreground transition-colors hover:bg-muted/60 hover:text-primary active:bg-muted";
 
               return "to" in n ? (
                 <Link
@@ -260,7 +226,7 @@ export function Header() {
                   onClick={() => setOpen(false)}
                   className={linkClasses}
                 >
-                  {content}
+                  {n.label}
                 </Link>
               ) : (
                 <Link
@@ -277,7 +243,7 @@ export function Header() {
                   }}
                   className={linkClasses}
                 >
-                  {content}
+                  {n.label}
                 </Link>
               );
             })}
@@ -289,20 +255,9 @@ export function Header() {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setOpen(false)}
-                className="group flex items-center justify-between rounded-2xl border border-primary/25 bg-primary/5 px-4 py-3.5 transition-all duration-150 hover:bg-primary/10 active:scale-[0.99] mt-1"
+                className="mt-3 flex min-h-12 items-center rounded-lg border-t border-border/60 px-3 pt-3 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
               >
-                <div className="flex items-center gap-3.5">
-                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-                    <FileText size={19} />
-                  </div>
-                  <span className="font-semibold text-base text-foreground transition-colors group-hover:text-primary">
-                    Télécharger mon CV
-                  </span>
-                </div>
-                <ChevronRight
-                  size={16}
-                  className="text-muted-foreground transition-transform duration-200 group-hover:translate-x-1 group-hover:text-primary"
-                />
+                Télécharger mon CV
               </a>
             )}
           </nav>

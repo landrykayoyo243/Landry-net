@@ -76,35 +76,40 @@ function APropos() {
       <main id="main">
         {/* ── 1. Hero d'introduction — Épuré & Impactant ─────────────────── */}
         <header className="relative overflow-hidden bg-hero text-ink-foreground">
-          <div className="bg-grid pointer-events-none absolute inset-0" aria-hidden />
+          <div className="bg-grid pointer-events-none absolute inset-0 opacity-30" aria-hidden />
           <div
-            className={`${container} relative grid items-center gap-12 pb-20 pt-36 sm:pt-40 md:grid-cols-[1.15fr_0.85fr] md:gap-14 md:pb-28 md:pt-48`}
+            className="pointer-events-none absolute -top-36 right-0 h-[500px] w-[500px] rounded-full bg-primary/10 blur-[140px]"
+            aria-hidden
+          />
+          <div
+            className={`${container} relative grid items-center gap-10 pb-16 pt-28 sm:pb-20 sm:pt-36 md:grid-cols-[1.15fr_0.85fr] md:gap-14 md:pb-24 md:pt-42`}
           >
-            <div>
+            {/* Colonne texte (Ordre 2 sur mobile, 1 sur desktop) */}
+            <div className="order-2 md:order-1 text-center md:text-left">
               <Link
                 to="/"
-                className={`mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-semibold text-white/90 backdrop-blur-sm transition duration-300 hover:bg-white/15 hover:text-white ${focus}`}
+                className={`mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-semibold text-white/90 backdrop-blur-sm transition duration-300 hover:bg-white/15 hover:text-white ${focus}`}
               >
                 <ArrowLeft size={14} /> {aboutPage.back}
               </Link>
 
-              <div className="mb-4 inline-flex items-center gap-3 text-xs md:text-sm font-semibold uppercase tracking-[0.22em] text-primary-glow">
-                <span className="h-[1.5px] w-7 rounded-full bg-primary-glow/70 inline-block" />
+              <div className="mb-4 inline-flex items-center gap-2.5 text-xs md:text-sm font-semibold uppercase tracking-[0.22em] text-primary-glow justify-center md:justify-start">
+                <span className="h-px w-6 sm:w-8 bg-primary-glow/70 inline-block" aria-hidden />
                 <span>{aboutPage.eyebrow}</span>
               </div>
 
-              <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-normal leading-[1.1] tracking-tight">
+              <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-normal leading-[1.12] tracking-tight text-white">
                 {aboutPage.titleLead}{" "}
-                <span className="italic font-serif text-primary-glow">
+                <span className="italic font-serif text-primary-glow block sm:inline">
                   {aboutPage.titleAccent}
                 </span>
               </h1>
 
-              <p className="mt-6 max-w-xl text-base sm:text-lg leading-relaxed text-ink-foreground/80">
+              <p className="mt-5 max-w-xl text-base sm:text-lg leading-[1.8] text-ink-foreground/80 mx-auto md:mx-0">
                 {aboutPage.intro}
               </p>
 
-              <div className="mt-8 flex flex-wrap items-center gap-3">
+              <div className="mt-8 flex flex-wrap items-center justify-center md:justify-start gap-3.5 sm:gap-4">
                 <a href="#histoire" className={btnPrimary}>
                   Découvrir mon histoire <ArrowRight size={16} />
                 </a>
@@ -113,7 +118,7 @@ function APropos() {
                     href={cvUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-md transition duration-300 hover:bg-white/20 hover:border-white/40 ${focus}`}
+                    className={`inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition duration-300 hover:bg-white/15 hover:border-white/35 ${focus}`}
                   >
                     <FileText size={16} /> Télécharger mon CV
                   </a>
@@ -121,13 +126,9 @@ function APropos() {
               </div>
             </div>
 
-            {/* Photo de profil avec badges élégants */}
-            <div className="relative mx-auto w-full max-w-[320px] sm:max-w-[340px]">
-              <div
-                className="absolute -inset-1 rounded-[2.2rem] bg-gradient-primary opacity-60 blur-2xl"
-                aria-hidden
-              />
-              <div className="relative rounded-[2rem] bg-gradient-primary p-[3px] shadow-2xl">
+            {/* Photo Mobile : Ronde épurée sans bordure épaisse (style Natacha) */}
+            <div className="order-1 mx-auto block md:hidden mb-2">
+              <div className="relative mx-auto h-52 w-52 sm:h-60 sm:w-60 rounded-full overflow-hidden shadow-2xl">
                 <picture>
                   <source srcSet={photo.webp} type="image/webp" />
                   <img
@@ -138,9 +139,30 @@ function APropos() {
                     loading="eager"
                     fetchPriority="high"
                     decoding="async"
-                    className="aspect-[4/5] w-full rounded-[1.85rem] object-cover object-[55%_25%]"
+                    className="h-full w-full rounded-full object-cover object-[52%_15%] scale-125"
                   />
-                </picture> 
+                </picture>
+              </div>
+            </div>
+
+            {/* Photo Desktop : Rectangulaire avec bords arrondis épurés */}
+            <div className="order-1 mx-auto hidden w-full md:order-2 md:block md:max-w-[360px] lg:max-w-[390px]">
+              <div className="relative">
+                <div className="relative overflow-hidden rounded-[2.2rem] sm:rounded-[2.6rem] border border-white/15 bg-white/5 p-2 sm:p-2.5 shadow-2xl backdrop-blur-md">
+                  <picture>
+                    <source srcSet={photo.webp} type="image/webp" />
+                    <img
+                      src={photo.fallback}
+                      alt="Landry Kayoyo — Administrateur systèmes & réseaux et développeur web"
+                      width={800}
+                      height={800}
+                      loading="eager"
+                      fetchPriority="high"
+                      decoding="async"
+                      className="aspect-[4/5] w-full rounded-[1.8rem] sm:rounded-[2.2rem] object-cover object-[55%_22%]"
+                    />
+                  </picture>
+                </div>
               </div>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import { SITE_URL, absoluteUrl } from "@/lib/siteConfig";
+﻿import { SITE_URL, absoluteUrl } from "@/lib/siteConfig";
 
 // Tout le contenu du site est ici : modifiez ce fichier pour mettre à jour les textes.
 const cv = { url: "/cv.pdf" };
@@ -81,12 +81,12 @@ export const conviction = {
 // Contenu de la page dédiée /a-propos inspiré d'une narration fluide et percutante.
 export const aboutPage = {
   back: "Retour à l'accueil",
-  eyebrow: "Mon histoire · Ma mission",
-  titleLead: "Bâtir des infrastructures fiables et du code moderne",
-  titleAccent: "au service des organisations.",
-  title: "Bâtir des infrastructures fiables et du code moderne au service des organisations.",
+  eyebrow: "Landry Kayoyo · Derrière la machine",
+  titleLead: "Bâtisseur de l'invisible,",
+  titleAccent: "garant de votre continuité numérique.",
+  title: "Bâtisseur de l'invisible, garant de votre continuité numérique.",
   intro:
-    "Je suis administrateur systèmes & réseaux et développeur web à Lubumbashi. J'accompagne les organisations dans la sécurisation de leurs infrastructures, la gestion de leurs parcs informatiques et la réalisation de plateformes logicielles pérennes.",
+    "Administrateur systèmes par discipline, développeur web par désir de créer. Je partage ici mon cheminement, mes racines à Lubumbashi et la façon dont je relie la technique brute aux besoins réels des organisations.",
 
   storyParagraphs: [
     "Diplômé en Administration des Systèmes et Réseaux à l'Université Don Bosco et membre technique de l'équipe XSECURITY à Lubumbashi, j'ai développé mes compétences au contact direct du terrain et des impératifs réels des entreprises.",
@@ -234,3 +234,22 @@ export const testimonials = [
   { quote: "Un technicien sérieux qui comprend à la fois le réseau et le développement. Il explique clairement ses choix.", name: "Don Moen", role: "Collègue, XSECURITY" },
   { quote: "Travail soigné, délais respectés et une vraie envie de bien faire. Je le recommande.", name: "Leader Bokassa", role: "Client" },
 ];
+
+
+// --- Section Hero (page d'accueil) ---
+export const heroSection = {
+  badge: "Administrateur Systèmes · Développeur Web",
+  titleLead: "Infrastructures fiables,",
+  titleAccent: "code créé pour durer.",
+  description: "J'aide les organisations à sécuriser leurs systèmes, gérer leurs parcs informatiques et déployer des applications web robustes.",
+  ctaPrimary: "Voir mes projets",
+  ctaSecondary: "Télécharger mon CV",
+  ctaContact: "Me contacter",
+};
+
+// --- Section Marques (BrandsMarquee) ---
+export const brandsSection = {
+  eyebrow: "Environnements d'intervention",
+  titleLead: "Ils m'ont fait",
+  titleAccent: "confiance.",
+};

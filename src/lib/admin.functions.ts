@@ -9,7 +9,7 @@ const LIMITED = "Trop de tentatives. Patientez quelques minutes avant de réessa
 
 /** Connexion admin côté serveur : limitation des tentatives + messages génériques. */
 export const adminSignIn = createServerFn({ method: "POST" })
-  .inputValidator((input: { email: string; password: string }) => ({
+  .validator((input: { email: string; password: string }) => ({
     email: String(input?.email ?? "").trim().slice(0, 254),
     password: String(input?.password ?? "").slice(0, 200),
   }))

@@ -30,7 +30,7 @@ export const listPublishedProjects = createServerFn({ method: "GET" }).handler(a
 });
 
 export const getPublishedProject = createServerFn({ method: "GET" })
-  .inputValidator((input: { slug: string }) => ({ slug: String(input.slug).slice(0, 120) }))
+  .validator((input: { slug: string }) => ({ slug: String(input.slug).slice(0, 120) }))
   .handler(async ({ data }) => {
     const { data: row, error } = await publicClient()
       .from("projects").select(projectCols)
