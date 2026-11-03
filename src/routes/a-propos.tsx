@@ -128,7 +128,7 @@ function APropos() {
 
             {/* Photo Mobile : Ronde épurée sans bordure épaisse (style Natacha) */}
             <div className="order-1 mx-auto block md:hidden mb-2">
-              <div className="relative mx-auto h-52 w-52 sm:h-60 sm:w-60 rounded-full overflow-hidden shadow-2xl">
+              <div className="relative mx-auto h-60 w-60 sm:h-68 sm:w-68 rounded-full overflow-hidden shadow-2xl">
                 <picture>
                   <source srcSet={photo.webp} type="image/webp" />
                   <img

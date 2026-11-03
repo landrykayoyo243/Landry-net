@@ -40,7 +40,8 @@ export const profile = {
   whatsapp: whatsappUrl,
   linkedin: "https://cd.linkedin.com/in/landry-kayoyo-48141534b",
   github: "https://github.com/landrykayoyo",
-  youtube: "https://share.google/6fI4VCZ680YWEZgCY",
+  youtube: "https://www.youtube.com/@LandryNet",
+  x: "https://x.com/Landrykayoyo",
   location: "Lubumbashi, RD Congo",
   cvUrl: cv.url,
 };

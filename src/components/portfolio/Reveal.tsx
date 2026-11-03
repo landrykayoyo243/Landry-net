@@ -1,30 +1,54 @@
 import { useEffect, useRef, type ReactNode } from "react";
 
-export function Reveal({ children, className = "" }: { children: ReactNode; className?: string }) {
+/**
+ * Reveal – animation d'entrée au défilement fluide et 100% non-bloquante.
+ * Garantit que le contenu est TOUJOURS visible au chargement ou rafraîchissement.
+ */
+export function Reveal({
+  children,
+  className = "",
+  delay = 0,
+}: {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+  from?: "bottom" | "left" | "right" | "scale";
+}) {
   const ref = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
 
-    // Immédiatement visible si déjà dans le viewport ou proche
+    // Si l'élément est déjà dans le champ de vision au chargement :
+    // On ne fait RIEN : il reste affiché immédiatement, sans aucun clignotement ni disparition !
     const rect = el.getBoundingClientRect();
-    if (rect.top < window.innerHeight + 100 && rect.bottom > -100) {
-      el.classList.add("is-visible");
+    if (rect.top < window.innerHeight) {
       return;
     }
 
+    // Uniquement pour les éléments situés plus bas dans la page :
+    el.classList.add("reveal-pending");
+
     const io = new IntersectionObserver(
-      ([e]) => {
-        if (e?.isIntersecting) {
-          el.classList.add("is-visible");
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          if (delay > 0) {
+            setTimeout(() => {
+              el?.classList.add("is-visible");
+            }, delay);
+          } else {
+            el.classList.add("is-visible");
+          }
           io.disconnect();
         }
       },
-      { threshold: 0.05, rootMargin: "140px" },
+      { threshold: 0.05, rootMargin: "60px" },
     );
     io.observe(el);
     return () => io.disconnect();
-  }, []);
+  }, [delay]);
+
   return (
     <div ref={ref} className={`reveal ${className}`}>
       {children}

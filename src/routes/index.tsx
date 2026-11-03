@@ -17,10 +17,13 @@ import { Footer } from "@/components/portfolio/Footer";
 import { Button } from "@/components/ui/button";
 import { Reveal, SectionHeading } from "@/components/portfolio/Reveal";
 import { ProjectCard } from "@/components/portfolio/ProjectCard";
+import { AnimatedStats } from "@/components/portfolio/AnimatedStats";
 import { useQuery } from "@tanstack/react-query";
 import { ContentError, ContentLoading } from "@/components/portfolio/ContentState";
 import {
+  certificationsQuery,
   cvUrlQuery,
+  experiencesQuery,
   immersionQuery,
   projectsQuery,
 } from "@/lib/content.queries";
@@ -30,7 +33,7 @@ import { absoluteUrl, getOptimizedImageUrl } from "@/lib/siteConfig";
 
 const photo = {
   webp: "/landry-a-propos.webp",
-  fallback: "/landry-a-propos.jpg",
+  fallback: "/landry-a-propos.png",
 };
 
 const TITLE = "Landry Kayoyo — Administrateur systèmes & réseaux | Développeur web";
@@ -61,6 +64,8 @@ export const Route = createFileRoute("/")({
   loader: ({ context }) =>
     Promise.all([
       context.queryClient.prefetchQuery(projectsQuery),
+      context.queryClient.prefetchQuery(certificationsQuery),
+      context.queryClient.prefetchQuery(experiencesQuery),
       context.queryClient.prefetchQuery(immersionQuery),
       context.queryClient.prefetchQuery(cvUrlQuery),
     ]),
@@ -76,20 +81,26 @@ const container = "mx-auto w-full max-w-6xl px-5 md:px-8";
 function Hero({ cvUrl }: { cvUrl: string | null }) {
   return (
     <section className="relative overflow-hidden bg-hero text-ink-foreground">
-      {/* Légère grille d'infrastructure discrète */}
+      {/* Grille d'infrastructure discrète */}
       <div className="bg-grid pointer-events-none absolute inset-0 opacity-30" aria-hidden />
 
-      {/* Aura lumineuse subtile en fond */}
+      {/* Aura lumineuse en fond */}
       <div
-        className="pointer-events-none absolute -top-36 right-0 h-[500px] w-[500px] rounded-full bg-primary/10 blur-[140px]"
+        className="pointer-events-none absolute -top-36 right-0 h-[520px] w-[520px] rounded-full bg-primary/10 blur-[140px] animate-aura"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute bottom-0 left-0 h-[360px] w-[360px] rounded-full bg-primary-glow/6 blur-[110px] animate-aura"
+        style={{ animationDelay: "3s" }}
         aria-hidden
       />
 
-      <div className={`${container} relative pb-16 pt-28 sm:pb-20 sm:pt-36 md:pb-24 md:pt-42`}>
+      <div className={`${container} relative pb-16 pt-24 sm:pb-20 sm:pt-32 md:pb-24 md:pt-36`}>
         <div className="grid items-center gap-10 md:grid-cols-[1.15fr_0.85fr] lg:gap-16">
-          {/* Colonne texte (Ordre 2 sur mobile, 1 sur desktop) */}
+
+          {/* ── Colonne texte (immédiate, solide, zéro disparition) ── */}
           <div className="order-2 md:order-1 text-center md:text-left">
-            {/* Surtitre sobre et aéré */}
+            {/* Surtitre */}
             <p className="mb-4 inline-flex items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.22em] text-primary-glow sm:text-sm justify-center md:justify-start">
               <span className="h-px w-6 sm:w-8 bg-primary-glow/70 inline-block" aria-hidden />
               <span>{heroSection.badge}</span>
@@ -103,12 +114,12 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
               </span>
             </h1>
 
-            {/* Description claire et découpée */}
-            <p className="mt-5 max-w-xl text-base sm:text-lg leading-[1.8] text-ink-foreground/80 mx-auto md:mx-0">
+            {/* Description claire */}
+            <p className="mt-5 max-w-xl text-base sm:text-lg leading-[1.8] text-ink-foreground/85 mx-auto md:mx-0">
               {heroSection.description}
             </p>
 
-            {/* Boutons d'action aérés et équilibrés */}
+            {/* Boutons CTA d'action */}
             <div className="mt-8 flex flex-wrap items-center justify-center md:justify-start gap-3.5 sm:gap-4">
               <Link to="/projets" className={btnPrimary}>
                 {heroSection.ctaPrimary} <ArrowRight size={16} />
@@ -125,16 +136,61 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
               )}
               <Link
                 to="/contact"
-                className={`inline-flex items-center gap-1.5 rounded-full px-4 py-3 text-sm font-medium text-white/75 hover:text-white transition hover:bg-white/10 ${focus}`}
+                className={`inline-flex items-center gap-1.5 rounded-full px-4 py-3 text-sm font-medium text-white/80 hover:text-white transition hover:bg-white/10 ${focus}`}
               >
                 <Mail size={15} /> {heroSection.ctaContact}
               </Link>
             </div>
+
+            {/* Liens réseaux sociaux */}
+            <div className="mt-7 flex flex-wrap items-center justify-center gap-3 text-ink-foreground/70 md:justify-start">
+              
+              <a
+                href={profile.linkedin}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="LinkedIn de Landry Kayoyo"
+                title="LinkedIn"
+                className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}
+              >
+                <Linkedin size={16} aria-hidden />
+              </a>
+              <a
+                href={profile.github}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="GitHub de Landry Kayoyo"
+                title="GitHub"
+                className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}
+              >
+                <Github size={16} aria-hidden />
+              </a>
+              <a
+                href={profile.youtube}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="YouTube de Landry Kayoyo"
+                title="YouTube"
+                className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}
+              >
+                <Youtube size={16} aria-hidden />
+              </a>
+              <a
+                href={profile.x}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Profil X de Landry Kayoyo"
+                title="X"
+                className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 text-sm font-semibold transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}
+              >
+                𝕏
+              </a>
+            </div>
           </div>
 
-          {/* Colonne photo Mobile : Ronde épurée, agrandie et sans bordure épaisse (style Natacha) */}
+          {/* ── Photo Mobile : Grand cercle épuré sans bordure épaisse (style Natacha) ── */}
           <div className="order-1 mx-auto block md:hidden mb-2">
-            <div className="relative mx-auto h-52 w-52 sm:h-60 sm:w-60 rounded-full overflow-hidden shadow-2xl">
+            <div className="relative mx-auto h-60 w-60 sm:h-68 sm:w-68 rounded-full overflow-hidden shadow-2xl">
               <picture>
                 <source srcSet={photo.webp} type="image/webp" />
                 <img
@@ -151,7 +207,7 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
             </div>
           </div>
 
-          {/* Colonne photo Desktop : Rectangulaire avec bords arrondis préservée */}
+          {/* ── Photo Desktop : Rectangle moderne aux bords arrondis ── */}
           <div className="order-1 mx-auto hidden w-full md:order-2 md:block md:max-w-[370px] lg:max-w-[400px]">
             <div className="relative">
               <div className="relative overflow-hidden rounded-[2.2rem] sm:rounded-[2.6rem] border border-white/15 bg-white/5 p-2 sm:p-2.5 shadow-2xl backdrop-blur-md">
@@ -171,6 +227,33 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
               </div>
             </div>
           </div>
+
+        </div>
+
+        {/* ── Indicateur de scroll discret ── */}
+        <div className="mt-12 hidden md:flex justify-center">
+          <a
+            href="#competences"
+            aria-label="Découvrir la suite"
+            className={`flex flex-col items-center gap-1.5 text-white/40 hover:text-white/75 transition-colors duration-300 ${focus}`}
+          >
+            <span className="text-[10px] font-semibold uppercase tracking-[0.2em]">Découvrir</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="animate-scroll-bounce"
+              aria-hidden
+            >
+              <path d="M12 5v14M5 12l7 7 7-7" />
+            </svg>
+          </a>
         </div>
       </div>
     </section>
@@ -217,6 +300,23 @@ function Index() {
           </div>
         </section>
 
+        {/* Repères chiffrés issus des contenus publiés */}
+        <section className="border-b border-border bg-background py-12 sm:py-16">
+          <div className={`${container} max-w-5xl`}>
+            <Reveal className="mb-7 text-center sm:mb-9">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+                Repères concrets
+              </p>
+              <h2 className="mt-2 font-serif text-2xl font-medium tracking-tight text-foreground sm:text-3xl">
+                L’expérience en quelques chiffres
+              </h2>
+            </Reveal>
+            <Reveal>
+              <AnimatedStats />
+            </Reveal>
+          </div>
+        </section>
+
         {/* Expertise — trois domaines complémentaires */}
         <section id="competences" className="scroll-mt-24 border-b border-border bg-muted/30 py-20 md:py-28">
           <div className={container}>
@@ -232,7 +332,7 @@ function Index() {
               {aboutPage.pillars.items.map((item, i) => {
                 const Icon = [Network, ShieldCheck, Code2][i];
                 return (
-                  <Reveal key={item.title}>
+                  <Reveal key={item.title} delay={i * 110}>
                     <div className="pillar-card flex h-full flex-col rounded-[28px] border border-border/70 bg-card p-7 sm:p-8 shadow-xs">
                       <div>
                         <div className="flex items-center justify-between">
@@ -336,8 +436,8 @@ function Index() {
             ) : (
               <>
                 <div className="grid gap-7 lg:gap-8 md:grid-cols-2">
-                  {featured.slice(0, 3).map((p) => (
-                    <Reveal key={p.slug}>
+                  {featured.slice(0, 3).map((p, i) => (
+                    <Reveal key={p.slug} delay={i * 100}>
                       <ProjectCard p={p} />
                     </Reveal>
                   ))}
