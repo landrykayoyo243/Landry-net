@@ -13,6 +13,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { NotFoundPage, ServerErrorPage } from "@/components/portfolio/ErrorPage";
 import { ImageFallback, OfflineBanner } from "@/components/portfolio/AppStatus";
 import { isPreviewDeployment } from "@/lib/siteConfig";
+import { DEFAULT_ROBOTS } from "@/lib/seo";
 
 function NotFoundComponent() {
   return <NotFoundPage />;
@@ -31,12 +32,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      { name: "theme-color", content: "#070c18" },
+      { name: "color-scheme", content: "dark light" },
       { name: "author", content: "Landry Kayoyo" },
       { property: "og:type", content: "website" },
-      { property: "og:site_name", content: "Landry Kayoyo" },
+      { name: "creator", content: "Landry Kayoyo" },
+      { property: "og:site_name", content: "Landry Net" },
+      { property: "og:locale", content: "fr_FR" },
+      { name: "twitter:site", content: "@Landrykayoyo" },
+      { name: "twitter:creator", content: "@Landrykayoyo" },
+      { name: "format-detection", content: "telephone=no" },
       { name: "google-site-verification", content: "7i407FtKGpD5q2BAf_JbE73Wc2niO1tXYjZ5n8sxq1I" },
-      ...(isPreviewDeployment ? [{ name: "robots", content: "noindex, nofollow" }] : []),
+      {
+        name: "robots",
+        content: isPreviewDeployment ? "noindex, nofollow" : DEFAULT_ROBOTS,
+      },
     ],
     scripts: [
       {

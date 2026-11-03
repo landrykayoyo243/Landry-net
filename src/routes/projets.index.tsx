@@ -9,15 +9,20 @@ import { ContentError, ContentLoading } from "@/components/portfolio/ContentStat
 import { projectsQuery } from "@/lib/content.queries";
 import { shareImage } from "@/content/portfolio";
 import { absoluteUrl } from "@/lib/siteConfig";
+import { buildBreadcrumbSchema } from "@/lib/seo";
 
-const TITLE = "Tous les projets — Landry Kayoyo";
-const DESC = "Toutes les réalisations et études de cas de Landry Kayoyo : haute disponibilité, réseaux résilients, sécurité et plateformes web modernes.";
+const TITLE = "Réalisations & Projets — Landry Kayoyo | Réseaux & Web";
+const DESC =
+  "Découvrez les réalisations techniques de Landry Kayoyo : infrastructures réseau résilientes, haute disponibilité, cybersécurité et applications web déployées.";
+const KEYWORDS =
+  "Projets Landry Kayoyo, Réalisations réseaux Lubumbashi, Études de cas Cisco, PayLix, XSECURITY, Développeur web portfolio RDC";
 
 export const Route = createFileRoute("/projets/")({
   head: () => ({
     meta: [
       { title: TITLE },
       { name: "description", content: DESC },
+      { name: "keywords", content: KEYWORDS },
       { property: "og:title", content: TITLE },
       { property: "og:description", content: DESC },
       { property: "og:type", content: "website" },
@@ -33,6 +38,17 @@ export const Route = createFileRoute("/projets/")({
       { name: "twitter:image:alt", content: shareImage.alt },
     ],
     links: [{ rel: "canonical", href: absoluteUrl("/projets") }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(
+          buildBreadcrumbSchema([
+            { name: "Accueil", path: "/" },
+            { name: "Projets", path: "/projets" },
+          ])
+        ),
+      },
+    ],
   }),
   loader: ({ context }) => context.queryClient.prefetchQuery(projectsQuery),
   component: ProjectsPage,

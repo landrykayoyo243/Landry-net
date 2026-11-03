@@ -16,20 +16,25 @@ import { useQuery } from "@tanstack/react-query";
 import { cvUrlQuery } from "@/lib/content.queries";
 import { aboutPage, profile, shareImage } from "@/content/portfolio";
 import { absoluteUrl } from "@/lib/siteConfig";
+import { buildBreadcrumbSchema, buildPersonSchema } from "@/lib/seo";
 
 const photo = {
   webp: "/landry-a-propos.webp",
   fallback: "/landry-a-propos.jpg",
 };
 
-const TITLE = "Mon histoire — Landry Kayoyo | Administrateur systèmes & réseaux | Développeur web";
-const DESC = "Découvrez le parcours, la vision et les expertises de Landry Kayoyo — administrateur systèmes & réseaux et développeur web à Lubumbashi, RD Congo.";
+const TITLE = "À propos & Mon Histoire — Landry Kayoyo | Systèmes, Réseaux & Web";
+const DESC =
+  "Découvrez le parcours de Landry Kayoyo à Lubumbashi (RDC) : formation Cisco & systèmes à Don Bosco, immersion terrain chez XSECURITY et vision des infrastructures modernes.";
+const KEYWORDS =
+  "Landry Kayoyo parcours, Don Bosco Lubumbashi, XSECURITY Lubumbashi, Administrateur systèmes Congo, Ingénieur réseau Lubumbashi, Développeur web RDC";
 
 export const Route = createFileRoute("/a-propos")({
   head: () => ({
     meta: [
       { title: TITLE },
       { name: "description", content: DESC },
+      { name: "keywords", content: KEYWORDS },
       { property: "og:title", content: TITLE },
       { property: "og:description", content: DESC },
       { property: "og:type", content: "profile" },
@@ -45,6 +50,25 @@ export const Route = createFileRoute("/a-propos")({
       { name: "twitter:image:alt", content: shareImage.alt },
     ],
     links: [{ rel: "canonical", href: absoluteUrl("/a-propos") }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(
+          buildBreadcrumbSchema([
+            { name: "Accueil", path: "/" },
+            { name: "À propos", path: "/a-propos" },
+          ])
+        ),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ProfilePage",
+          mainEntity: buildPersonSchema(),
+        }),
+      },
+    ],
   }),
   loader: ({ context }) =>
     Promise.all([

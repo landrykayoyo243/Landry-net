@@ -5,16 +5,20 @@ import { Footer } from "@/components/portfolio/Footer";
 import { ContactForm } from "@/components/portfolio/ContactForm";
 import { profile, shareImage } from "@/content/portfolio";
 import { absoluteUrl } from "@/lib/siteConfig";
+import { buildBreadcrumbSchema } from "@/lib/seo";
 
-const TITLE = "Contact — Landry Kayoyo | Administrateur systèmes & réseaux";
+const TITLE = "Contact — Landry Kayoyo | Systèmes, Réseaux & Web à Lubumbashi";
 const DESC =
-  "Contactez Landry Kayoyo pour vos projets d'infrastructures réseaux, haute disponibilité, cybersécurité et applications web.";
+  "Contactez Landry Kayoyo pour vos besoins en administration systèmes, réseaux, cybersécurité ou développement d'applications web. Échangeons via WhatsApp ou email.";
+const KEYWORDS =
+  "Contact Landry Kayoyo, Recruter administrateur réseau Lubumbashi, Développeur web RDC contact, WhatsApp Landry Kayoyo";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
       { title: TITLE },
       { name: "description", content: DESC },
+      { name: "keywords", content: KEYWORDS },
       { property: "og:title", content: TITLE },
       { property: "og:description", content: DESC },
       { property: "og:type", content: "website" },
@@ -30,6 +34,27 @@ export const Route = createFileRoute("/contact")({
       { name: "twitter:image:alt", content: shareImage.alt },
     ],
     links: [{ rel: "canonical", href: absoluteUrl("/contact") }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(
+          buildBreadcrumbSchema([
+            { name: "Accueil", path: "/" },
+            { name: "Contact", path: "/contact" },
+          ])
+        ),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ContactPage",
+          name: TITLE,
+          description: DESC,
+          url: absoluteUrl("/contact"),
+        }),
+      },
+    ],
   }),
   component: ContactPage,
 });

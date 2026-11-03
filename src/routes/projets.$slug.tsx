@@ -11,6 +11,7 @@ import { parseBlocks } from "@/lib/blocks";
 import { projectQuery, projectsQuery } from "@/lib/content.queries";
 import { profile, projectPage as copy, shareImage } from "@/content/portfolio";
 import { absoluteUrl, getOptimizedImageUrl, getOptimizedOgImageUrl } from "@/lib/siteConfig";
+import { buildBreadcrumbSchema, buildProjectSchema } from "@/lib/seo";
 import { getRelatedProjects } from "@/lib/project-similarity";
 
 export const Route = createFileRoute("/projets/$slug")({
@@ -56,6 +57,24 @@ export const Route = createFileRoute("/projets/$slug")({
         ...(!isFound ? [{ name: "robots", content: "noindex, nofollow" }] : []),
       ],
       links: [{ rel: "canonical", href: projectUrl }],
+      scripts: isFound
+        ? [
+            {
+              type: "application/ld+json",
+              children: JSON.stringify(
+                buildBreadcrumbSchema([
+                  { name: "Accueil", path: "/" },
+                  { name: "Projets", path: "/projets" },
+                  { name: loaderData.title, path: `/projets/${params.slug}` },
+                ])
+              ),
+            },
+            {
+              type: "application/ld+json",
+              children: JSON.stringify(buildProjectSchema(loaderData)),
+            },
+          ]
+        : [],
     };
   },
   component: ProjectDetail,

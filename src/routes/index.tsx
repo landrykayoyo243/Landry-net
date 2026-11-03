@@ -30,21 +30,25 @@ import {
 import { about, aboutPage, conviction, heroSection, profile, shareImage } from "@/content/portfolio";
 import { BrandsMarquee } from "@/components/portfolio/BrandsMarquee";
 import { absoluteUrl, getOptimizedImageUrl } from "@/lib/siteConfig";
+import { buildPersonSchema, buildWebSiteSchema } from "@/lib/seo";
 
 const photo = {
   webp: "/landry-a-propos.webp",
   fallback: "/landry-a-propos.png",
 };
 
-const TITLE = "Landry Kayoyo — Administrateur systèmes & réseaux | Développeur web";
+const TITLE = "Landry Kayoyo — Administrateur Systèmes & Réseaux, Développeur Web | Lubumbashi";
 const DESC =
-  "Portfolio de Landry Kayoyo, administrateur systèmes et réseaux et développeur web à Lubumbashi : réseaux, haute disponibilité, sécurité et applications web.";
+  "Portfolio officiel de Landry Kayoyo à Lubumbashi (RDC) : conception d'infrastructures informatiques fiables, haute disponibilité, cybersécurité et applications web modernes.";
+const KEYWORDS =
+  "Landry Kayoyo, Landry Net, Administrateur systèmes Lubumbashi, Administrateur réseaux RDC, Développeur web Lubumbashi, Cisco CCNA, Linux Ubuntu, Windows Server, Haute disponibilité, Cybersécurité, PayLix, XSECURITY";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: TITLE },
       { name: "description", content: DESC },
+      { name: "keywords", content: KEYWORDS },
       { property: "og:title", content: TITLE },
       { property: "og:description", content: DESC },
       { property: "og:type", content: "website" },
@@ -60,6 +64,16 @@ export const Route = createFileRoute("/")({
       { name: "twitter:image:alt", content: shareImage.alt },
     ],
     links: [{ rel: "canonical", href: absoluteUrl("/") }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(buildPersonSchema()),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(buildWebSiteSchema()),
+      },
+    ],
   }),
   loader: ({ context }) =>
     Promise.all([
@@ -372,15 +386,18 @@ function Index() {
                 {/* Colonne gauche : Portrait éditorial */}
                 <div className="relative mx-auto w-full max-w-[340px] sm:max-w-[400px] lg:max-w-none">
                   <div className="relative aspect-[4/5] overflow-hidden rounded-[28px] border border-border/80 bg-muted/40 shadow-md">
-                    <img
-                      src="/Profil & Conviction.jpg"
-                      alt="Landry Kayoyo — Mon histoire"
-                      width={700}
-                      height={800}
-                      loading="lazy"
-                      decoding="async"
-                      className="absolute inset-0 h-full w-full object-cover object-[50%_25%]"
-                    />
+                    <picture>
+                      <source srcSet="/profil-conviction.webp" type="image/webp" />
+                      <img
+                        src="/Profil%20%26%20Conviction.jpg"
+                        alt="Landry Kayoyo — Mon histoire"
+                        width={700}
+                        height={800}
+                        loading="lazy"
+                        decoding="async"
+                        className="absolute inset-0 h-full w-full object-cover object-[50%_25%]"
+                      />
+                    </picture>
                   </div>
                 </div>
 
