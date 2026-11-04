@@ -34,14 +34,14 @@ import { buildPersonSchema, buildWebSiteSchema } from "@/lib/seo";
 
 const photo = {
   webp: "/landry-a-propos.webp",
-  fallback: "/landry-a-propos.png",
+  fallback: "/landry-a-propos.jpg",
 };
 
 const TITLE = "Landry Kayoyo — Administrateur Systèmes & Réseaux, Développeur Web | Lubumbashi";
 const DESC =
   "Portfolio officiel de Landry Kayoyo à Lubumbashi (RDC) : conception d'infrastructures informatiques fiables, haute disponibilité, cybersécurité et applications web modernes.";
 const KEYWORDS =
-  "Landry Kayoyo, Landry Net, Administrateur systèmes Lubumbashi, Administrateur réseaux RDC, Développeur web Lubumbashi, Cisco CCNA, Linux Ubuntu, Windows Server, Haute disponibilité, Cybersécurité, PayLix, XSECURITY";
+  "Landry Kayoyo, Landry Net, Administrateur systèmes Lubumbashi, Administrateur réseaux RDC, Développeur web Lubumbashi, Cisco CCNA, Linux Ubuntu, Windows Server, Haute disponibilité, Cybersécurité, Infrastructure, Support IT";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -89,16 +89,13 @@ export const Route = createFileRoute("/")({
 const focus =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
 const btnPrimary = `inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-glow transition duration-300 hover:brightness-110 ${focus}`;
-const btnGhostDark = `inline-flex items-center justify-center gap-2 rounded-full border border-ink-foreground/20 bg-ink-foreground/5 px-6 py-3.5 text-sm font-semibold text-ink-foreground backdrop-blur-sm transition duration-300 hover:bg-ink-foreground/15 hover:border-ink-foreground/35 ${focus}`;
+const btnGhostDark = `inline-flex items-center justify-center gap-2 rounded-full border border-ink-foreground/20 bg-ink-foreground/5 px-6 py-3.5 text-sm font-semibold text-ink-foreground backdrop-blur-sm transition duration-300 hover:bg-ink-foreground/10 ${focus}`;
 const container = "mx-auto w-full max-w-6xl px-5 md:px-8";
 
 function Hero({ cvUrl }: { cvUrl: string | null }) {
   return (
     <section className="relative overflow-hidden bg-hero text-ink-foreground">
-      {/* Grille d'infrastructure discrète */}
       <div className="bg-grid pointer-events-none absolute inset-0 opacity-30" aria-hidden />
-
-      {/* Aura lumineuse en fond */}
       <div
         className="pointer-events-none absolute -top-36 right-0 h-[520px] w-[520px] rounded-full bg-primary/10 blur-[140px] animate-aura"
         aria-hidden
@@ -111,16 +108,12 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
 
       <div className={`${container} relative pb-16 pt-24 sm:pb-20 sm:pt-32 md:pb-24 md:pt-36`}>
         <div className="grid items-center gap-10 md:grid-cols-[1.15fr_0.85fr] lg:gap-16">
-
-          {/* ── Colonne texte (immédiate, solide, zéro disparition) ── */}
           <div className="order-2 md:order-1 text-center md:text-left">
-            {/* Surtitre */}
             <p className="mb-4 inline-flex items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.22em] text-primary-glow sm:text-sm justify-center md:justify-start">
               <span className="h-px w-6 sm:w-8 bg-primary-glow/70 inline-block" aria-hidden />
               <span>{heroSection.badge}</span>
             </p>
 
-            {/* Grand titre noble et aéré */}
             <h1 className="max-w-3xl font-serif text-3xl sm:text-4xl md:text-5xl lg:text-[3.35rem] font-normal leading-[1.12] tracking-tight text-white">
               {heroSection.titleLead}{" "}
               <span className="italic font-serif text-primary-glow block sm:inline">
@@ -128,12 +121,10 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
               </span>
             </h1>
 
-            {/* Description claire */}
             <p className="mt-5 max-w-xl text-base sm:text-lg leading-[1.8] text-ink-foreground/85 mx-auto md:mx-0">
               {heroSection.description}
             </p>
 
-            {/* Boutons CTA d'action */}
             <div className="mt-8 flex flex-wrap items-center justify-center md:justify-start gap-3.5 sm:gap-4">
               <Link to="/projets" className={btnPrimary}>
                 {heroSection.ctaPrimary} <ArrowRight size={16} />
@@ -156,9 +147,7 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
               </Link>
             </div>
 
-            {/* Liens réseaux sociaux */}
             <div className="mt-7 flex flex-wrap items-center justify-center gap-3 text-ink-foreground/70 md:justify-start">
-              
               <a
                 href={profile.linkedin}
                 target="_blank"
@@ -202,7 +191,6 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
             </div>
           </div>
 
-          {/* ── Photo Mobile : Grand cercle épuré sans bordure épaisse (style Natacha) ── */}
           <div className="order-1 mx-auto block md:hidden mb-2">
             <div className="relative mx-auto h-60 w-60 sm:h-68 sm:w-68 rounded-full overflow-hidden shadow-2xl">
               <picture>
@@ -221,7 +209,6 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
             </div>
           </div>
 
-          {/* ── Photo Desktop : Rectangle moderne aux bords arrondis ── */}
           <div className="order-1 mx-auto hidden w-full md:order-2 md:block md:max-w-[370px] lg:max-w-[400px]">
             <div className="relative">
               <div className="relative overflow-hidden rounded-[2.2rem] sm:rounded-[2.6rem] border border-white/15 bg-white/5 p-2 sm:p-2.5 shadow-2xl backdrop-blur-md">
@@ -241,10 +228,8 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
               </div>
             </div>
           </div>
-
         </div>
 
-        {/* ── Indicateur de scroll discret ── */}
         <div className="mt-12 hidden md:flex justify-center">
           <a
             href="#competences"
@@ -293,10 +278,8 @@ function Index() {
       </a>
       <Header />
       <main id="main">
-        {/* Hero d'accueil */}
         <Hero cvUrl={cvUrl} />
 
-        {/* Conviction & Philosophie */}
         <section className="relative overflow-hidden border-b border-border bg-card py-14 md:py-20">
           <div className={`${container} text-center`}>
             <Reveal className="mx-auto max-w-3xl">
@@ -314,7 +297,6 @@ function Index() {
           </div>
         </section>
 
-        {/* Repères chiffrés issus des contenus publiés */}
         <section className="border-b border-border bg-background py-12 sm:py-16">
           <div className={`${container} max-w-5xl`}>
             <Reveal className="mb-7 text-center sm:mb-9">
@@ -331,7 +313,6 @@ function Index() {
           </div>
         </section>
 
-        {/* Expertise — trois domaines complémentaires */}
         <section id="competences" className="scroll-mt-24 border-b border-border bg-muted/30 py-20 md:py-28">
           <div className={container}>
             <Reveal>
@@ -378,16 +359,14 @@ function Index() {
           </div>
         </section>
 
-        {/* Mon histoire — introduction, le parcours détaillé reste sur À propos */}
         <section id="apropos" className="scroll-mt-24 py-20 md:py-28 border-b border-border bg-background">
           <div className={container}>
             <Reveal>
               <div className="grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
-                {/* Colonne gauche : Portrait éditorial */}
                 <div className="relative mx-auto w-full max-w-[340px] sm:max-w-[400px] lg:max-w-none">
                   <div className="relative aspect-[4/5] overflow-hidden rounded-[28px] border border-border/80 bg-muted/40 shadow-md">
                     <picture>
-                      <source srcSet="/profil-conviction.webp" type="image/webp" />
+                      <source srcSet="/Profil%20%26%20Conviction.webp" type="image/webp" />
                       <img
                         src="/Profil%20%26%20Conviction.jpg"
                         alt="Landry Kayoyo — Mon histoire"
@@ -401,7 +380,6 @@ function Index() {
                   </div>
                 </div>
 
-                {/* Colonne droite : récit concis et lien vers la page dédiée */}
                 <div className="mx-auto w-full max-w-2xl lg:mx-0">
                   <div className="mb-5 inline-flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">
                     <span className="h-px w-7 rounded-full bg-primary/80" aria-hidden="true" />
@@ -435,7 +413,6 @@ function Index() {
           </div>
         </section>
 
-        {/* 04 · Projets clés */}
         <section id="projets" className="scroll-mt-24 py-20 md:py-28 border-b border-border bg-card">
           <div className={container}>
             <Reveal>
@@ -477,7 +454,6 @@ function Index() {
           </div>
         </section>
 
-        {/* Immersion — aperçus du travail et des projets sur le terrain */}
         {immersionItems.length > 0 && (
           <section id="immersion" className="scroll-mt-24 border-b border-border bg-muted/30 py-20 md:py-28">
             <div className={container}>
@@ -517,10 +493,8 @@ function Index() {
           </section>
         )}
 
-        {/* Partenaires & références — bandeau discret */}
         <BrandsMarquee />
 
-        {/* 09 · Appel à l'action / Contact */}
         <section id="contact" className="relative overflow-hidden bg-hero py-20 text-ink-foreground md:py-28">
           <div className="bg-grid pointer-events-none absolute inset-0" aria-hidden />
           <div className={`${container} relative text-center`}>
@@ -533,7 +507,7 @@ function Index() {
                 <span className="italic font-serif text-primary-glow">durable</span>.
               </h2>
               <p className="mt-5 text-base sm:text-lg leading-relaxed text-ink-foreground/75 max-w-xl mx-auto">
-                Que vous ayez un réseau à installer, des données à sécuriser ou une application web à développer, échangeons sur votre besoin. Basé à Lubumbashi, j’accompagne les organisations sur leurs projets numériques.
+                Que vous ayez un réseau à installer, des données à sécuriser ou une application web à développer, échangeons sur votre besoin. Basé à Lubumbashi, j’accompagne les organisations et les entrepreneurs dans la mise en place d’outils fiables et efficaces.
               </p>
               <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link to="/contact" className={btnPrimary}>
@@ -557,3 +531,4 @@ function Index() {
     </div>
   );
 }
+
