@@ -294,15 +294,6 @@ function BlogPostDetail() {
               ))}
             </div>
           )}
-
-          {/* Bouton retour vers la liste */}
-          <div className="mt-12 pt-6 border-t border-border flex items-center justify-between">
-            <Button asChild variant="outline" size="sm" className="rounded-full gap-2 cursor-pointer">
-              <Link to="/blog">
-                <ArrowLeft size={14} /> Retour à tous les articles
-              </Link>
-            </Button>
-          </div>
         </article>
 
         {/* Section Dernières publications */}
