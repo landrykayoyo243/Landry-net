@@ -90,6 +90,10 @@ function AdminBlogIndex() {
     toast.success(newStatus === "published" ? "Article publié en ligne !" : "Article mis en brouillon.");
   }
 
+  function openEditor(id: string) {
+    void navigate({ to: "/admin/blog/$id", params: { id } });
+  }
+
   return (
     <div className="space-y-6">
       {/* En-tête */}
@@ -152,7 +156,21 @@ function AdminBlogIndex() {
       ) : (
         <div className="rounded-2xl border border-border bg-card overflow-hidden divide-y divide-border/60 shadow-xs">
           {posts.map((post) => (
-            <div key={post.id} className="flex items-center gap-4 px-4 py-3.5 hover:bg-muted/30 transition-colors group">
+            <div
+              key={post.id}
+              role="button"
+              tabIndex={0}
+              aria-label={`Modifier l'article ${post.title || "sans titre"}`}
+              onClick={() => openEditor(post.id)}
+              onKeyDown={(e) => {
+                if (e.target !== e.currentTarget) return;
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  openEditor(post.id);
+                }
+              }}
+              className="flex items-center gap-4 px-4 py-3.5 hover:bg-muted/30 transition-colors group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
+            >
               {/* Miniature */}
               <div className="shrink-0 w-16 h-11 rounded-lg overflow-hidden border border-border bg-muted">
                 {post.cover_url ? (
@@ -200,15 +218,20 @@ function AdminBlogIndex() {
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+              <div
+                className="flex items-center gap-1 shrink-0"
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
+              >
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
                   disabled={togglingId === post.id}
                   onClick={() => handleToggleStatus(post.id, post.status)}
-                  className="h-8 w-8 cursor-pointer"
+                  className="h-9 w-9 cursor-pointer"
                   title={post.status === "published" ? "Mettre en brouillon" : "Publier"}
+                  aria-label={post.status === "published" ? "Mettre en brouillon" : "Publier l'article"}
                 >
                   {togglingId === post.id ? (
                     <Loader2 size={14} className="animate-spin" />
@@ -223,9 +246,10 @@ function AdminBlogIndex() {
                   type="button"
                   variant="ghost"
                   size="icon"
-                  onClick={() => navigate({ to: "/admin/blog/$id", params: { id: post.id } })}
-                  className="h-8 w-8 cursor-pointer"
+                  onClick={() => openEditor(post.id)}
+                  className="h-9 w-9 cursor-pointer"
                   title="Modifier l'article"
+                  aria-label="Modifier l'article"
                 >
                   <Pencil size={14} />
                 </Button>
@@ -235,8 +259,9 @@ function AdminBlogIndex() {
                   variant="ghost"
                   size="icon"
                   onClick={() => setDeletingId(post.id)}
-                  className="h-8 w-8 text-destructive hover:bg-destructive/10 cursor-pointer"
+                  className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
                   title="Supprimer l'article"
+                  aria-label="Supprimer l'article"
                 >
                   <Trash2 size={14} />
                 </Button>
