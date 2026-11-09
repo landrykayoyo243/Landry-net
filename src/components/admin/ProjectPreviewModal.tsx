@@ -7,6 +7,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight, Github, Globe, Sparkles, X } from "lucide-react";
 import { sanitizeProjectHtml } from "@/lib/project-content";
+import { removeCoverImageFromHtml, stripSignatureFromHtml } from "@/lib/blog-content";
+import { LandrySignature } from "@/components/LandrySignature";
 import type { ProjectSidePanelData } from "./ProjectSidePanel";
 
 export function ProjectPreviewModal({
@@ -15,13 +17,16 @@ export function ProjectPreviewModal({
   title,
   htmlContent,
   settings,
+  entityType = "project",
 }: {
   open: boolean;
   onClose: () => void;
   title: string;
   htmlContent: string;
   settings: ProjectSidePanelData;
+  entityType?: "project" | "blog";
 }) {
+  const isBlog = entityType === "blog";
   const cleanHtml = useMemo(() => sanitizeProjectHtml(htmlContent), [htmlContent]);
   const container = "mx-auto w-full max-w-5xl px-4 sm:px-6 md:px-8";
 
@@ -34,63 +39,12 @@ export function ProjectPreviewModal({
 
   // Déduplication stricte : si l'affiche est présentée en haut à sa manière,
   // on retire son double dans le corps du texte pour ne jamais avoir deux fois la même image.
+  // De même, on retire toute signature HTML pour afficher la signature officielle Landry Net de manière unique.
   const displayHtml = useMemo(() => {
     if (!cleanHtml) return "";
-    if (!coverUrl) return cleanHtml;
-
-    const normalize = (u: string) => {
-      try {
-        return u.split("?")[0].replace(/\/upload\/(?:[a-z0-9_,:]+\/)?/, "/upload/");
-      } catch {
-        return u;
-      }
-    };
-
-    const target = normalize(coverUrl);
-    let stripped = false;
-
-    // 1. Balise figure englobante
-    let clean = cleanHtml.replace(
-      /<figure[^>]*>\s*<img[^>]+src=["']([^"']+)["'][^>]*>(?:\s*<figcaption>.*?<\/figcaption>)?\s*<\/figure>/i,
-      (match, src) => {
-        if (!stripped && (normalize(src) === target || src === coverUrl)) {
-          stripped = true;
-          return "";
-        }
-        return match;
-      }
-    );
-
-    // 2. Balise p englobante
-    if (!stripped) {
-      clean = clean.replace(
-        /<p[^>]*>\s*<img[^>]+src=["']([^"']+)["'][^>]*>\s*<\/p>/i,
-        (match, src) => {
-          if (!stripped && (normalize(src) === target || src === coverUrl)) {
-            stripped = true;
-            return "";
-          }
-          return match;
-        }
-      );
-    }
-
-    // 3. Balise img seule
-    if (!stripped) {
-      clean = clean.replace(
-        /<img[^>]+src=["']([^"']+)["'][^>]*>/i,
-        (match, src) => {
-          if (!stripped && (normalize(src) === target || src === coverUrl)) {
-            stripped = true;
-            return "";
-          }
-          return match;
-        }
-      );
-    }
-
-    return clean;
-  }, [cleanHtml, coverUrl]);
+    const withoutCover = removeCoverImageFromHtml(cleanHtml, coverUrl);
+    return isBlog ? stripSignatureFromHtml(withoutCover) : withoutCover;
+  }, [cleanHtml, coverUrl, isBlog]);
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -121,7 +75,7 @@ export function ProjectPreviewModal({
           <section className={container}>
             <div className="mb-4 flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-xs font-semibold text-primary">
-                <Sparkles size={11} /> Étude de cas
+                <Sparkles size={11} /> {isBlog ? "Article de blog" : "Étude de cas"}
               </span>
               {settings.tag && (
                 <span className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground">
@@ -195,6 +149,12 @@ export function ProjectPreviewModal({
             ) : (
               <div className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
                 Aucun contenu rédigé pour le moment.
+              </div>
+            )}
+
+            {isBlog && (
+              <div className="mt-12 pt-6 border-t border-border/80">
+                <LandrySignature size="lg" />
               </div>
             )}
           </section>

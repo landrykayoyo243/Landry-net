@@ -1,4 +1,4 @@
-﻿import { SITE_URL, absoluteUrl } from "@/lib/siteConfig";
+import { SITE_URL, absoluteUrl } from "@/lib/siteConfig";
 
 // Tout le contenu du site est ici : modifiez ce fichier pour mettre à jour les textes.
 const cv = { url: "/cv.pdf" };
@@ -52,6 +52,7 @@ export const nav = [
   { to: "/a-propos", label: "À propos" },
   { href: "#competences", label: "Compétences" },
   { href: "#projets", label: "Projets" },
+  { to: "/blog", label: "Blog" },
   { href: "#parcours", label: "Parcours" },
   { to: "/contact", label: "Contact" },
 ];

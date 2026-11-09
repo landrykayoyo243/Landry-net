@@ -128,3 +128,74 @@ export function buildBreadcrumbSchema(
     })),
   };
 }
+
+/**
+ * Données structurées Schema.org pour un article de blog (BlogPosting).
+ */
+export function buildBlogPostSchema(post: {
+  title: string;
+  slug: string;
+  summary?: string | null;
+  cover_url?: string | null;
+  published_at?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  category?: string | null;
+  tags?: string[] | null;
+  reading_time?: number | null;
+}) {
+  const url = absoluteUrl(`/blog/${post.slug}`);
+  const image = post.cover_url ? absoluteUrl(post.cover_url) : shareImage.url;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "@id": `${url}#blogpost`,
+    headline: post.title,
+    description: post.summary || post.title,
+    url,
+    image,
+    datePublished: post.published_at || post.created_at || undefined,
+    dateModified: post.updated_at || post.published_at || post.created_at || undefined,
+    author: {
+      "@type": "Person",
+      name: profile.name,
+      url: SITE_URL,
+    },
+    publisher: {
+      "@type": "Person",
+      name: profile.name,
+      url: SITE_URL,
+    },
+    inLanguage: "fr-FR",
+    articleSection: post.category || "Technologie",
+    keywords: post.tags?.join(", ") || post.category || undefined,
+    timeRequired: post.reading_time ? `PT${post.reading_time}M` : undefined,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": url,
+    },
+  };
+}
+
+/**
+ * Données structurées pour la page d'accueil du blog (Blog).
+ */
+export function buildBlogIndexSchema() {
+  const url = absoluteUrl("/blog");
+  return {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "@id": `${url}#blog`,
+    url,
+    name: "Blog technique — Landry Net",
+    description:
+      "Articles et retours d'expérience sur l'administration systèmes, les réseaux Cisco, la cybersécurité et le développement web.",
+    inLanguage: "fr-FR",
+    publisher: {
+      "@type": "Person",
+      name: profile.name,
+      url: SITE_URL,
+    },
+  };
+}

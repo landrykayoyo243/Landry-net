@@ -30,8 +30,13 @@ import { Route as AdminLoginRouteImport } from './routes/admin_.login'
 import { Route as ApiCloudinarySignRouteImport } from './routes/api/cloudinary-sign'
 import { Route as ApiContactRouteImport } from './routes/api/contact'
 import { Route as ApiReplyRouteImport } from './routes/api/reply'
+import { Route as BlogIndexRouteImport } from './routes/blog.index'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as ProjetsIndexRouteImport } from './routes/projets.index'
 import { Route as ProjetsSlugRouteImport } from './routes/projets.$slug'
+import { Route as AdminBlogIndexRouteImport } from './routes/admin.blog.index'
+import { Route as AdminBlogIdRouteImport } from './routes/admin.blog.$id'
+import { Route as AdminBlogNouveauRouteImport } from './routes/admin.blog.nouveau'
 import { Route as AdminIaIndexRouteImport } from './routes/admin.ia.index'
 import { Route as AdminIaAssistantRouteImport } from './routes/admin.ia.assistant'
 import { Route as AdminIaSkillsRouteImport } from './routes/admin.ia.skills'
@@ -151,6 +156,16 @@ const ApiReplyRoute = ApiReplyRouteImport.update({
   path: '/api/reply',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/blog/$slug',
+  path: '/blog/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProjetsIndexRoute = ProjetsIndexRouteImport.update({
   id: '/projets/',
   path: '/projets/',
@@ -160,6 +175,21 @@ const ProjetsSlugRoute = ProjetsSlugRouteImport.update({
   id: '/projets/$slug',
   path: '/projets/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminBlogIndexRoute = AdminBlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBlogIdRoute = AdminBlogIdRouteImport.update({
+  id: '/blog/$id',
+  path: '/blog/$id',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBlogNouveauRoute = AdminBlogNouveauRouteImport.update({
+  id: '/blog/nouveau',
+  path: '/blog/nouveau',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminIaIndexRoute = AdminIaIndexRouteImport.update({
   id: '/ia/',
@@ -249,9 +279,13 @@ export interface FileRoutesByFullPath {
   '/api/cloudinary-sign': typeof ApiCloudinarySignRoute
   '/api/contact': typeof ApiContactRoute
   '/api/reply': typeof ApiReplyRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/projets/$slug': typeof ProjetsSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/blog/': typeof BlogIndexRoute
   '/projets/': typeof ProjetsIndexRoute
+  '/admin/blog/$id': typeof AdminBlogIdRoute
+  '/admin/blog/nouveau': typeof AdminBlogNouveauRoute
   '/admin/ia/assistant': typeof AdminIaAssistantRoute
   '/admin/ia/skills': typeof AdminIaSkillsRoute
   '/admin/projets/$id': typeof AdminProjetsIdRoute
@@ -262,6 +296,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/secrets': typeof ApiAdminSecretsRoute
   '/api/admin/skills': typeof ApiAdminSkillsRoute
   '/api/admin/telegram': typeof ApiAdminTelegramRoute
+  '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/ia/': typeof AdminIaIndexRoute
   '/admin/projets/': typeof AdminProjetsIndexRoute
   '/api/public/project-images/$': typeof ApiPublicProjectImagesSplatRoute
@@ -286,9 +321,13 @@ export interface FileRoutesByTo {
   '/api/cloudinary-sign': typeof ApiCloudinarySignRoute
   '/api/contact': typeof ApiContactRoute
   '/api/reply': typeof ApiReplyRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/projets/$slug': typeof ProjetsSlugRoute
   '/admin': typeof AdminIndexRoute
+  '/blog': typeof BlogIndexRoute
   '/projets': typeof ProjetsIndexRoute
+  '/admin/blog/$id': typeof AdminBlogIdRoute
+  '/admin/blog/nouveau': typeof AdminBlogNouveauRoute
   '/admin/ia/assistant': typeof AdminIaAssistantRoute
   '/admin/ia/skills': typeof AdminIaSkillsRoute
   '/admin/projets/$id': typeof AdminProjetsIdRoute
@@ -299,6 +338,7 @@ export interface FileRoutesByTo {
   '/api/admin/secrets': typeof ApiAdminSecretsRoute
   '/api/admin/skills': typeof ApiAdminSkillsRoute
   '/api/admin/telegram': typeof ApiAdminTelegramRoute
+  '/admin/blog': typeof AdminBlogIndexRoute
   '/admin/ia': typeof AdminIaIndexRoute
   '/admin/projets': typeof AdminProjetsIndexRoute
   '/api/public/project-images/$': typeof ApiPublicProjectImagesSplatRoute
@@ -325,9 +365,13 @@ export interface FileRoutesById {
   '/api/cloudinary-sign': typeof ApiCloudinarySignRoute
   '/api/contact': typeof ApiContactRoute
   '/api/reply': typeof ApiReplyRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/projets/$slug': typeof ProjetsSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/blog/': typeof BlogIndexRoute
   '/projets/': typeof ProjetsIndexRoute
+  '/admin/blog/$id': typeof AdminBlogIdRoute
+  '/admin/blog/nouveau': typeof AdminBlogNouveauRoute
   '/admin/ia/assistant': typeof AdminIaAssistantRoute
   '/admin/ia/skills': typeof AdminIaSkillsRoute
   '/admin/projets/$id': typeof AdminProjetsIdRoute
@@ -338,6 +382,7 @@ export interface FileRoutesById {
   '/api/admin/secrets': typeof ApiAdminSecretsRoute
   '/api/admin/skills': typeof ApiAdminSkillsRoute
   '/api/admin/telegram': typeof ApiAdminTelegramRoute
+  '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/ia/': typeof AdminIaIndexRoute
   '/admin/projets/': typeof AdminProjetsIndexRoute
   '/api/public/project-images/$': typeof ApiPublicProjectImagesSplatRoute
@@ -365,9 +410,13 @@ export interface FileRouteTypes {
     | '/api/cloudinary-sign'
     | '/api/contact'
     | '/api/reply'
+    | '/blog/$slug'
     | '/projets/$slug'
     | '/admin/'
+    | '/blog/'
     | '/projets/'
+    | '/admin/blog/$id'
+    | '/admin/blog/nouveau'
     | '/admin/ia/assistant'
     | '/admin/ia/skills'
     | '/admin/projets/$id'
@@ -378,6 +427,7 @@ export interface FileRouteTypes {
     | '/api/admin/secrets'
     | '/api/admin/skills'
     | '/api/admin/telegram'
+    | '/admin/blog/'
     | '/admin/ia/'
     | '/admin/projets/'
     | '/api/public/project-images/$'
@@ -402,9 +452,13 @@ export interface FileRouteTypes {
     | '/api/cloudinary-sign'
     | '/api/contact'
     | '/api/reply'
+    | '/blog/$slug'
     | '/projets/$slug'
     | '/admin'
+    | '/blog'
     | '/projets'
+    | '/admin/blog/$id'
+    | '/admin/blog/nouveau'
     | '/admin/ia/assistant'
     | '/admin/ia/skills'
     | '/admin/projets/$id'
@@ -415,6 +469,7 @@ export interface FileRouteTypes {
     | '/api/admin/secrets'
     | '/api/admin/skills'
     | '/api/admin/telegram'
+    | '/admin/blog'
     | '/admin/ia'
     | '/admin/projets'
     | '/api/public/project-images/$'
@@ -440,9 +495,13 @@ export interface FileRouteTypes {
     | '/api/cloudinary-sign'
     | '/api/contact'
     | '/api/reply'
+    | '/blog/$slug'
     | '/projets/$slug'
     | '/admin/'
+    | '/blog/'
     | '/projets/'
+    | '/admin/blog/$id'
+    | '/admin/blog/nouveau'
     | '/admin/ia/assistant'
     | '/admin/ia/skills'
     | '/admin/projets/$id'
@@ -453,6 +512,7 @@ export interface FileRouteTypes {
     | '/api/admin/secrets'
     | '/api/admin/skills'
     | '/api/admin/telegram'
+    | '/admin/blog/'
     | '/admin/ia/'
     | '/admin/projets/'
     | '/api/public/project-images/$'
@@ -470,7 +530,9 @@ export interface RootRouteChildren {
   ApiCloudinarySignRoute: typeof ApiCloudinarySignRoute
   ApiContactRoute: typeof ApiContactRoute
   ApiReplyRoute: typeof ApiReplyRoute
+  BlogSlugRoute: typeof BlogSlugRoute
   ProjetsSlugRoute: typeof ProjetsSlugRoute
+  BlogIndexRoute: typeof BlogIndexRoute
   ProjetsIndexRoute: typeof ProjetsIndexRoute
   ApiAdminAiRoute: typeof ApiAdminAiRoute
   ApiAdminAssistantRoute: typeof ApiAdminAssistantRoute
@@ -630,6 +692,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiReplyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/blog/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/projets/': {
       id: '/projets/'
       path: '/projets'
@@ -643,6 +719,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/projets/$slug'
       preLoaderRoute: typeof ProjetsSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/blog/': {
+      id: '/admin/blog/'
+      path: '/blog'
+      fullPath: '/admin/blog/'
+      preLoaderRoute: typeof AdminBlogIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/blog/$id': {
+      id: '/admin/blog/$id'
+      path: '/blog/$id'
+      fullPath: '/admin/blog/$id'
+      preLoaderRoute: typeof AdminBlogIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/blog/nouveau': {
+      id: '/admin/blog/nouveau'
+      path: '/blog/nouveau'
+      fullPath: '/admin/blog/nouveau'
+      preLoaderRoute: typeof AdminBlogNouveauRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/admin/ia/': {
       id: '/admin/ia/'
@@ -749,10 +846,13 @@ interface AdminRouteChildren {
   AdminParametresRoute: typeof AdminParametresRoute
   AdminParcoursRoute: typeof AdminParcoursRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminBlogIdRoute: typeof AdminBlogIdRoute
+  AdminBlogNouveauRoute: typeof AdminBlogNouveauRoute
   AdminIaAssistantRoute: typeof AdminIaAssistantRoute
   AdminIaSkillsRoute: typeof AdminIaSkillsRoute
   AdminProjetsIdRoute: typeof AdminProjetsIdRoute
   AdminProjetsNouveauRoute: typeof AdminProjetsNouveauRoute
+  AdminBlogIndexRoute: typeof AdminBlogIndexRoute
   AdminIaIndexRoute: typeof AdminIaIndexRoute
   AdminProjetsIndexRoute: typeof AdminProjetsIndexRoute
 }
@@ -768,10 +868,13 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminParametresRoute: AdminParametresRoute,
   AdminParcoursRoute: AdminParcoursRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminBlogIdRoute: AdminBlogIdRoute,
+  AdminBlogNouveauRoute: AdminBlogNouveauRoute,
   AdminIaAssistantRoute: AdminIaAssistantRoute,
   AdminIaSkillsRoute: AdminIaSkillsRoute,
   AdminProjetsIdRoute: AdminProjetsIdRoute,
   AdminProjetsNouveauRoute: AdminProjetsNouveauRoute,
+  AdminBlogIndexRoute: AdminBlogIndexRoute,
   AdminIaIndexRoute: AdminIaIndexRoute,
   AdminProjetsIndexRoute: AdminProjetsIndexRoute,
 }
@@ -790,7 +893,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCloudinarySignRoute: ApiCloudinarySignRoute,
   ApiContactRoute: ApiContactRoute,
   ApiReplyRoute: ApiReplyRoute,
+  BlogSlugRoute: BlogSlugRoute,
   ProjetsSlugRoute: ProjetsSlugRoute,
+  BlogIndexRoute: BlogIndexRoute,
   ProjetsIndexRoute: ProjetsIndexRoute,
   ApiAdminAiRoute: ApiAdminAiRoute,
   ApiAdminAssistantRoute: ApiAdminAssistantRoute,

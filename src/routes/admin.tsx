@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, redirect, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Award, BrainCircuit, Briefcase, Building2, Camera, FileText, FolderKanban, KeyRound, LayoutDashboard, LogOut, Menu, MessageSquare, PanelLeftClose, PanelLeftOpen, ShieldCheck, UserCog } from "lucide-react";
+import { Award, BookOpen, BrainCircuit, Briefcase, Building2, Camera, FileText, FolderKanban, KeyRound, LayoutDashboard, LogOut, Menu, MessageSquare, PanelLeftClose, PanelLeftOpen, ShieldCheck, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Toaster } from "@/components/ui/sonner";
@@ -29,6 +29,7 @@ const links = [
   { to: "/admin", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
   { to: "/admin/messages", label: "Messages", icon: MessageSquare },
   { to: "/admin/projets", label: "Projets", icon: FolderKanban },
+  { to: "/admin/blog", label: "Blog", icon: BookOpen },
   { to: "/admin/immersion", label: "Immersion terrain", icon: Camera },
   { to: "/admin/parcours", label: "Parcours", icon: Briefcase },
   { to: "/admin/certifications", label: "Certifications", icon: Award },
@@ -170,16 +171,18 @@ function AdminLayout() {
   const signOut = useSignOut();
   const locked = admin.mustChangePassword;
   const path = useRouterState({ select: (s) => s.location.pathname });
-  const isProjectEditor =
+  const isEditor =
     path.startsWith("/admin/projets/nouveau") ||
-    (path.startsWith("/admin/projets/") && path !== "/admin/projets" && path !== "/admin/projets/");
+    (path.startsWith("/admin/projets/") && path !== "/admin/projets" && path !== "/admin/projets/") ||
+    path.startsWith("/admin/blog/nouveau") ||
+    (path.startsWith("/admin/blog/") && path !== "/admin/blog" && path !== "/admin/blog/");
 
   // État d'ouverture/fermeture de la sidebar sur grand écran (desktop)
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("admin_sidebar_open");
       if (saved !== null) return saved === "true";
-      if (isProjectEditor) return false;
+      if (isEditor) return false;
     }
     return true;
   });
@@ -219,7 +222,7 @@ function AdminLayout() {
         </div>
       </aside>
 
-      {!isProjectEditor && (
+      {!isEditor && (
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card px-4 lg:hidden">
           <Link to="/admin" className="flex items-center gap-2">
             <img src={logo.url} alt="" width={880} height={880} className="h-8 w-8 rounded-md" />
@@ -239,9 +242,9 @@ function AdminLayout() {
       <main
         className={`min-w-0 transition-all duration-300 ease-in-out ${
           sidebarOpen ? "lg:pl-64" : "lg:pl-16"
-        } ${isProjectEditor ? "h-screen overflow-hidden" : "overflow-x-hidden"}`}
+        } ${isEditor ? "h-screen overflow-hidden" : "overflow-x-hidden"}`}
       >
-        <div className={isProjectEditor ? "w-full h-full min-w-0" : "mx-auto w-full max-w-5xl px-3 sm:px-6 py-4 sm:py-6 lg:py-10 min-w-0"}>
+        <div className={isEditor ? "w-full h-full min-w-0" : "mx-auto w-full max-w-5xl px-3 sm:px-6 py-4 sm:py-6 lg:py-10 min-w-0"}>
           <Outlet />
         </div>
       </main>

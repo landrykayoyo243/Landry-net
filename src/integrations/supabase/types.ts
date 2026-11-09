@@ -176,6 +176,69 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_posts: {
+        Row: {
+          category: string
+          content: Json
+          cover_alt: string
+          cover_url: string | null
+          created_at: string
+          featured: boolean
+          id: string
+          published_at: string | null
+          reading_time: number
+          seo_description: string
+          seo_title: string
+          slug: string
+          sort_order: number
+          status: string
+          summary: string
+          tags: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          content?: Json
+          cover_alt?: string
+          cover_url?: string | null
+          created_at?: string
+          featured?: boolean
+          id?: string
+          published_at?: string | null
+          reading_time?: number
+          seo_description?: string
+          seo_title?: string
+          slug: string
+          sort_order?: number
+          status?: string
+          summary?: string
+          tags?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          content?: Json
+          cover_alt?: string
+          cover_url?: string | null
+          created_at?: string
+          featured?: boolean
+          id?: string
+          published_at?: string | null
+          reading_time?: number
+          seo_description?: string
+          seo_title?: string
+          slug?: string
+          sort_order?: number
+          status?: string
+          summary?: string
+          tags?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string

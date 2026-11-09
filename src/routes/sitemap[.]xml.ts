@@ -32,6 +32,7 @@ export const Route = createFileRoute("/sitemap.xml")({
         const today = new Date().toISOString().split("T")[0];
 
         let publishedProjects: Array<{ slug: string; lastmod: string }> = [];
+        let publishedBlogPosts: Array<{ slug: string; lastmod: string }> = [];
 
         const supabaseUrl = process.env["SUPABASE_URL"] || process.env["VITE_SUPABASE_URL"];
         const supabaseKey =
@@ -53,17 +54,32 @@ export const Route = createFileRoute("/sitemap.xml")({
               },
             });
 
-            const { data, error } = await client
+            // 1. Projets publiés
+            const { data: projectsData, error: projectsError } = await client
               .from("projects")
               .select("slug, updated_at, created_at")
               .eq("status", "published")
               .order("sort_order", { ascending: true })
               .order("created_at", { ascending: true });
 
-            if (!error && data) {
-              publishedProjects = data.map((p) => ({
+            if (!projectsError && projectsData) {
+              publishedProjects = projectsData.map((p) => ({
                 slug: p.slug,
                 lastmod: (p.updated_at || p.created_at || today).split("T")[0],
+              }));
+            }
+
+            // 2. Articles de blog publiés
+            const { data: blogData, error: blogError } = await client
+              .from("blog_posts")
+              .select("slug, updated_at, published_at, created_at")
+              .eq("status", "published")
+              .order("published_at", { ascending: false });
+
+            if (!blogError && blogData) {
+              publishedBlogPosts = blogData.map((b) => ({
+                slug: b.slug,
+                lastmod: (b.updated_at || b.published_at || b.created_at || today).split("T")[0],
               }));
             }
           } catch (err) {
@@ -86,6 +102,7 @@ export const Route = createFileRoute("/sitemap.xml")({
         const staticPages = [
           { loc: `${baseUrl}/`, priority: "1.0", changefreq: "weekly", lastmod: today },
           { loc: `${baseUrl}/projets`, priority: "0.9", changefreq: "weekly", lastmod: today },
+          { loc: `${baseUrl}/blog`, priority: "0.9", changefreq: "weekly", lastmod: today },
           { loc: `${baseUrl}/a-propos`, priority: "0.8", changefreq: "monthly", lastmod: today },
           { loc: `${baseUrl}/contact`, priority: "0.8", changefreq: "monthly", lastmod: today },
         ];
@@ -97,7 +114,14 @@ export const Route = createFileRoute("/sitemap.xml")({
           lastmod: p.lastmod,
         }));
 
-        const allUrls = [...staticPages, ...projectPages];
+        const blogPages = publishedBlogPosts.map((b) => ({
+          loc: `${baseUrl}/blog/${b.slug}`,
+          priority: "0.8",
+          changefreq: "weekly",
+          lastmod: b.lastmod,
+        }));
+
+        const allUrls = [...staticPages, ...projectPages, ...blogPages];
 
         const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

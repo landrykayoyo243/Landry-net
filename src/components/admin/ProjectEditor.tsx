@@ -30,6 +30,8 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { slugify, sectionTextToRichBlocks } from "@/lib/blocks";
 import { type ProjectRow } from "@/lib/admin-data";
+import { type BlogPostRow, estimateReadingTime } from "@/lib/blog-data";
+import { appendSignatureIfMissing } from "@/lib/blog-content";
 import {
   normalizeProjectContent,
   legacyBlocksToHtml,
@@ -50,9 +52,10 @@ import {
 import { ProjectPreviewModal } from "./ProjectPreviewModal";
 import { ProjectAiAssistant } from "./ProjectAiAssistant";
 
-interface ProjectEditorProps {
-  row: ProjectRow | null;
-  nextOrder: number;
+export interface ProjectEditorProps {
+  row: ProjectRow | BlogPostRow | null;
+  nextOrder?: number;
+  entityType?: "project" | "blog";
   asModal?: boolean;
   onClose?: () => void;
   onSaved?: () => Promise<unknown> | void;
@@ -60,7 +63,8 @@ interface ProjectEditorProps {
 
 export function ProjectEditor({
   row,
-  nextOrder,
+  nextOrder = 0,
+  entityType = "project",
   asModal,
   onClose,
   onSaved,
@@ -68,8 +72,9 @@ export function ProjectEditor({
   const qc = useQueryClient();
   const navigate = useNavigate();
 
-  // ID du projet (null si création)
+  // ID de l'entité (null si création)
   const [id, setId] = useState<string | null>(row?.id ?? null);
+  const isBlog = entityType === "blog";
 
   // État initial normalisé (supporte à la fois les anciens blocs et le nouveau format)
   const initialData = useMemo(() => {
@@ -77,7 +82,7 @@ export function ProjectEditor({
       return {
         title: "",
         slug: "",
-        tag: "Projet personnel",
+        tag: isBlog ? "Technologie" : "Projet personnel",
         intro: "",
         summary: "",
         image_url: "",
@@ -90,26 +95,38 @@ export function ProjectEditor({
         status: "draft" as "draft" | "published",
         featured: false,
         gallery: [] as ProjectGalleryItem[],
-        html: `<h2>Contexte du projet</h2><p>Présentez ici le cadre du projet, l'organisation et la situation de départ.</p><h2>Problématique & Objectifs</h2><p>Quel besoin ou quelle difficulté technique fallait-il résoudre ?</p><h2>Architecture & Solution développée</h2><p>Décrivez la solution technique mise en œuvre, les composants clés et vos choix d'ingénierie.</p><h2>Résultats & Impact</h2><p>Quels résultats concrets le projet a-t-il apportés ?</p>`,
+        html: isBlog
+          ? `<h2>Introduction</h2><p>Présentez ici le sujet de l'article, les enjeux et ce que le lecteur va apprendre.</p><h2>Comprendre les principes clés</h2><p>Détaillez les concepts fondamentaux, l'architecture ou les principes théoriques.</p><h2>Mise en pratique étape par étape</h2><p>Partagez vos commandes, configurations et exemples concrets.</p><h2>Bonnes pratiques et retour d'expérience</h2><p>Partagez vos conseils terrain et les erreurs courantes à éviter.</p><h2>Conclusion</h2><p>Résumez les points essentiels et ouvrez sur les perspectives techniques.</p>`
+          : `<h2>Contexte du projet</h2><p>Présentez ici le cadre du projet, l'organisation et la situation de départ.</p><h2>Problématique & Objectifs</h2><p>Quel besoin ou quelle difficulté technique fallait-il résoudre ?</p><h2>Architecture & Solution développée</h2><p>Décrivez la solution technique mise en œuvre, les composants clés et vos choix d'ingénierie.</p><h2>Résultats & Impact</h2><p>Quels résultats concrets le projet a-t-il apportés ?</p>`,
         created_at: undefined,
         updated_at: undefined,
       };
     }
 
     const norm = normalizeProjectContent(row.content);
+    const anyRow = row as Record<string, unknown>;
+    const resolvedTag = (anyRow.category as string) || (anyRow.tag as string) || (isBlog ? "Technologie" : "Projet personnel");
+    const resolvedCover = (anyRow.cover_url as string) || (anyRow.image_url as string) || "";
+    const resolvedCoverAlt = (anyRow.cover_alt as string) || (anyRow.image_alt as string) || "";
+    const resolvedTags = Array.isArray(anyRow.tags)
+      ? (anyRow.tags as string[])
+      : Array.isArray(anyRow.technologies)
+      ? (anyRow.technologies as string[])
+      : [];
+
     return {
-      title: row.title ?? "",
-      slug: row.slug ?? "",
-      tag: row.tag ?? "",
-      intro: row.intro ?? "",
-      summary: row.summary ?? "",
-      image_url: row.image_url ?? "",
-      image_alt: row.image_alt ?? "",
-      technologies: row.technologies ?? [],
-      external_url: row.external_url ?? "",
+      title: (anyRow.title as string) ?? "",
+      slug: (anyRow.slug as string) ?? "",
+      tag: resolvedTag,
+      intro: (anyRow.intro as string) ?? "",
+      summary: (anyRow.summary as string) ?? (anyRow.seo_description as string) ?? "",
+      image_url: resolvedCover,
+      image_alt: resolvedCoverAlt,
+      technologies: resolvedTags,
+      external_url: (anyRow.external_url as string) ?? "",
       github_url: norm.github_url || "",
-      seo_title: norm.seo_title || "",
-      seo_description: norm.seo_description || "",
+      seo_title: (anyRow.seo_title as string) || norm.seo_title || "",
+      seo_description: (anyRow.seo_description as string) || norm.seo_description || "",
       status: (row.status === "published" ? "published" : "draft") as "draft" | "published",
       featured: Boolean(row.featured),
       gallery: norm.gallery || [],
@@ -117,7 +134,7 @@ export function ProjectEditor({
       created_at: row.created_at,
       updated_at: row.updated_at,
     };
-  }, [row]);
+  }, [row, isBlog]);
 
   // Titre principal
   const [title, setTitle] = useState(initialData.title);
@@ -300,6 +317,10 @@ export function ProjectEditor({
         settings.seo_description.trim() ||
         plainText.slice(0, 300);
 
+      const htmlWithSignature = isBlog && finalStatus === "published"
+        ? appendSignatureIfMissing(currentHtml)
+        : currentHtml;
+
       const projectPayload = {
         title: title.trim(),
         slug: settings.slug.trim(),
@@ -315,10 +336,30 @@ export function ProjectEditor({
         content: payloadContent as unknown as Record<string, unknown>,
       };
 
+      const blogPayload = {
+        title: title.trim(),
+        slug: settings.slug.trim(),
+        category: settings.tag.trim() || "Technologie",
+        tags: settings.technologies,
+        summary: autoSummary,
+        cover_url: resolvedCover || null,
+        cover_alt: settings.image_alt.trim() || title.trim(),
+        featured: settings.featured,
+        status: finalStatus,
+        reading_time: estimateReadingTime(currentHtml),
+        seo_title: settings.seo_title.trim() || title.trim(),
+        seo_description: settings.seo_description.trim() || autoSummary,
+        content: { version: 2, html: htmlWithSignature } as unknown as Record<string, unknown>,
+        published_at: finalStatus === "published" ? new Date().toISOString() : null,
+      };
+
       try {
+        const table = isBlog ? "blog_posts" : "projects";
+        const payload = isBlog ? blogPayload : projectPayload;
+
         const res = id
-          ? await supabase.from("projects").update(projectPayload).eq("id", id).select("id").single()
-          : await supabase.from("projects").insert({ ...projectPayload, sort_order: nextOrder }).select("id").single();
+          ? await (supabase.from(table as any) as any).update(payload).eq("id", id).select("id").single()
+          : await (supabase.from(table as any) as any).insert({ ...payload, sort_order: nextOrder }).select("id").single();
 
         savingRef.current = false;
         setSaving(false);
@@ -327,7 +368,7 @@ export function ProjectEditor({
           if (!opts.silent) {
             toast.error(
               res.error.code === "23505"
-                ? "Ce slug est déjà utilisé par un autre projet."
+                ? `Ce slug est déjà utilisé par un autre ${isBlog ? "article" : "projet"}.`
                 : "Échec de l'enregistrement."
             );
           }
@@ -341,23 +382,24 @@ export function ProjectEditor({
         setDirty(false);
         setLastSaved(new Date());
 
-        void qc.invalidateQueries({ queryKey: ["admin"] });
-        void qc.invalidateQueries({ queryKey: ["public"] });
+        void qc.invalidateQueries({ queryKey: isBlog ? ["admin", "blog"] : ["admin"] });
+        void qc.invalidateQueries({ queryKey: isBlog ? ["blog"] : ["public"] });
 
         if (onSaved) await onSaved();
 
         if (!opts.silent) {
           toast.success(
             finalStatus === "published"
-              ? "Projet publié en ligne avec succès !"
-              : "Brouillon enregistré avec succès"
+              ? `${isBlog ? "Article" : "Projet"} publié en ligne avec succès !`
+              : `Brouillon ${isBlog ? "d'article" : "de projet"} enregistré avec succès`
           );
         }
 
         if (!id && res.data?.id) {
           setId(res.data.id);
           if (!asModal) {
-            navigate({ to: "/admin/projets/$id", params: { id: res.data.id }, replace: true });
+            const redirectPath = isBlog ? "/admin/blog/$id" : "/admin/projets/$id";
+            navigate({ to: redirectPath as any, params: { id: res.data.id }, replace: true });
           }
         }
 
@@ -539,9 +581,9 @@ export function ProjectEditor({
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground shrink-0 cursor-pointer"
-                title="Tous les projets"
+                title={isBlog ? "Tous les articles" : "Tous les projets"}
               >
-                <Link to="/admin/projets">
+                <Link to={(isBlog ? "/admin/blog" : "/admin/projets") as any}>
                   <ArrowLeft size={18} />
                 </Link>
               </Button>
@@ -638,7 +680,7 @@ export function ProjectEditor({
             type="text"
             value={title}
             onChange={(e) => handleTitleChange(e.target.value)}
-            placeholder="Titre du projet"
+            placeholder={isBlog ? "Titre de l'article" : "Titre du projet"}
             className="w-full bg-transparent text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-foreground placeholder:text-muted-foreground/40 focus:outline-none py-1 transition-colors"
           />
           <div className="h-0.5 w-full bg-gradient-to-r from-primary via-primary/50 to-transparent mt-1 rounded-full" />
@@ -690,7 +732,7 @@ export function ProjectEditor({
           <button
             type="button"
             onClick={() => setShowSidePanel(true)}
-            className="fixed right-0 top-1/2 -translate-y-1/2 z-40 flex h-10 w-10 items-center justify-center rounded-l-xl border border-r-0 border-border bg-card shadow-lg hover:bg-muted text-primary transition-all duration-200 hover:-translate-x-0.5 cursor-pointer"
+            className="fixed right-0 top-1/2 -translate-y-1/2 z-40 flex h-10 w-10 items-center justify-center rounded-l-xl border border-r-0 border-border/40 bg-card/95 shadow-md hover:bg-muted text-primary transition-all duration-200 hover:-translate-x-0.5 cursor-pointer"
             title="Ouvrir les paramètres du projet"
             aria-label="Ouvrir les paramètres du projet"
           >
@@ -708,23 +750,23 @@ export function ProjectEditor({
               aria-hidden
             />
 
-            <aside className="fixed top-0 right-0 bottom-0 z-50 w-[85vw] sm:w-96 max-w-md border-l border-border bg-card shadow-2xl transition-all duration-300 lg:static lg:w-80 xl:w-84 lg:z-10 lg:shadow-xs flex flex-col overflow-hidden">
-              <div className="sticky top-0 bg-card/95 backdrop-blur-xs border-b border-border/80 px-4 py-2.5 flex items-center justify-between text-xs font-bold text-foreground shrink-0 z-10">
-                <span className="uppercase tracking-wider text-muted-foreground text-[11px] flex items-center gap-2">
+            <aside className="fixed top-0 right-0 bottom-0 z-50 w-[85vw] sm:w-96 max-w-md border-l border-border/40 bg-card/95 backdrop-blur-md shadow-xl transition-all duration-300 lg:static lg:w-80 xl:w-84 lg:z-10 lg:shadow-none flex flex-col overflow-hidden">
+              <div className="sticky top-0 bg-card/90 backdrop-blur-xs border-b border-border/40 px-4 py-3 flex items-center justify-between text-xs font-semibold text-foreground shrink-0 z-10">
+                <span className="text-[12px] text-foreground/90 flex items-center gap-2 font-medium">
                   <SlidersHorizontal size={14} className="text-primary" /> Paramètres du projet
                 </span>
                 <button
                   type="button"
                   onClick={() => setShowSidePanel(false)}
-                  className="grid h-7 w-7 place-items-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors cursor-pointer"
+                  className="grid h-7 w-7 place-items-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors cursor-pointer"
                   title="Fermer les paramètres"
                   aria-label="Fermer les paramètres"
                 >
-                  <X size={16} />
+                  <X size={15} />
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:w-[3px] [&::-webkit-scrollbar-track]:transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border/50 hover:[&::-webkit-scrollbar-thumb]:bg-border">
+              <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:w-[3px] [&::-webkit-scrollbar-track]:transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border/30 hover:[&::-webkit-scrollbar-thumb]:bg-border/60">
                 <ProjectSidePanel
                   data={settings}
                   onChange={updateSettings}
@@ -777,6 +819,7 @@ export function ProjectEditor({
         title={title}
         htmlContent={htmlContent}
         settings={settings}
+        entityType={entityType}
       />
 
       <ProjectAiAssistant
@@ -882,4 +925,9 @@ export function ProjectEditor({
       </AlertDialog>
     </div>
   );
+}
+
+/** Wrapper spécifique pour les articles de blog, réutilisant 100% de l'éditeur */
+export function BlogPostEditor({ row }: { row: BlogPostRow | null }) {
+  return <ProjectEditor row={row} entityType="blog" />;
 }
