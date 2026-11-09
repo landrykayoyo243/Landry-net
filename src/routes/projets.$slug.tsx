@@ -1,13 +1,14 @@
-
 import { createFileRoute, Link, notFound, type ErrorComponentProps } from "@tanstack/react-router";
+import { useMemo } from "react";
 import { ErrorPage, ServerErrorPage, errorBtn } from "@/components/portfolio/ErrorPage";
-import { ArrowLeft, ArrowRight, ArrowUpRight, Globe, Mail, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, Github, Globe, Mail, Sparkles } from "lucide-react";
 import { Header } from "@/components/portfolio/Header";
 import { Footer } from "@/components/portfolio/Footer";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { ProjectBody, firstImage } from "@/components/portfolio/ProjectBody";
 import { parseBlocks } from "@/lib/blocks";
+import { normalizeProjectContent, sanitizeProjectHtml } from "@/lib/project-content";
 import { projectQuery, projectsQuery } from "@/lib/content.queries";
 import { profile, projectPage as copy, shareImage } from "@/content/portfolio";
 import { absoluteUrl, getOptimizedImageUrl, getOptimizedOgImageUrl } from "@/lib/siteConfig";
@@ -23,17 +24,38 @@ export const Route = createFileRoute("/projets/$slug")({
   },
   head: ({ loaderData, params }) => {
     const isFound = Boolean(loaderData);
-    const title = loaderData ? `${loaderData.title} — Landry Kayoyo` : "Projet introuvable — Landry Kayoyo";
-    const description = (isFound && loaderData?.summary) ? loaderData.summary : copy.unavailableText;
+    const norm = isFound && loaderData?.content ? normalizeProjectContent(loaderData.content) : null;
+    const title = norm?.seo_title
+      ? `${norm.seo_title} — Landry Kayoyo`
+      : loaderData
+      ? `${loaderData.title} — Landry Kayoyo`
+      : "Projet introuvable — Landry Kayoyo";
+    const description =
+      norm?.seo_description ||
+      (isFound && loaderData?.summary ? loaderData.summary : copy.unavailableText);
     const projectUrl = absoluteUrl(`/projets/${params.slug}`);
 
-    const ogImageUrl = isFound && loaderData?.image_url
-      ? getOptimizedOgImageUrl(loaderData.image_url)
-      : shareImage.url;
+    // Détection dynamique de l'affiche/image du projet pour les partages
+    let projectShareImage = loaderData?.image_url;
+    if (!projectShareImage && norm?.gallery && norm.gallery.length > 0) {
+      projectShareImage = norm.gallery[0].url;
+    }
+    if (!projectShareImage && norm?.html) {
+      const match = norm.html.match(/<img[^>]+src=["']([^"']+)["']/i);
+      if (match && match[1]) {
+        projectShareImage = match[1];
+      }
+    }
 
-    const ogImageAlt = isFound && loaderData?.image_url
-      ? (loaderData.image_alt || loaderData.title)
-      : "Logo Landry Net";
+    const ogImageUrl =
+      isFound && projectShareImage
+        ? getOptimizedOgImageUrl(projectShareImage)
+        : shareImage.url;
+
+    const ogImageAlt =
+      isFound && (loaderData?.image_alt || loaderData?.title)
+        ? loaderData.image_alt || loaderData.title
+        : "Illustration du projet — Landry Net";
 
     const ogImageType = ogImageUrl.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg";
 
@@ -92,8 +114,12 @@ function ProjectNotFound() {
       text={<p>Retrouvez toutes mes réalisations sur la page des projets.</p>}
       actions={
         <>
-          <Link to="/projets" className={errorBtn.primary}>Voir tous les projets</Link>
-          <Link to="/" className={errorBtn.outline}>Retour à l'accueil</Link>
+          <Link to="/projets" className={errorBtn.primary}>
+            Voir tous les projets
+          </Link>
+          <Link to="/" className={errorBtn.outline}>
+            Retour à l&apos;accueil
+          </Link>
         </>
       }
     />
@@ -107,10 +133,73 @@ function ProjectError({ error }: ErrorComponentProps) {
 
 function ProjectDetail() {
   const p = Route.useLoaderData();
-  const blocks = parseBlocks(p.content);
+  const contentData = useMemo(() => normalizeProjectContent(p.content), [p.content]);
+  const sanitizedHtml = useMemo(() => sanitizeProjectHtml(contentData.html), [contentData.html]);
+  const blocks = useMemo(() => parseBlocks(p.content), [p.content]);
   const hero = firstImage(blocks);
   const all = useQuery(projectsQuery).data ?? [];
   const related = getRelatedProjects(p, all);
+
+  // Déduplication intelligente de l'affiche : si l'image de couverture est affichée en haut à sa manière,
+  // on retire son double dans le corps du texte pour ne jamais avoir deux fois la même image.
+  const displayHtml = useMemo(() => {
+    if (!sanitizedHtml) return "";
+    const cover = (p.image_url || hero?.url || "").trim();
+    if (!cover) return sanitizedHtml;
+
+    const normalize = (u: string) => {
+      try {
+        return u.split("?")[0].replace(/\/upload\/(?:[a-z0-9_,:]+\/)?/, "/upload/");
+      } catch {
+        return u;
+      }
+    };
+
+    const target = normalize(cover);
+    let stripped = false;
+
+    // 1. Balise figure englobante
+    let clean = sanitizedHtml.replace(
+      /<figure[^>]*>\s*<img[^>]+src=["']([^"']+)["'][^>]*>(?:\s*<figcaption>.*?<\/figcaption>)?\s*<\/figure>/i,
+      (match, src) => {
+        if (!stripped && (normalize(src) === target || src === cover)) {
+          stripped = true;
+          return "";
+        }
+        return match;
+      }
+    );
+
+    // 2. Balise p englobante
+    if (!stripped) {
+      clean = clean.replace(
+        /<p[^>]*>\s*<img[^>]+src=["']([^"']+)["'][^>]*>\s*<\/p>/i,
+        (match, src) => {
+          if (!stripped && (normalize(src) === target || src === cover)) {
+            stripped = true;
+            return "";
+          }
+          return match;
+        }
+      );
+    }
+
+    // 3. Balise img seule
+    if (!stripped) {
+      clean = clean.replace(
+        /<img[^>]+src=["']([^"']+)["'][^>]*>/i,
+        (match, src) => {
+          if (!stripped && (normalize(src) === target || src === cover)) {
+            stripped = true;
+            return "";
+          }
+          return match;
+        }
+      );
+    }
+
+    return clean;
+  }, [sanitizedHtml, p.image_url, hero?.url]);
 
   return (
     <div id="top" className="bg-background text-foreground overflow-x-clip min-w-0">
@@ -164,22 +253,32 @@ function ProjectDetail() {
             </div>
           )}
 
-          {/* Actions & Lien Live */}
-          {p.external_url && (
-            <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-              <Button asChild size="lg" className="rounded-full bg-gradient-primary gap-2 shadow-sm w-full sm:w-auto justify-center">
-                <a href={p.external_url} target="_blank" rel="noopener noreferrer">
-                  <Globe size={18} /> {copy.live} <ArrowUpRight size={16} />
-                </a>
-              </Button>
-              <a
-                href={p.external_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="break-all text-xs sm:text-sm text-muted-foreground underline-offset-4 hover:underline hover:text-foreground transition-colors truncate max-w-full"
-              >
-                {p.external_url}
-              </a>
+          {/* Actions : Liens Démo en direct & GitHub */}
+          {(p.external_url || contentData.github_url) && (
+            <div className="mt-6 sm:mt-8 flex flex-wrap items-center gap-3 sm:gap-4">
+              {p.external_url && (
+                <Button
+                  asChild
+                  size="lg"
+                  className="rounded-full bg-gradient-primary gap-2 shadow-sm w-full sm:w-auto justify-center"
+                >
+                  <a href={p.external_url} target="_blank" rel="noopener noreferrer">
+                    <Globe size={18} /> {copy.live} <ArrowUpRight size={16} />
+                  </a>
+                </Button>
+              )}
+              {contentData.github_url && (
+                <Button
+                  asChild
+                  size="lg"
+                  variant="outline"
+                  className="rounded-full gap-2 shadow-2xs w-full sm:w-auto justify-center"
+                >
+                  <a href={contentData.github_url} target="_blank" rel="noopener noreferrer">
+                    <Github size={18} /> Code source GitHub <ArrowUpRight size={16} />
+                  </a>
+                </Button>
+              )}
             </div>
           )}
 
@@ -202,8 +301,53 @@ function ProjectDetail() {
           {hero?.note && <p className="mt-3 text-xs text-muted-foreground text-center">{hero.note}</p>}
         </section>
 
-        {/* Corps structuré de l'étude de cas */}
-        <ProjectBody blocks={blocks} />
+        {/* ── Contenu détaillé du projet ── */}
+        {!contentData.isLegacyBlocks && displayHtml ? (
+          <section className={`${container} mt-8 sm:mt-12 md:mt-16`}>
+            <div
+              className="project-prose"
+              dangerouslySetInnerHTML={{ __html: displayHtml }}
+            />
+          </section>
+        ) : (
+          /* Compatibilité ascendante avec les anciens blocs JSON */
+          <ProjectBody blocks={blocks} />
+        )}
+
+        {/* ── Galerie photos additionnelles si présente ── */}
+        {contentData.gallery.length > 0 && (
+          <section className={`${container} mt-12 sm:mt-16 md:mt-20 pt-10 border-t border-border/70`}>
+            <div className="mb-6">
+              <p className="text-xs font-semibold uppercase tracking-widest text-primary">Photos & Documents</p>
+              <h2 className="mt-1 font-serif text-2xl sm:text-3xl font-medium tracking-tight text-foreground">
+                Galerie du projet
+              </h2>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {contentData.gallery.map((img, i) => (
+                <figure
+                  key={img.id || i}
+                  className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-xs group"
+                >
+                  <div className="aspect-[16/10] overflow-hidden bg-muted">
+                    <img
+                      src={getOptimizedImageUrl(img.url, { width: 600 })}
+                      alt={img.alt || img.title || "Image de galerie"}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  {img.caption && (
+                    <figcaption className="p-3 text-xs text-muted-foreground text-center italic">
+                      {img.caption}
+                    </figcaption>
+                  )}
+                </figure>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Section Contact / CTA */}
         <section className="relative overflow-hidden bg-hero py-12 sm:py-16 text-ink-foreground md:py-24 my-10 sm:my-14 md:my-20">

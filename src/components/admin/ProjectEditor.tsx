@@ -1,47 +1,61 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { Link, useBlocker, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ArrowUpRight, Copy, Eye, Globe, ImagePlus, Loader2, Plus, Save, Sparkles, Trash2, X } from "lucide-react";
+import type { Editor } from "@tiptap/react";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  CheckCircle2,
+  Cloud,
+  Eye,
+  Loader2,
+  Save,
+  Send,
+  SlidersHorizontal,
+  Sparkles,
+  X,
+} from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
-import { SortableList } from "@/components/admin/SortableList";
-import { RichEditor } from "@/components/admin/RichEditor";
-import { ConfirmDelete, FieldError } from "@/components/admin/ui";
-import { ProjectBody, firstImage } from "@/components/portfolio/ProjectBody";
-import { blockLabels, createBlock, newId, parseBlocks, safeUrl, slugify, starterTemplate, textDoc, sectionTextToRichBlocks, type Block, type BlockType, type HeadingBlock, type ParagraphBlock, type MediaBlock, type MediaItem } from "@/lib/blocks";
-import { uploadProjectImage, type ProjectRow } from "@/lib/admin-data";
-import { ProjectAiAssistant } from "@/components/admin/ProjectAiAssistant";
+import { slugify, sectionTextToRichBlocks } from "@/lib/blocks";
+import { type ProjectRow } from "@/lib/admin-data";
+import {
+  normalizeProjectContent,
+  legacyBlocksToHtml,
+  type ProjectGalleryItem,
+  type ProjectContentPayload,
+} from "@/lib/project-content";
+import { BloggerToolbar } from "./BloggerToolbar";
+import { WysiwygEditor } from "./WysiwygEditor";
+import { HtmlCodeEditor } from "./HtmlCodeEditor";
+import { formatHtml } from "@/lib/formatHtml";
+import { ProjectSidePanel, type ProjectSidePanelData } from "./ProjectSidePanel";
+import { MediaLibraryDialog, type MediaInsertPayload } from "./MediaLibraryDialog";
+import {
+  LinkInsertDialog,
+  VideoInsertDialog,
+  TableInsertDialog,
+} from "./EditorModals";
+import { ProjectPreviewModal } from "./ProjectPreviewModal";
+import { ProjectAiAssistant } from "./ProjectAiAssistant";
 
-type Form = {
-  title: string; slug: string; tag: string; intro: string; summary: string;
-  image_url: string; image_alt: string; technologies: string[]; external_url: string;
-  featured: boolean; status: "draft" | "published"; content: Block[];
-};
-
-function fromRow(r: ProjectRow | null): Form {
-  if (!r) return { title: "", slug: "", tag: "", intro: "", summary: "", image_url: "", image_alt: "", technologies: [], external_url: "", featured: false, status: "draft", content: starterTemplate() };
-  return {
-    title: r.title, slug: r.slug, tag: r.tag, intro: r.intro, summary: r.summary, image_url: r.image_url ?? "", image_alt: r.image_alt,
-    technologies: r.technologies, external_url: r.external_url ?? "", featured: r.featured, status: r.status === "published" ? "published" : "draft",
-    content: parseBlocks(r.content),
-  };
-}
-
-function validate(f: Form) {
-  const e: Record<string, string> = {};
-  if (!f.title.trim()) e["title"] = "Le titre est obligatoire.";
-  else if (f.title.length > 200) e["title"] = "200 caractères maximum.";
-  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(f.slug)) e["slug"] = "Lettres minuscules, chiffres et tirets uniquement.";
-  if (f.external_url && !/^https?:\/\//.test(f.external_url)) e["external_url"] = "Adresse complète requise (https://…).";
-  if (f.image_url && !f.image_alt.trim()) e["image_alt"] = "Décrivez l'image pour l'accessibilité.";
-  if (f.summary.length > 600) e["summary"] = "600 caractères maximum.";
-  return e;
+interface ProjectEditorProps {
+  row: ProjectRow | null;
+  nextOrder: number;
+  asModal?: boolean;
+  onClose?: () => void;
+  onSaved?: () => Promise<unknown> | void;
 }
 
 export function ProjectEditor({
@@ -50,705 +64,822 @@ export function ProjectEditor({
   asModal,
   onClose,
   onSaved,
-}: {
-  row: ProjectRow | null;
-  nextOrder: number;
-  asModal?: boolean;
-  onClose?: () => void;
-  onSaved?: () => Promise<unknown> | void;
-}) {
+}: ProjectEditorProps) {
   const qc = useQueryClient();
   const navigate = useNavigate();
+
+  // ID du projet (null si création)
   const [id, setId] = useState<string | null>(row?.id ?? null);
-  const [form, setForm] = useState<Form>(() => fromRow(row));
-  const [slugTouched, setSlugTouched] = useState(!!row);
+
+  // État initial normalisé (supporte à la fois les anciens blocs et le nouveau format)
+  const initialData = useMemo(() => {
+    if (!row) {
+      return {
+        title: "",
+        slug: "",
+        tag: "Projet personnel",
+        intro: "",
+        summary: "",
+        image_url: "",
+        image_alt: "",
+        technologies: [] as string[],
+        external_url: "",
+        github_url: "",
+        seo_title: "",
+        seo_description: "",
+        status: "draft" as "draft" | "published",
+        featured: false,
+        gallery: [] as ProjectGalleryItem[],
+        html: `<h2>Contexte du projet</h2><p>Présentez ici le cadre du projet, l'organisation et la situation de départ.</p><h2>Problématique & Objectifs</h2><p>Quel besoin ou quelle difficulté technique fallait-il résoudre ?</p><h2>Architecture & Solution développée</h2><p>Décrivez la solution technique mise en œuvre, les composants clés et vos choix d'ingénierie.</p><h2>Résultats & Impact</h2><p>Quels résultats concrets le projet a-t-il apportés ?</p>`,
+        created_at: undefined,
+        updated_at: undefined,
+      };
+    }
+
+    const norm = normalizeProjectContent(row.content);
+    return {
+      title: row.title ?? "",
+      slug: row.slug ?? "",
+      tag: row.tag ?? "",
+      intro: row.intro ?? "",
+      summary: row.summary ?? "",
+      image_url: row.image_url ?? "",
+      image_alt: row.image_alt ?? "",
+      technologies: row.technologies ?? [],
+      external_url: row.external_url ?? "",
+      github_url: norm.github_url || "",
+      seo_title: norm.seo_title || "",
+      seo_description: norm.seo_description || "",
+      status: (row.status === "published" ? "published" : "draft") as "draft" | "published",
+      featured: Boolean(row.featured),
+      gallery: norm.gallery || [],
+      html: norm.html || "",
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+    };
+  }, [row]);
+
+  // Titre principal
+  const [title, setTitle] = useState(initialData.title);
+  const [slugTouched, setSlugTouched] = useState(Boolean(row));
+
+  // Contenu HTML source de vérité
+  const [htmlContent, setHtmlContent] = useState(initialData.html);
+
+  // Mode actif : "wysiwyg" (Rédiger) ou "html" (Code)
+  const [mode, setMode] = useState<"wysiwyg" | "html">("wysiwyg");
+
+  // Panneau latéral visible (fermé par défaut sur mobile pour libérer l'espace)
+  const [showSidePanel, setShowSidePanel] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth >= 1024;
+    }
+    return true;
+  });
+
+  // Données des paramètres du panneau latéral
+  const [settings, setSettings] = useState<ProjectSidePanelData>({
+    slug: initialData.slug,
+    tag: initialData.tag,
+    intro: initialData.intro,
+    summary: initialData.summary,
+    technologies: initialData.technologies,
+    image_url: initialData.image_url,
+    image_alt: initialData.image_alt,
+    gallery: initialData.gallery,
+    external_url: initialData.external_url,
+    github_url: initialData.github_url,
+    seo_title: initialData.seo_title,
+    seo_description: initialData.seo_description,
+    status: initialData.status,
+    featured: initialData.featured,
+    created_at: initialData.created_at,
+    updated_at: initialData.updated_at,
+  });
+
+  // États de sauvegarde et de statut
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [preview, setPreview] = useState(false);
-  const [showAiAssistant, setShowAiAssistant] = useState(false);
-  const [deletingBlock, setDeletingBlock] = useState<Block | null>(null);
   const savingRef = useRef(false);
 
-  const update = (patch: Partial<Form>) => { setForm((f) => ({ ...f, ...patch })); setDirty(true); };
+  // Instance de l'éditeur Tiptap
+  const [editorInstance, setEditorInstance] = useState<Editor | null>(null);
 
-  async function save(opts: { silent?: boolean; status?: Form["status"] } = {}) {
-    if (savingRef.current) return false;
-    const data = { ...form, ...(opts.status ? { status: opts.status } : {}) };
-    const errs = validate(data);
-    if (!opts.silent) setErrors(errs);
-    if (Object.keys(errs).length) { if (!opts.silent) toast.error("Corrigez les champs signalés avant d'enregistrer."); return false; }
-    savingRef.current = true; setSaving(true);
-    const payload = {
-      title: data.title.trim(), slug: data.slug, tag: data.tag.trim(), intro: data.intro.trim(), summary: data.summary.trim(),
-      image_url: data.image_url || null, image_alt: data.image_alt.trim(), technologies: data.technologies,
-      external_url: data.external_url.trim() || null, featured: data.featured, status: data.status, content: data.content as never,
-    };
-    const res = id
-      ? await supabase.from("projects").update(payload).eq("id", id).select("id").single()
-      : await supabase.from("projects").insert({ ...payload, sort_order: nextOrder }).select("id").single();
-    savingRef.current = false; setSaving(false);
-    if (res.error) {
-      if (!opts.silent) toast.error(res.error.code === "23505" ? "Ce slug est déjà utilisé par un autre projet." : "Enregistrement impossible. Réessayez.");
-      if (res.error.code === "23505") setErrors((e) => ({ ...e, slug: "Ce slug est déjà utilisé." }));
-      return false;
-    }
-    if (opts.status) setForm((f) => ({ ...f, status: opts.status! }));
-    setDirty(false); setLastSaved(new Date());
-    void qc.invalidateQueries({ queryKey: ["admin"] }); void qc.invalidateQueries({ queryKey: ["public"] });
-    if (onSaved) await onSaved();
-    if (!opts.silent) toast.success(opts.status === "published" ? "Projet publié" : "Projet enregistré");
-    if (asModal) {
-      if (onClose) onClose();
-    } else if (!id) {
-      setId(res.data.id);
-      navigate({ to: "/admin/projets/$id", params: { id: res.data.id }, replace: true });
-    }
-    return true;
-  }
+  // Dialogs
+  const [showMediaDialog, setShowMediaDialog] = useState(false);
+  const [showLinkDialog, setShowLinkDialog] = useState(false);
+  const [showVideoDialog, setShowVideoDialog] = useState(false);
+  const [showTableDialog, setShowTableDialog] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [showAiAssistant, setShowAiAssistant] = useState(false);
+  // Dialog de confirmation de sortie (remplace window.confirm)
+  const [showLeaveDialog, setShowLeaveDialog] = useState(false);
+  const pendingBlockerRef = useRef<(() => void) | null>(null);
 
-  // Sauvegarde automatique des brouillons (uniquement hors modal pour éviter de fermer intempestivement)
+  // Mise à jour des paramètres
+  const updateSettings = (patch: Partial<ProjectSidePanelData>) => {
+    setSettings((prev) => ({ ...prev, ...patch }));
+    setDirty(true);
+  };
+
+  // Synchronisation du titre avec le slug
+  const handleTitleChange = (val: string) => {
+    setTitle(val);
+    setDirty(true);
+    if (!slugTouched) {
+      setSettings((prev) => ({ ...prev, slug: slugify(val) }));
+    }
+  };
+
+  // Extraction dynamique de toutes les images présentes dans le projet (corps HTML + galerie)
+  const availableProjectImages = useMemo(() => {
+    const list: string[] = [];
+    if (htmlContent) {
+      const matches = htmlContent.matchAll(/<img[^>]+src=["']([^"']+)["']/gi);
+      for (const m of matches) {
+        if (m[1] && !list.includes(m[1])) {
+          list.push(m[1]);
+        }
+      }
+    }
+    if (settings.gallery) {
+      for (const item of settings.gallery) {
+        if (item.url && !list.includes(item.url)) {
+          list.push(item.url);
+        }
+      }
+    }
+    return list;
+  }, [htmlContent, settings.gallery]);
+
+  // Bascule de mode avec synchronisation fluide et sans blocage
+  const handleModeChange = (nextMode: "wysiwyg" | "html") => {
+    if (nextMode === mode) return;
+
+    if (mode === "wysiwyg" && editorInstance) {
+      // De Rédiger vers HTML : on extrait le HTML généré par Tiptap et on le structure proprement
+      try {
+        const currentHtml = editorInstance.getHTML();
+        setHtmlContent(formatHtml(currentHtml));
+      } catch (err) {
+        console.error("Erreur synchronisation Tiptap vers HTML:", err);
+      }
+    } else if (nextMode === "wysiwyg" && editorInstance) {
+      // De HTML vers Rédiger : on injecte le HTML édité dans Tiptap qui est toujours monté
+      try {
+        editorInstance.commands.setContent(htmlContent, false);
+      } catch (err) {
+        console.error("Erreur injection HTML vers Tiptap:", err);
+      }
+    }
+
+    setMode(nextMode);
+  };
+
+  // ── Validation ──
+  const validate = useCallback(() => {
+    const errs: string[] = [];
+    if (!title.trim()) errs.push("Le titre du projet est obligatoire.");
+    if (title.length > 200) errs.push("Le titre ne doit pas dépasser 200 caractères.");
+    if (!settings.slug.trim()) errs.push("Le slug du projet est obligatoire.");
+    else if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(settings.slug)) {
+      errs.push("Le slug ne doit contenir que des lettres minuscules, chiffres et tirets.");
+    }
+    if (settings.external_url && !/^https?:\/\//i.test(settings.external_url)) {
+      errs.push("Le lien de démo doit commencer par https:// ou http://");
+    }
+    if (settings.github_url && !/^https?:\/\//i.test(settings.github_url)) {
+      errs.push("Le lien GitHub doit commencer par https:// ou http://");
+    }
+    return errs;
+  }, [title, settings.slug, settings.external_url, settings.github_url]);
+
+  // ── Enregistrement dans Supabase ──
+  const save = useCallback(
+    async (opts: { silent?: boolean; forceStatus?: "draft" | "published" } = {}) => {
+      if (savingRef.current) return false;
+
+      const finalStatus = opts.forceStatus ?? settings.status;
+      const errs = validate();
+
+      if (errs.length > 0) {
+        if (!opts.silent) toast.error(errs[0]);
+        return false;
+      }
+
+      // Si en mode WYSIWYG, récupérer le HTML frais
+      let currentHtml = htmlContent;
+      if (mode === "wysiwyg" && editorInstance) {
+        currentHtml = editorInstance.getHTML();
+        setHtmlContent(currentHtml);
+      }
+
+      savingRef.current = true;
+      setSaving(true);
+
+      const payloadContent: ProjectContentPayload = {
+        version: 2,
+        html: currentHtml,
+        gallery: settings.gallery,
+        github_url: settings.github_url.trim() || undefined,
+        seo_title: settings.seo_title.trim() || undefined,
+        seo_description: settings.seo_description.trim() || undefined,
+      };
+
+      // Extraction automatique de la première image du projet si aucune image spécifique n'est choisie
+      let resolvedCover = settings.image_url.trim();
+      if (!resolvedCover && availableProjectImages.length > 0) {
+        resolvedCover = availableProjectImages[0];
+      }
+
+      // Résumé automatique dérivé du SEO ou du texte de l'article si vide
+      const plainText = currentHtml.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+      const autoSummary =
+        settings.summary.trim() ||
+        settings.seo_description.trim() ||
+        plainText.slice(0, 300);
+
+      const projectPayload = {
+        title: title.trim(),
+        slug: settings.slug.trim(),
+        tag: settings.tag.trim(),
+        intro: settings.intro.trim(),
+        summary: autoSummary,
+        image_url: resolvedCover || null,
+        image_alt: settings.image_alt.trim() || title.trim(),
+        technologies: settings.technologies,
+        external_url: settings.external_url.trim() || null,
+        featured: settings.featured,
+        status: finalStatus,
+        content: payloadContent as unknown as Record<string, unknown>,
+      };
+
+      try {
+        const res = id
+          ? await supabase.from("projects").update(projectPayload).eq("id", id).select("id").single()
+          : await supabase.from("projects").insert({ ...projectPayload, sort_order: nextOrder }).select("id").single();
+
+        savingRef.current = false;
+        setSaving(false);
+
+        if (res.error) {
+          if (!opts.silent) {
+            toast.error(
+              res.error.code === "23505"
+                ? "Ce slug est déjà utilisé par un autre projet."
+                : "Échec de l'enregistrement."
+            );
+          }
+          return false;
+        }
+
+        if (opts.forceStatus) {
+          setSettings((prev) => ({ ...prev, status: opts.forceStatus! }));
+        }
+
+        setDirty(false);
+        setLastSaved(new Date());
+
+        void qc.invalidateQueries({ queryKey: ["admin"] });
+        void qc.invalidateQueries({ queryKey: ["public"] });
+
+        if (onSaved) await onSaved();
+
+        if (!opts.silent) {
+          toast.success(
+            finalStatus === "published"
+              ? "Projet publié en ligne avec succès !"
+              : "Brouillon enregistré avec succès"
+          );
+        }
+
+        if (!id && res.data?.id) {
+          setId(res.data.id);
+          if (!asModal) {
+            navigate({ to: "/admin/projets/$id", params: { id: res.data.id }, replace: true });
+          }
+        }
+
+        return true;
+      } catch (e) {
+        savingRef.current = false;
+        setSaving(false);
+        console.error(e);
+        if (!opts.silent) toast.error("Une erreur réseau inattendue s'est produite.");
+        return false;
+      }
+    },
+    [
+      validate,
+      settings,
+      htmlContent,
+      mode,
+      editorInstance,
+      title,
+      id,
+      nextOrder,
+      qc,
+      onSaved,
+      asModal,
+      navigate,
+    ]
+  );
+
+  // ── Sauvegarde automatique des brouillons (toutes les 4 secondes d'inactivité) ──
   useEffect(() => {
-    if (!dirty || form.status !== "draft" || asModal) return;
-    const t = setTimeout(() => { void save({ silent: true }); }, 4000);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form, dirty, asModal]);
+    if (!dirty || settings.status !== "draft" || asModal) return;
+    const timer = setTimeout(() => {
+      void save({ silent: true });
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [dirty, settings.status, asModal, save]);
 
-  useBlocker({
-    shouldBlockFn: () => !asModal && dirty && !window.confirm("Des modifications ne sont pas enregistrées. Quitter quand même ?"),
+  // ── Protection contre la perte de modifications non enregistrées ──
+  // Utilise un AlertDialog React élégant au lieu du window.confirm natif du navigateur
+  const blocker = useBlocker({
+    shouldBlockFn: () => !asModal && dirty,
     enableBeforeUnload: () => !asModal && dirty,
   });
 
-  const [tagInput, setTagInput] = useState("");
-  function addTech() {
-    const v = tagInput.trim();
-    if (v && !form.technologies.includes(v) && v.length <= 60) update({ technologies: [...form.technologies, v] });
-    setTagInput("");
-  }
+  // Quand le routeur tente de bloquer la navigation, on affiche notre dialog custom
+  useEffect(() => {
+    if (blocker.status === "blocked") {
+      setShowLeaveDialog(true);
+      pendingBlockerRef.current = () => blocker.proceed();
+    }
+  }, [blocker.status]);
 
-  const [addType, setAddType] = useState<BlockType>("paragraph");
-  const setBlock = (b: Block) => update({ content: form.content.map((x) => (x.id === b.id ? b : x)) });
+  // ── Raccourcis clavier (Ctrl+S / Cmd+S pour enregistrer) ──
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+        e.preventDefault();
+        void save();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [save]);
 
-  function insertBlockAfter(blockId: string, type: BlockType = "media") {
-    const index = form.content.findIndex((b) => b.id === blockId);
-    if (index === -1) return;
-    const newBlock = createBlock(type);
-    const updated = [
-      ...form.content.slice(0, index + 1),
-      newBlock,
-      ...form.content.slice(index + 1),
-    ];
-    update({ content: updated });
-    toast.success(type === "media" ? "Section média ajoutée dans cette section !" : "Bloc inséré !");
-  }
+  // ── Insertion d'image depuis la bibliothèque de médias ──
+  const handleInsertMedia = (media: MediaInsertPayload) => {
+    if (mode === "wysiwyg" && editorInstance) {
+      editorInstance
+        .chain()
+        .focus()
+        .setImage({ src: media.url, alt: media.alt })
+        .run();
+    } else {
+      const imgTag = `<figure>\n  <img\n    src="${media.url}"\n    alt="${media.alt || ""}"\n  />${
+        media.caption ? `\n  <figcaption>${media.caption}</figcaption>` : ""
+      }\n</figure>`;
+      setHtmlContent((prev) => (prev ? prev + "\n\n" + imgTag : imgTag));
+      setDirty(true);
+    }
+    toast.success("Média inséré dans l'article !");
+  };
 
-  function insertBlockAtStart(type: BlockType = "media") {
-    update({ content: [createBlock(type), ...form.content] });
-    toast.success(type === "media" ? "Section média ajoutée au début !" : "Bloc inséré au début !");
-  }
+  // ── Insertion de vidéo avec conversion automatique d'URL ──
+  const handleInsertVideo = (url: string) => {
+    let embedUrl = url.trim();
+    // YouTube Shorts: youtube.com/shorts/ID
+    const shortsMatch = embedUrl.match(/(?:youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/i);
+    if (shortsMatch && shortsMatch[1]) {
+      embedUrl = `https://www.youtube-nocookie.com/embed/${shortsMatch[1]}`;
+    } else {
+      const ytMatch = embedUrl.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i);
+      if (ytMatch && ytMatch[1]) {
+        embedUrl = `https://www.youtube-nocookie.com/embed/${ytMatch[1]}`;
+      } else {
+        const vimeoMatch = embedUrl.match(/vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|)(\d+)/i);
+        if (vimeoMatch && vimeoMatch[1]) {
+          embedUrl = `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+        }
+      }
+    }
 
-  const formSections = (
-    <>
-      <section className="space-y-4 rounded-xl sm:rounded-2xl border border-border bg-card p-3.5 sm:p-6 shadow-xs">
-        <h3 className="text-base sm:text-lg font-semibold">Fiche du projet</h3>
-        <Field label="Titre *" error={errors["title"]}>
-          <Input className="h-11 text-base sm:text-sm" value={form.title} onChange={(e) => update({ title: e.target.value, ...(slugTouched ? {} : { slug: slugify(e.target.value) }) })} />
-        </Field>
-        <Field label="Slug (adresse) *" error={errors["slug"]} hint={`/projets/${form.slug || "…"}`}>
-          <Input className="h-11 text-base sm:text-sm" value={form.slug} onChange={(e) => { setSlugTouched(true); update({ slug: slugify(e.target.value) || e.target.value.toLowerCase() }); }} />
-        </Field>
-        <div className="grid gap-4 sm:gap-5 sm:grid-cols-2">
-          <Field label="Statut affiché (étiquette)" hint="Ex. Projet personnel, En cours de développement"><Input className="h-11" value={form.tag} onChange={(e) => update({ tag: e.target.value })} /></Field>
-          <Field label="Lien externe" error={errors["external_url"]}><Input className="h-11" type="url" placeholder="https://…" value={form.external_url} onChange={(e) => update({ external_url: e.target.value })} /></Field>
-        </div>
-        <Field label="Introduction" hint="Texte sous le titre de la page projet."><Textarea rows={3} value={form.intro} onChange={(e) => update({ intro: e.target.value })} /></Field>
-        <Field label="Résumé / problème" error={errors["summary"]} hint="Affiché sur la carte du projet et dans l'aperçu de partage."><Textarea rows={2} value={form.summary} onChange={(e) => update({ summary: e.target.value })} /></Field>
-        {/* Champ image_alt conservé en base mais masqué de l'UI */}
-        <input type="hidden" value={form.image_alt} readOnly />
-        <ImagePicker url={form.image_url} onChange={(url) => update({ image_url: url, image_alt: url ? (form.image_alt || "Image du projet") : "" })} label="Image de couverture" />
-        <Field label="Technologies">
-          <div className="flex flex-wrap gap-1.5 sm:gap-2">
-            {form.technologies.map((t) => (
-              <span key={t} className="inline-flex items-center gap-1 rounded-full bg-secondary py-1 pl-3 pr-1 text-xs sm:text-sm font-semibold">
-                {t}<button type="button" aria-label={`Retirer ${t}`} className="grid h-6 w-6 place-items-center rounded-full hover:bg-background" onClick={() => update({ technologies: form.technologies.filter((x) => x !== t) })}><X size={13} /></button>
-              </span>
-            ))}
-          </div>
-          <div className="mt-2 flex gap-2">
-            <Input className="h-11 flex-1 text-xs sm:text-sm" placeholder="Ex. React, Docker..." value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addTech(); } }} />
-            <Button type="button" variant="outline" className="h-11 shrink-0 px-3.5 text-xs sm:text-sm" onClick={addTech}>Ajouter</Button>
-          </div>
-        </Field>
-        <div className="grid gap-2.5 sm:grid-cols-2">
-          <Toggle label="Mis en avant sur l'accueil" checked={form.featured} onChange={(v) => update({ featured: v })} />
-          <Toggle label={form.status === "published" ? "Publié" : "Brouillon"} checked={form.status === "published"} onChange={(v) => update({ status: v ? "published" : "draft" })} />
-        </div>
-      </section>
+    if (mode === "wysiwyg" && editorInstance) {
+      editorInstance.chain().focus().setYoutubeVideo({ src: embedUrl }).run();
+    } else {
+      const videoTag = `<figure class="video-container">\n  <iframe\n    src="${embedUrl}"\n    allowfullscreen\n  ></iframe>\n</figure>`;
+      setHtmlContent((prev) => (prev ? prev + "\n\n" + videoTag : videoTag));
+      setDirty(true);
+    }
+    toast.success("Vidéo intégrée et mise en forme !");
+  };
 
-      <section className="space-y-4 rounded-xl sm:rounded-2xl border border-border bg-card p-3.5 sm:p-6 shadow-xs">
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-base sm:text-lg font-semibold">Étude de cas & Contenu détaillé</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Organisez vos sections, textes et médias explicatifs. Vous pouvez insérer des médias dans n'importe quelle section.
-            </p>
-          </div>
-          {form.content.length === 0 && <Button type="button" variant="outline" className="min-h-10 text-xs sm:text-sm" onClick={() => update({ content: starterTemplate() })}>Utiliser le modèle guidé</Button>}
-        </div>
-        {form.content.length === 0 && <p className="mb-4 rounded-xl bg-muted p-4 text-sm text-muted-foreground">Aucun bloc. Ajoutez-en un ci-dessous ou partez du modèle : Contexte, Problème, Solution, Mon rôle, Technologies, Résultats.</p>}
-        
-        <div className="space-y-3">
-          <SortableList items={form.content} onReorder={(content) => update({ content })} render={(b, handle) => (
-            <div className="rounded-xl sm:rounded-2xl border border-border bg-background p-3 sm:p-4 shadow-xs transition-shadow hover:shadow-sm">
-              <div className="mb-2 flex items-center gap-1 pb-1">
-                {handle}
-                <span className="flex-1 text-xs font-semibold uppercase tracking-wide text-primary truncate">{blockLabels[b.type]}</span>
-                <Button type="button" variant="ghost" size="icon" className="h-8 w-8" aria-label="Dupliquer" onClick={() => { const i = form.content.findIndex((x) => x.id === b.id); const copy = { ...structuredClone(b), id: newId() }; update({ content: [...form.content.slice(0, i + 1), copy, ...form.content.slice(i + 1)] }); }}><Copy size={15} /></Button>
-                <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" aria-label="Supprimer le bloc" onClick={() => setDeletingBlock(b)}><Trash2 size={15} /></Button>
-              </div>
-              <BlockFields block={b} onChange={setBlock} />
+  // ── Insertion de tableau ──
+  const handleInsertTable = (rows: number, cols: number) => {
+    if (mode === "wysiwyg" && editorInstance) {
+      editorInstance
+        .chain()
+        .focus()
+        .insertTable({ rows, cols, withHeaderRow: true })
+        .run();
+    } else {
+      let tableHtml = "<table>\n  <thead>\n    <tr>\n";
+      for (let c = 0; c < cols; c++) tableHtml += `      <th>Entête ${c + 1}</th>\n`;
+      tableHtml += "    </tr>\n  </thead>\n  <tbody>\n";
+      for (let r = 0; r < rows; r++) {
+        tableHtml += "    <tr>\n";
+        for (let c = 0; c < cols; c++) tableHtml += `      <td>Cellule</td>\n`;
+        tableHtml += "    </tr>\n";
+      }
+      tableHtml += "  </tbody>\n</table>";
+      setHtmlContent((prev) => prev + "\n" + tableHtml);
+    }
+    toast.success("Tableau inséré !");
+  };
+
+  // ── Insertion de lien ──
+  const handleInsertLink = (url: string, text?: string) => {
+    if (mode === "wysiwyg" && editorInstance) {
+      if (text) {
+        editorInstance
+          .chain()
+          .focus()
+          .insertContent(`<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`)
+          .run();
+      } else {
+        editorInstance.chain().focus().setLink({ href: url }).run();
+      }
+    } else {
+      const linkTag = `<a href="${url}" target="_blank" rel="noopener noreferrer">${
+        text || url
+      }</a>`;
+      setHtmlContent((prev) => prev + " " + linkTag);
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-full w-full bg-background text-foreground relative">
+      {/* ════════════════════════════════════════════════════════════════════════
+          BLOC SUPÉRIEUR FIXE AU SCROLL : HEADER + TITRE + BARRE D'OUTILS
+      ════════════════════════════════════════════════════════════════════════ */}
+      <div className="sticky top-0 z-30 bg-card border-b border-border shadow-xs shrink-0">
+        {/* 1. Header d'actions et de statut */}
+        <header className="flex items-center justify-between px-3 sm:px-6 py-2 border-b border-border/70 bg-card">
+          {/* Côté gauche : Retour & Statut */}
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            {asModal ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground shrink-0 cursor-pointer"
+                onClick={onClose}
+                title="Fermer la fenêtre"
+              >
+                <X size={18} />
+              </Button>
+            ) : (
+              <Button
+                asChild
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground shrink-0 cursor-pointer"
+                title="Tous les projets"
+              >
+                <Link to="/admin/projets">
+                  <ArrowLeft size={18} />
+                </Link>
+              </Button>
+            )}
+
+            {/* Indicateur de sauvegarde automatique */}
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground select-none" aria-live="polite">
+              {saving ? (
+                <span className="flex items-center gap-1 text-primary animate-pulse font-medium">
+                  <Loader2 size={13} className="animate-spin" />
+                  <span className="hidden sm:inline">Enregistrement...</span>
+                </span>
+              ) : dirty ? (
+                <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-medium">
+                  <span className="h-2 w-2 rounded-full bg-amber-500 animate-ping" />
+                  <span className="hidden md:inline">Non enregistré</span>
+                </span>
+              ) : lastSaved ? (
+                <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
+                  <CheckCircle2 size={13} />
+                  <span className="hidden sm:inline">
+                    Enregistré à {lastSaved.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                </span>
+              ) : (
+                <span className="flex items-center gap-1 text-muted-foreground">
+                  <Cloud size={13} />
+                  <span className="hidden sm:inline">Prêt</span>
+                </span>
+              )}
             </div>
-          )} />
-        </div>
+          </div>
 
-        <div className="mt-5 flex flex-col sm:flex-row sm:items-center gap-2.5 pt-3 border-t border-border/60">
-          <Button
-            type="button"
-            variant="secondary"
-            className="min-h-11 w-full sm:w-auto gap-2"
-            onClick={() => update({ content: [...form.content, createBlock("media")] })}
-          >
-            <ImagePlus size={16} /> + Ajouter une section média
-          </Button>
+          {/* Côté droit : Actions rapides */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Assistant IA */}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowAiAssistant(true)}
+              className="h-8 px-2.5 text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10 shadow-2xs cursor-pointer"
+              title="Générer ou enrichir avec l'IA"
+            >
+              <Sparkles size={14} />
+              <span className="hidden md:inline font-semibold">Assistant IA</span>
+            </Button>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto sm:flex-1">
-            <select aria-label="Type de bloc" value={addType} onChange={(e) => setAddType(e.target.value as BlockType)} className="h-11 rounded-md border border-input bg-background px-3 text-xs sm:text-sm flex-1 sm:w-56">
-              {(Object.keys(blockLabels) as BlockType[]).map((t) => <option key={t} value={t}>{blockLabels[t]}</option>)}
-            </select>
-            <Button type="button" variant="outline" className="min-h-11 shrink-0 gap-1 text-xs sm:text-sm" onClick={() => update({ content: [...form.content, createBlock(addType)] })}>
-              <Plus size={14} /> Autre bloc
+            {/* Aperçu */}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowPreviewModal(true)}
+              className="h-8 px-2.5 text-xs gap-1.5 text-muted-foreground hover:text-foreground shadow-2xs cursor-pointer"
+              title="Aperçu du rendu final de la page"
+            >
+              <Eye size={14} />
+              <span className="hidden sm:inline">Aperçu</span>
+            </Button>
+
+            {/* Enregistrer (Brouillon) */}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={saving}
+              onClick={() => save({ forceStatus: "draft" })}
+              className="h-8 px-3 text-xs gap-1.5 font-medium shadow-2xs cursor-pointer"
+              title="Enregistrer en brouillon (Ctrl+S)"
+            >
+              {saving ? <Loader2 size={13} className="animate-spin" /> : <Save size={14} />}
+              <span className="hidden sm:inline">Enregistrer</span>
+            </Button>
+
+            {/* Publier / Mettre à jour */}
+            <Button
+              type="button"
+              size="sm"
+              disabled={saving}
+              onClick={() => save({ forceStatus: "published" })}
+              className="h-8 px-3.5 text-xs font-semibold gap-1.5 bg-gradient-primary shadow-sm cursor-pointer"
+              title={settings.status === "published" ? "Mettre à jour la version en ligne" : "Publier immédiatement"}
+            >
+              <Send size={13} />
+              <span>{settings.status === "published" ? "Mettre à jour" : "Publier"}</span>
             </Button>
           </div>
+        </header>
+
+        {/* 2. Zone de Titre avec ligne d'accentuation Blogger */}
+        <div className="bg-card px-4 sm:px-8 pt-2.5 pb-2">
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => handleTitleChange(e.target.value)}
+            placeholder="Titre du projet"
+            className="w-full bg-transparent text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-foreground placeholder:text-muted-foreground/40 focus:outline-none py-1 transition-colors"
+          />
+          <div className="h-0.5 w-full bg-gradient-to-r from-primary via-primary/50 to-transparent mt-1 rounded-full" />
         </div>
-      </section>
-    </>
-  );
 
-  const actionButtons = (
-    <div className="flex flex-wrap items-center gap-2">
-      {asModal && onClose && (
-        <Button type="button" variant="outline" className="min-h-10 text-xs sm:text-sm flex-1 sm:flex-none" onClick={onClose}>Annuler</Button>
-      )}
-      <Button
-        type="button"
-        variant="outline"
-        className="min-h-10 text-xs sm:text-sm flex-1 sm:flex-none gap-1.5 border-primary/40 text-primary hover:bg-primary/10"
-        onClick={() => setShowAiAssistant(true)}
-      >
-        <Sparkles size={15} /><span>Assistant IA</span>
-      </Button>
-      <Button type="button" variant="outline" className="min-h-10 text-xs sm:text-sm flex-1 sm:flex-none gap-1.5" onClick={() => setPreview(true)}>
-        <Eye size={15} /><span>Aperçu</span>
-      </Button>
-      <Button type="button" variant="outline" className="min-h-10 text-xs sm:text-sm flex-1 sm:flex-none gap-1.5" disabled={saving} onClick={() => save()}>
-        {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
-        <span>Enregistrer</span>
-      </Button>
-      {form.status === "draft" && (
-        <Button type="button" className="min-h-10 text-xs sm:text-sm flex-1 sm:flex-none bg-gradient-primary" disabled={saving} onClick={() => save({ status: "published" })}>
-          Publier
-        </Button>
-      )}
-    </div>
-  );
+        {/* 3. Barre d'outils de mise en forme */}
+        <BloggerToolbar
+          editor={editorInstance}
+          mode={mode}
+          onModeChange={handleModeChange}
+          onOpenMedia={() => setShowMediaDialog(true)}
+          onOpenLink={() => setShowLinkDialog(true)}
+          onOpenVideo={() => setShowVideoDialog(true)}
+          onOpenTable={() => setShowTableDialog(true)}
+        />
+      </div>
 
-  const dialogs = (
-    <>
-      <Dialog open={preview} onOpenChange={setPreview}>
-        <DialogContent className="max-h-[94dvh] h-[94dvh] w-[calc(100vw-1rem)] sm:w-[calc(100vw-3rem)] max-w-5xl overflow-y-auto p-0 rounded-2xl sm:rounded-3xl border border-border bg-background shadow-2xl">
-          <DialogTitle className="sr-only">Aperçu du projet</DialogTitle>
-          <Preview form={form} onClose={() => setPreview(false)} />
-        </DialogContent>
-      </Dialog>
+      {/* ════════════════════════════════════════════════════════════════════════
+          CORPS PRINCIPAL : ZONE DE RÉDACTION + PANNEAU LATÉRAL PARAMÈTRES
+      ════════════════════════════════════════════════════════════════════════ */}
+      <div className="flex-1 flex min-h-0 overflow-hidden relative">
+        {/* Zone centrale de rédaction fluide */}
+        <main className="flex-1 overflow-y-auto p-3 sm:p-6 md:p-8 bg-muted/15 flex flex-col items-center">
+          <div className="w-full max-w-4xl flex-1 flex flex-col">
+            <div className={`w-full flex-1 flex flex-col ${mode === "wysiwyg" ? "flex" : "hidden"}`}>
+              <WysiwygEditor
+                initialHtml={htmlContent}
+                onChange={(html) => {
+                  setHtmlContent(html);
+                  setDirty(true);
+                }}
+                onEditorReady={setEditorInstance}
+              />
+            </div>
+            <div className={`w-full flex-1 flex flex-col ${mode === "html" ? "flex" : "hidden"}`}>
+              <HtmlCodeEditor
+                value={htmlContent}
+                onChange={(html) => {
+                  setHtmlContent(html);
+                  setDirty(true);
+                }}
+              />
+            </div>
+          </div>
+        </main>
 
-      <ConfirmDelete
-        open={!!deletingBlock}
-        onOpenChange={(o) => { if (!o) setDeletingBlock(null); }}
-        title="Supprimer ce bloc ?"
-        label={deletingBlock ? blockLabels[deletingBlock.type] : "Bloc"}
-        description={`Le bloc « ${deletingBlock ? blockLabels[deletingBlock.type] : "sélectionné"} » sera retiré de l'étude de cas. Ses textes et contenus ne seront plus affichés.`}
-        onConfirm={() => {
-          if (deletingBlock) {
-            update({ content: form.content.filter((x) => x.id !== deletingBlock.id) });
-            toast.success("Bloc supprimé");
-            setDeletingBlock(null);
-          }
-        }}
+        {/* ── Bouton flottant discret centré verticalement pour réouvrir (jamais sur la toolbar) ── */}
+        {!showSidePanel && (
+          <button
+            type="button"
+            onClick={() => setShowSidePanel(true)}
+            className="fixed right-0 top-1/2 -translate-y-1/2 z-40 flex h-10 w-10 items-center justify-center rounded-l-xl border border-r-0 border-border bg-card shadow-lg hover:bg-muted text-primary transition-all duration-200 hover:-translate-x-0.5 cursor-pointer"
+            title="Ouvrir les paramètres du projet"
+            aria-label="Ouvrir les paramètres du projet"
+          >
+            <SlidersHorizontal size={18} />
+          </button>
+        )}
+
+        {/* ── Panneau latéral droit épuré ── */}
+        {showSidePanel && (
+          <>
+            {/* Backdrop sombre sur mobile / tablette */}
+            <div
+              className="fixed inset-0 bg-background/60 backdrop-blur-xs z-40 lg:hidden animate-fade-in"
+              onClick={() => setShowSidePanel(false)}
+              aria-hidden
+            />
+
+            <aside className="fixed top-0 right-0 bottom-0 z-50 w-[85vw] sm:w-96 max-w-md border-l border-border bg-card shadow-2xl transition-all duration-300 lg:static lg:w-80 xl:w-84 lg:z-10 lg:shadow-xs flex flex-col overflow-hidden">
+              <div className="sticky top-0 bg-card/95 backdrop-blur-xs border-b border-border/80 px-4 py-2.5 flex items-center justify-between text-xs font-bold text-foreground shrink-0 z-10">
+                <span className="uppercase tracking-wider text-muted-foreground text-[11px] flex items-center gap-2">
+                  <SlidersHorizontal size={14} className="text-primary" /> Paramètres du projet
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowSidePanel(false)}
+                  className="grid h-7 w-7 place-items-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors cursor-pointer"
+                  title="Fermer les paramètres"
+                  aria-label="Fermer les paramètres"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:w-[3px] [&::-webkit-scrollbar-track]:transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border/50 hover:[&::-webkit-scrollbar-thumb]:bg-border">
+                <ProjectSidePanel
+                  data={settings}
+                  onChange={updateSettings}
+                  projectTitle={title}
+                  projectHtml={htmlContent}
+                  availableImages={availableProjectImages}
+                />
+              </div>
+            </aside>
+          </>
+        )}
+      </div>
+
+      {/* ════════════════════════════════════════════════════════════════════════
+          MODALES ET DIALOGUES
+      ════════════════════════════════════════════════════════════════════════ */}
+      <MediaLibraryDialog
+        open={showMediaDialog}
+        onClose={() => setShowMediaDialog(false)}
+        onInsert={handleInsertMedia}
+        existingMedia={[
+          ...(settings.image_url ? [{ url: settings.image_url, alt: settings.image_alt }] : []),
+          ...settings.gallery.map((g) => ({ url: g.url, alt: g.alt })),
+        ]}
+      />
+
+      <LinkInsertDialog
+        open={showLinkDialog}
+        onClose={() => setShowLinkDialog(false)}
+        onConfirm={handleInsertLink}
+        initialUrl={editorInstance?.getAttributes("link")?.["href"] ?? ""}
+        onRemove={() => editorInstance?.chain().focus().unsetLink().run()}
+      />
+
+      <VideoInsertDialog
+        open={showVideoDialog}
+        onClose={() => setShowVideoDialog(false)}
+        onConfirm={handleInsertVideo}
+      />
+
+      <TableInsertDialog
+        open={showTableDialog}
+        onClose={() => setShowTableDialog(false)}
+        onConfirm={handleInsertTable}
+      />
+
+      <ProjectPreviewModal
+        open={showPreviewModal}
+        onClose={() => setShowPreviewModal(false)}
+        title={title}
+        htmlContent={htmlContent}
+        settings={settings}
       />
 
       <ProjectAiAssistant
         open={showAiAssistant}
         onOpenChange={setShowAiAssistant}
         projectData={{
-          title: form.title,
-          tag: form.tag,
-          intro: form.intro,
-          summary: form.summary,
-          technologies: form.technologies,
-          content: form.content,
+          title,
+          tag: settings.tag,
+          intro: settings.intro,
+          summary: settings.summary,
+          technologies: settings.technologies,
+          content: [],
         }}
-        onApplySummary={(intro, summary) => {
-          setForm((prev) => ({
+        onApplySummary={(aiIntro, aiSummary) => {
+          setSettings((prev) => ({
             ...prev,
-            ...(intro ? { intro: intro.trim() } : {}),
-            ...(summary ? { summary: summary.trim() } : {}),
+            ...(aiIntro ? { intro: aiIntro.trim() } : {}),
+            ...(aiSummary ? { summary: aiSummary.trim() } : {}),
           }));
           setDirty(true);
         }}
-        onApplyTechnologies={(technologies) => {
-          setForm((prev) => ({ ...prev, technologies }));
+        onApplyTechnologies={(aiTechs) => {
+          setSettings((prev) => ({ ...prev, technologies: aiTechs }));
           setDirty(true);
         }}
         onApplyCaseStudyBlocks={(blocks, opts) => {
-          setForm((prev) => {
-            // Si le projet n'avait que le template par défaut "Contexte", on le remplace directement
-            const isStarter =
-              prev.content.length <= 8 &&
-              prev.content.some((b) => b.type === "heading" && (b.text === "Contexte" || b.text === "Problème"));
-            const shouldReplace = opts?.replace ?? isStarter;
-            return {
-              ...prev,
-              content: shouldReplace ? blocks : [...prev.content, ...blocks],
-            };
-          });
+          const { html: convertedHtml } = legacyBlocksToHtml(blocks);
+          if (opts?.replace) {
+            setHtmlContent(convertedHtml);
+            if (editorInstance) editorInstance.commands.setContent(convertedHtml, false);
+          } else {
+            const combined = htmlContent + "\n" + convertedHtml;
+            setHtmlContent(combined);
+            if (editorInstance) editorInstance.commands.setContent(combined, false);
+          }
           setDirty(true);
         }}
         onAppendSingleSection={(secTitle, secContent) => {
           const richBlocks = sectionTextToRichBlocks(secTitle, secContent);
-
-          setForm((prev) => {
-            const isStarter =
-              prev.content.length === 7 &&
-              prev.content.some((b) => b.type === "heading" && b.text === "Contexte");
-            const baseContent = isStarter ? [] : prev.content;
-            return {
-              ...prev,
-              content: [...baseContent, ...richBlocks],
-            };
-          });
+          const { html: convertedHtml } = legacyBlocksToHtml(richBlocks);
+          const combined = htmlContent ? `${htmlContent}\n${convertedHtml}` : convertedHtml;
+          setHtmlContent(combined);
+          if (editorInstance) editorInstance.commands.setContent(combined, false);
+          setDirty(true);
+        }}
+        onApplySeo={(seoTitle, seoDesc) => {
+          setSettings((prev) => ({
+            ...prev,
+            seo_title: seoTitle.trim(),
+            seo_description: seoDesc.trim(),
+          }));
           setDirty(true);
         }}
       />
-    </>
-  );
 
-  if (asModal) {
-    return (
-      <div className="flex flex-col h-full max-h-[92dvh] min-h-0 w-full overflow-hidden bg-card">
-        {/* En-tête fixe du modal */}
-        <div className="shrink-0 flex items-center justify-between border-b border-border bg-card px-4 py-3 sm:px-6 sm:py-3.5">
-          <div className="min-w-0 flex-1 pr-3">
-            <h2 className="text-base sm:text-lg font-bold leading-tight truncate">
-              {row ? "Modifier le projet" : "Nouveau projet"}
-            </h2>
-            <p className="text-[11px] sm:text-xs text-muted-foreground truncate">
-              {dirty ? "Modifications non enregistrées" : "Renseignez les détails du projet"}
-            </p>
-          </div>
-          {onClose && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground shrink-0"
-              onClick={onClose}
-              aria-label="Fermer"
-            >
-              <X size={16} />
-            </Button>
-          )}
-        </div>
-
-        {/* Corps scrollable du modal */}
-        <div className="flex-1 overflow-y-auto p-3.5 sm:p-6 space-y-5 min-w-0">
-          {formSections}
-        </div>
-
-        {/* Pied d'actions fixe du modal */}
-        <div className="shrink-0 border-t border-border bg-card px-3.5 py-3 sm:px-6">
-          {actionButtons}
-        </div>
-
-        {dialogs}
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-w-0">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <Button asChild variant="link" className="px-0"><Link to="/admin/projets"><ArrowLeft /> Tous les projets</Link></Button>
-        <p className="text-xs text-muted-foreground" aria-live="polite">
-          {saving ? "Enregistrement…" : dirty ? (form.status === "draft" ? "Modifications en cours — sauvegarde automatique" : "Modifications non enregistrées") : lastSaved ? `Enregistré à ${lastSaved.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}` : ""}
-        </p>
-      </div>
-      <h1 className="mb-6 text-2xl font-semibold sm:text-3xl">{row ? "Modifier le projet" : "Nouveau projet"}</h1>
-
-      <div className="space-y-6">
-        {formSections}
-      </div>
-
-      <div className="sticky bottom-0 z-20 mt-6 border-t border-border bg-card/95 py-3 backdrop-blur -mx-4 px-4 sm:mx-0 sm:rounded-2xl sm:border">
-        {actionButtons}
-      </div>
-
-      {dialogs}
-    </div>
-  );
-}
-
-function Field({ label, error, hint, children }: { label: string; error?: string | undefined; hint?: string; children: ReactNode }) {
-  return (
-    <div className="space-y-1.5">
-      <Label>{label}</Label>
-      {children}
-      {hint && !error && <p className="text-xs text-muted-foreground">{hint}</p>}
-      <FieldError message={error} />
-    </div>
-  );
-}
-
-function Toggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <label className="flex min-h-12 items-center justify-between gap-3 rounded-xl border border-border px-4">
-      <span className="text-sm font-medium">{label}</span><Switch checked={checked} onCheckedChange={onChange} />
-    </label>
-  );
-}
-
-function ImagePicker({ url, onChange, label }: { url: string; onChange: (url: string) => void; label: string }) {
-  const [busy, setBusy] = useState(false);
-  const input = useRef<HTMLInputElement>(null);
-  async function onFile(file: File | undefined) {
-    if (!file) return;
-    setBusy(true);
-    try { onChange(await uploadProjectImage(file)); toast.success("Image envoyée"); }
-    catch (e) { toast.error(e instanceof Error ? e.message : "Envoi impossible."); }
-    finally { setBusy(false); if (input.current) input.current.value = ""; }
-  }
-  return (
-    <div className="space-y-1.5">
-      <Label>{label}</Label>
-      <button type="button" onClick={() => input.current?.click()} className="relative grid aspect-[3/2] w-full place-items-center overflow-hidden rounded-xl border border-dashed border-border bg-muted text-sm text-muted-foreground hover:border-primary">
-        {url ? <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" /> : <span className="flex flex-col items-center gap-1"><ImagePlus /> PNG, JPG, WEBP · 5 Mo</span>}
-        {busy && <span className="absolute inset-0 grid place-items-center bg-background/70"><Loader2 className="animate-spin" /></span>}
-      </button>
-      <input ref={input} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(e) => onFile(e.target.files?.[0])} />
-      {url && <button type="button" className="text-xs font-semibold text-destructive" onClick={() => onChange("")}>Retirer l'image</button>}
-    </div>
-  );
-}
-
-function MediaBlockFields({ block, onChange }: { block: MediaBlock; onChange: (b: Block) => void }) {
-  const multiInputRef = useRef<HTMLInputElement>(null);
-  const [uploadingMultiple, setUploadingMultiple] = useState(false);
-
-  async function handleMultipleFiles(files: FileList | null) {
-    if (!files || files.length === 0) return;
-    setUploadingMultiple(true);
-    try {
-      const newItems: MediaItem[] = [];
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (!file) continue;
-        const url = await uploadProjectImage(file);
-        newItems.push({
-          id: newId(),
-          url,
-          alt: "",
-          title: "",
-          caption: "",
-        });
-      }
-      const existing = block.items.filter((it) => it.url.trim() !== "");
-      onChange({ ...block, items: [...existing, ...newItems] });
-      toast.success(`${newItems.length} média(s) importé(s) avec succès !`);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Erreur lors de l'envoi.");
-    } finally {
-      setUploadingMultiple(false);
-      if (multiInputRef.current) multiInputRef.current.value = "";
-    }
-  }
-
-  function addItem() {
-    onChange({
-      ...block,
-      items: [
-        ...block.items,
-        { id: newId(), url: "", alt: "", title: "", caption: "" },
-      ],
-    });
-  }
-
-  function updateItem(index: number, patch: Partial<MediaItem>) {
-    const next = [...block.items];
-    const current = next[index];
-    if (current) {
-      next[index] = { ...current, ...patch };
-      onChange({ ...block, items: next });
-    }
-  }
-
-  function removeItem(index: number) {
-    if (block.items.length <= 1) {
-      updateItem(0, { url: "", alt: "", title: "", caption: "" });
-      return;
-    }
-    onChange({
-      ...block,
-      items: block.items.filter((_, i) => i !== index),
-    });
-  }
-
-  return (
-    <div className="space-y-4 rounded-xl border border-border/80 bg-muted/10 p-3 sm:p-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/60">
-        <div className="min-w-0 flex-1">
-          <Input
-            className="h-10 text-sm font-semibold"
-            placeholder="Titre de la section (optionnel)"
-            value={block.title ?? ""}
-            onChange={(e) => onChange({ ...block, title: e.target.value })}
-          />
-        </div>
-        <select
-          aria-label="Disposition"
-          value={block.layout ?? "grid"}
-          onChange={(e) => onChange({ ...block, layout: e.target.value as "grid" | "stacked" })}
-          className="h-10 rounded-md border border-input bg-background px-3 text-xs sm:text-sm shrink-0"
-        >
-          <option value="grid">Galerie fluide</option>
-          <option value="stacked">Grandes cartes</option>
-        </select>
-      </div>
-
-      {/* Description de la section */}
-      <div className="space-y-1.5">
-        <label className="text-xs font-semibold text-foreground">
-          Description de la section
-        </label>
-        <Textarea
-          rows={3}
-          className="text-xs sm:text-sm leading-relaxed"
-          placeholder="Description de la section..."
-          value={block.caption ?? ""}
-          onChange={(e) => onChange({ ...block, caption: e.target.value })}
-        />
-      </div>
-
-      {/* Images */}
-      <div className="space-y-3 pt-1">
-        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          Images ({block.items.length})
-        </span>
-
-        <div className="grid gap-3 sm:grid-cols-2">
-          {block.items.map((item, index) => (
-            <div
-              key={item.id}
-              className="rounded-xl border border-border bg-card p-3 space-y-2.5 shadow-2xs relative"
-            >
-              <div className="flex items-center justify-between text-xs font-semibold">
-                <span className="flex items-center gap-1.5 text-primary">
-                  <span className="grid h-5 w-5 place-items-center rounded-full bg-primary/10 text-[10px] font-bold">
-                    {index + 1}
-                  </span>
-                  Image {index + 1}
-                </span>
-                <button
-                  type="button"
-                  className="text-xs text-destructive hover:underline flex items-center gap-1"
-                  onClick={() => removeItem(index)}
-                  title="Supprimer"
-                >
-                  <Trash2 size={12} /> Supprimer
-                </button>
-              </div>
-
-              <ImagePicker
-                url={item.url}
-                label={`Image ${index + 1}`}
-                onChange={(url) => updateItem(index, { url })}
-              />
-
-              <Input
-                className="h-8 text-xs text-muted-foreground"
-                placeholder="Légende (optionnelle)"
-                value={item.caption || item.title || ""}
-                onChange={(e) => updateItem(index, { caption: e.target.value, title: "" })}
-              />
+      {/* ── Dialog de confirmation de sortie (remplace window.confirm générique) ── */}
+      <AlertDialog
+        open={showLeaveDialog}
+        onOpenChange={(o) => {
+          if (!o) {
+            setShowLeaveDialog(false);
+            pendingBlockerRef.current = null;
+            if (blocker.status === "blocked") blocker.reset();
+          }
+        }}
+      >
+        <AlertDialogContent className="max-w-sm rounded-2xl border border-border bg-card shadow-2xl p-6">
+          <AlertDialogHeader className="flex flex-col items-center text-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
+              <AlertTriangle size={22} className="text-amber-600 dark:text-amber-400" />
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Boutons d'ajout */}
-      <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-border/50">
-        <input
-          ref={multiInputRef}
-          type="file"
-          accept="image/png,image/jpeg,image/webp"
-          multiple
-          className="hidden"
-          onChange={(e) => handleMultipleFiles(e.target.files)}
-          disabled={uploadingMultiple}
-        />
-        <Button
-          type="button"
-          variant="secondary"
-          size="sm"
-          className="h-9 gap-1.5 text-xs font-semibold"
-          onClick={() => multiInputRef.current?.click()}
-          disabled={uploadingMultiple}
-        >
-          {uploadingMultiple ? <Loader2 size={13} className="animate-spin" /> : <ImagePlus size={13} />}
-          Importer plusieurs images
-        </Button>
-
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-9 gap-1.5 text-xs font-semibold"
-          onClick={addItem}
-        >
-          <Plus size={13} /> Ajouter une image
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function BlockFields({ block, onChange }: { block: Block; onChange: (b: Block) => void }) {
-  switch (block.type) {
-    case "media": return <MediaBlockFields block={block as MediaBlock} onChange={onChange} />;
-    case "heading": {
-      const h = block as HeadingBlock;
-      return (
-        <div className="space-y-2">
-          <Input className="h-11 text-base font-semibold" placeholder="Titre de section" value={h.text} onChange={(e) => onChange({ ...h, text: e.target.value })} />
-          <div className="grid gap-2 sm:grid-cols-3">
-            <select aria-label="Largeur" value={h.layout ?? "full"} onChange={(e) => onChange({ ...h, layout: e.target.value as HeadingBlock["layout"] })} className="h-10 rounded-md border border-input bg-background px-2 text-sm"><option value="full">Pleine largeur</option><option value="half">Demi-colonne</option></select>
-            <select aria-label="Fond" value={h.tone ?? "plain"} onChange={(e) => onChange({ ...h, tone: e.target.value as HeadingBlock["tone"] })} className="h-10 rounded-md border border-input bg-background px-2 text-sm"><option value="plain">Fond blanc</option><option value="muted">Fond grisé</option></select>
-            <select aria-label="Style" value={h.variant ?? "default"} onChange={(e) => onChange({ ...h, variant: e.target.value as HeadingBlock["variant"] })} className="h-10 rounded-md border border-input bg-background px-2 text-sm"><option value="default">Section simple</option><option value="steps">Étapes numérotées</option><option value="result">Résultat (coche)</option></select>
-          </div>
-        </div>
-      );
-    }
-    case "subheading": return <Input className="h-11 font-semibold" placeholder="Sous-titre" value={block.text} onChange={(e) => onChange({ ...block, text: e.target.value })} />;
-    case "paragraph": return <RichEditor value={block.doc} onChange={(doc) => onChange({ ...block, doc })} placeholder="Paragraphe" />;
-    case "list": return (
-      <div className="space-y-2">
-        <select aria-label="Style de liste" value={block.style ?? "bullet"} onChange={(e) => onChange({ ...block, style: e.target.value as "bullet" })} className="h-10 rounded-md border border-input bg-background px-2 text-sm"><option value="bullet">Puces</option><option value="check">Coches</option><option value="tags">Étiquettes</option></select>
-        <RichEditor value={block.doc} onChange={(doc) => onChange({ ...block, doc })} placeholder="Liste" />
-      </div>
-    );
-    case "image": return (
-      <div className="grid gap-3 sm:grid-cols-[200px_1fr]">
-        <ImagePicker url={block.url} label="Image" onChange={(url) => onChange({ ...block, url })} />
-        <div className="space-y-2">
-          <Input className="h-11" placeholder="Description de l'image (accessibilité)" value={block.alt} onChange={(e) => onChange({ ...block, alt: e.target.value })} />
-          <Input className="h-11" placeholder="Titre de l'image" value={block.title ?? ""} onChange={(e) => onChange({ ...block, title: e.target.value })} />
-          <Textarea rows={2} placeholder="Légende" value={block.caption ?? ""} onChange={(e) => onChange({ ...block, caption: e.target.value })} />
-          <Input className="h-11" placeholder="Note (ex. illustration explicative)" value={block.note ?? ""} onChange={(e) => onChange({ ...block, note: e.target.value })} />
-        </div>
-      </div>
-    );
-    case "quote": return (
-      <div className="space-y-2">
-        <RichEditor value={block.doc} lists={false} onChange={(doc) => onChange({ ...block, doc })} placeholder="Citation" />
-        <Input className="h-11" placeholder="Auteur (facultatif)" value={block.cite ?? ""} onChange={(e) => onChange({ ...block, cite: e.target.value })} />
-      </div>
-    );
-    case "code": return <Textarea rows={5} className="font-mono text-sm" placeholder="Code" value={block.code} onChange={(e) => onChange({ ...block, code: e.target.value })} />;
-    case "button": return (
-      <div className="grid gap-2 sm:grid-cols-2">
-        <Input className="h-11" placeholder="Texte du bouton" value={block.label} onChange={(e) => onChange({ ...block, label: e.target.value })} />
-        <Input className="h-11" type="url" placeholder="https://…" value={block.url} onChange={(e) => onChange({ ...block, url: e.target.value })} />
-        {block.url && !safeUrl(block.url) && <p className="text-sm text-destructive">Adresse non valide : le bouton ne sera pas affiché.</p>}
-      </div>
-    );
-    case "divider": return <hr className="my-2 border-border" />;
-  }
-}
-
-/** Aperçu fidèle : mêmes composants que la page publique, optimisé responsive mobile. */
-function Preview({ form, onClose }: { form: Form; onClose?: () => void }) {
-  const hero = useMemo(() => firstImage(form.content), [form.content]);
-  const container = "mx-auto w-full max-w-5xl px-4 sm:px-6 md:px-8";
-  const cover = form.image_url || hero?.url;
-  return (
-    <div className="bg-background pb-12 pt-14 sm:pt-12 text-foreground min-w-0">
-      {/* Bandeau d'aperçu propre */}
-      <div className="mx-3 sm:mx-6 md:mx-8 mb-6 flex items-center justify-between gap-3 rounded-full bg-accent/80 border border-primary/20 px-3.5 sm:px-5 py-2 text-xs font-semibold text-primary">
-        <span className="flex items-center gap-1.5 truncate">
-          <Sparkles size={13} className="shrink-0" />
-          <span className="truncate">Aperçu · {form.status === "published" ? "Publié" : "Brouillon privé"}</span>
-        </span>
-        {onClose && (
-          <button
-            type="button"
-            onClick={onClose}
-            className="shrink-0 text-muted-foreground hover:text-foreground text-[11px] underline underline-offset-2"
-          >
-            Fermer
-          </button>
-        )}
-      </div>
-
-      <section className={container}>
-        <p className="mb-2.5 text-xs sm:text-sm font-semibold uppercase tracking-wide text-primary">
-          Étude de cas · {form.tag || "Projet"}
-        </p>
-        <h1 className="max-w-4xl text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-tight break-words">
-          {form.title || "Titre du projet"}
-        </h1>
-        {form.intro && (
-          <p className="mt-4 sm:mt-6 max-w-3xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            {form.intro}
-          </p>
-        )}
-        {form.technologies.length > 0 && (
-          <ul className="mt-5 flex flex-wrap gap-1.5 sm:gap-2">
-            {form.technologies.map((t) => (
-              <li key={t} className="rounded-full border border-border bg-secondary/60 px-2.5 sm:px-3 py-1 text-xs font-semibold">
-                {t}
-              </li>
-            ))}
-          </ul>
-        )}
-        {safeUrl(form.external_url) && (
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            <Button size="lg" className="rounded-full bg-gradient-primary w-full sm:w-auto">
-              <Globe /> Voir le projet en ligne <ArrowUpRight />
-            </Button>
-          </div>
-        )}
-        {cover && (
-          <div className="mt-8 sm:mt-10 overflow-hidden rounded-2xl sm:rounded-3xl border border-border/80 bg-card shadow-sm">
-            <img
-              src={cover}
-              alt={form.image_alt || hero?.alt || form.title}
-              className="aspect-[16/10] sm:aspect-[16/9] w-full object-cover"
-            />
-          </div>
-        )}
-        {hero?.note && <p className="mt-2 text-xs text-muted-foreground">{hero.note}</p>}
-      </section>
-      <ProjectBody blocks={form.content} />
+            <AlertDialogTitle className="text-base font-bold text-foreground">
+              Modifications non enregistrées
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-muted-foreground leading-relaxed">
+              Vous avez des modifications non enregistrées sur ce projet. Si vous quittez maintenant, elles seront perdues définitivement.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2 mt-2">
+            <AlertDialogCancel
+              className="flex-1 rounded-xl cursor-pointer"
+              onClick={() => {
+                setShowLeaveDialog(false);
+                pendingBlockerRef.current = null;
+                if (blocker.status === "blocked") blocker.reset();
+              }}
+            >
+              Continuer l&apos;édition
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="flex-1 rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90 cursor-pointer"
+              onClick={() => {
+                setShowLeaveDialog(false);
+                const proceed = pendingBlockerRef.current;
+                pendingBlockerRef.current = null;
+                if (proceed) proceed();
+              }}
+            >
+              Quitter sans enregistrer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

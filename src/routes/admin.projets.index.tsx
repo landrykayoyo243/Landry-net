@@ -1,24 +1,22 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { ExternalLink, Plus, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { SortableList } from "@/components/admin/SortableList";
 import { ConfirmDelete, EmptyState, ListLoading, LoadError, PageHeader, Toolbar, applyListView, type SortKey } from "@/components/admin/ui";
-import { ProjectEditor } from "@/components/admin/ProjectEditor";
 import { adminProjectsQuery, saveOrder, type ProjectRow } from "@/lib/admin-data";
 
 export const Route = createFileRoute("/admin/projets/")({ component: ProjectsAdmin });
 
 function ProjectsAdmin() {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const { data, isPending, isError, refetch } = useQuery(adminProjectsQuery);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortKey>("order");
-  const [editingProject, setEditingProject] = useState<ProjectRow | "new" | null>(null);
   const [deleting, setDeleting] = useState<ProjectRow | null>(null);
   const [busy, setBusy] = useState(false);
   const view = useMemo(
@@ -64,10 +62,11 @@ function ProjectsAdmin() {
     await refresh();
   }
 
-  const nextOrder = (data ?? []).reduce((m, p) => Math.max(m, p.sort_order + 1), 0);
   const add = (
-    <Button onClick={() => setEditingProject("new")} className="min-h-11 rounded-full bg-gradient-primary">
-      <Plus size={16} /> Nouveau projet
+    <Button asChild className="min-h-11 rounded-full bg-gradient-primary">
+      <Link to="/admin/projets/nouveau">
+        <Plus size={16} /> Nouveau projet
+      </Link>
     </Button>
   );
 
@@ -101,11 +100,11 @@ function ProjectsAdmin() {
               <div
                 role="button"
                 tabIndex={0}
-                onClick={() => setEditingProject(p)}
+                onClick={() => navigate({ to: "/admin/projets/$id", params: { id: p.id } })}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    setEditingProject(p);
+                    navigate({ to: "/admin/projets/$id", params: { id: p.id } });
                   }
                 }}
                 className="group relative flex flex-col gap-3.5 rounded-2xl border border-border/80 bg-card p-3 sm:p-4 shadow-xs transition-all duration-200 hover:border-primary/40 hover:shadow-md hover:bg-accent/5 cursor-pointer sm:flex-row sm:items-center sm:justify-between"
@@ -239,28 +238,6 @@ function ProjectsAdmin() {
             )}
           />
         </div>
-      )}
-
-      {editingProject && (
-        <Dialog
-          open
-          onOpenChange={(o) => {
-            if (!o) setEditingProject(null);
-          }}
-        >
-          <DialogContent className="max-h-[92dvh] h-[92dvh] w-[calc(100vw-1rem)] sm:w-[calc(100vw-2rem)] max-w-4xl p-0 rounded-2xl sm:rounded-3xl border border-border bg-card shadow-2xl overflow-hidden [&>button:last-child]:hidden">
-            <DialogTitle className="sr-only">
-              {editingProject === "new" ? "Nouveau projet" : "Modifier le projet"}
-            </DialogTitle>
-            <ProjectEditor
-              asModal
-              row={editingProject === "new" ? null : editingProject}
-              nextOrder={nextOrder}
-              onClose={() => setEditingProject(null)}
-              onSaved={refresh}
-            />
-          </DialogContent>
-        </Dialog>
       )}
 
       <ConfirmDelete

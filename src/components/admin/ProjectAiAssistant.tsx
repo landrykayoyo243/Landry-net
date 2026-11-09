@@ -56,6 +56,7 @@ interface ProjectAiAssistantProps {
   onApplyTechnologies: (technologies: string[]) => void;
   onApplyCaseStudyBlocks: (blocks: Block[], opts?: { replace?: boolean }) => void;
   onAppendSingleSection?: (title: string, content: string) => void;
+  onApplySeo?: (seoTitle: string, seoDescription: string) => void;
 }
 
 interface ChatMessage {
@@ -152,6 +153,7 @@ export function ProjectAiAssistant({
   onApplyTechnologies,
   onApplyCaseStudyBlocks,
   onAppendSingleSection,
+  onApplySeo,
 }: ProjectAiAssistantProps) {
   const [tab, setTab] = useState<"chat" | "generator">("chat");
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
@@ -328,31 +330,69 @@ DIRECTIVES RÉDACTIONNELLES ET ÉDITORIALES (DIRECTEUR ÉDITORIAL TECHNIQUE) :
     }
   }
 
-  /** Insérer une seule section directement dans le projet Word */
+  /** Insérer une seule section directement dans le projet — TOUJOURS en mode ajout */
   function handleInsertSection(title: string, content: string) {
     if (onAppendSingleSection) {
       onAppendSingleSection(title, content);
       setInsertedTitles((prev) => new Set([...prev, title]));
-      toast.success(`Section « ${title} » insérée avec ses composants riches !`);
+      toast.success(`Section « ${title} » ajoutée au projet !`);
     } else {
       const blocks = sectionTextToRichBlocks(title, cleanProseText(content));
-      onApplyCaseStudyBlocks(blocks);
+      // append = pas de replace
+      onApplyCaseStudyBlocks(blocks, { replace: false });
       setInsertedTitles((prev) => new Set([...prev, title]));
-      toast.success(`Section « ${title} » insérée !`);
+      toast.success(`Section « ${title} » ajoutée !`);
     }
   }
 
-  /** Insérer toutes les sections détectées et fermer pour voir le résultat */
-  function handleInsertAllSections(sections: Array<{ title: string; content: string }>, closeDialog = true) {
-    const allBlocks: Block[] = [];
+  /**
+   * Insérer toutes les sections détectées.
+   * @param replace - true seulement pour le Générateur Express (remplacement total voulu).
+   *                  false (défaut) pour le chat : ajoute les sections au contenu existant.
+   */
+  function handleInsertAllSections(
+    sections: Array<{ title: string; content: string }>,
+    closeDialog = true,
+    replace = false
+  ) {
     for (const sec of sections) {
-      const richBlocks = sectionTextToRichBlocks(sec.title, cleanProseText(sec.content));
-      allBlocks.push(...richBlocks);
+      if (onAppendSingleSection) {
+        onAppendSingleSection(sec.title, cleanProseText(sec.content));
+      } else {
+        const richBlocks = sectionTextToRichBlocks(sec.title, cleanProseText(sec.content));
+        onApplyCaseStudyBlocks(richBlocks, { replace: false });
+      }
     }
 
-    onApplyCaseStudyBlocks(allBlocks, { replace: true });
     setInsertedTitles(new Set(sections.map((s) => s.title)));
-    toast.success(`${sections.length} sections insérées dans l'étude de cas !`);
+    toast.success(
+      replace
+        ? `${sections.length} sections insérées (contenu remplacé).`
+        : `${sections.length} section(s) ajoutée(s) au projet !`
+    );
+
+    // Auto-SEO uniquement si remplacement complet (Générateur Express)
+    if (replace && onApplySeo && projectData.title.trim()) {
+      const textSample = sections
+        .map((s) => `${s.title}: ${s.content}`)
+        .join(" ")
+        .slice(0, 2000);
+
+      adminApi.generateAiText({
+        prompt: `Projet: "${projectData.title}"\nCatégorie: ${projectData.tag || "Technologie"}\nContenu: ${textSample}\n\nGénère un titre SEO (50-60 car.) et une méta-description (140-160 car.) pour Landry Kayoyo.\nRéponds UNIQUEMENT par JSON: {"seo_title": "...", "seo_description": "..."}`,
+        temperature: 0.6,
+      })
+        .then((res) => {
+          const json = res.text.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
+          const parsed = JSON.parse(json) as { seo_title?: string; seo_description?: string };
+          if (parsed.seo_title && parsed.seo_description && onApplySeo) {
+            onApplySeo(parsed.seo_title, parsed.seo_description);
+            toast.success("SEO auto-généré ✨");
+          }
+        })
+        .catch(() => {});
+    }
+
     if (closeDialog) {
       onOpenChange(false);
     }
@@ -367,7 +407,8 @@ DIRECTIVES RÉDACTIONNELLES ET ÉDITORIALES (DIRECTEUR ÉDITORIAL TECHNIQUE) :
       onApplyTechnologies(Array.from(new Set([...projectData.technologies, ...m.parsedTechs])));
     }
     if (m.parsedSections && m.parsedSections.length > 0) {
-      handleInsertAllSections(m.parsedSections, true);
+      // Chat → toujours en mode AJOUT (replace=false), jamais de suppression du contenu existant
+      handleInsertAllSections(m.parsedSections, true, false);
     } else {
       onOpenChange(false);
       toast.success("Modifications appliquées au projet !");
@@ -477,7 +518,37 @@ Réponds uniquement par la liste séparée par des virgules. Sans aucun émoji n
     } else if (genMode === "case_study") {
       if (genParsedBlocks && genParsedBlocks.length > 0) {
         onApplyCaseStudyBlocks(genParsedBlocks, { replace: true });
-        toast.success("Étude de cas insérée dans l'éditeur Word !");
+
+        // Génération automatique du SEO après insertion d'une étude de cas complète
+        if (onApplySeo && projectData.title.trim()) {
+          const plainText = genResult
+            .replace(/```[\s\S]*?```/g, " ")
+            .replace(/<[^>]+>/g, " ")
+            .replace(/\s+/g, " ")
+            .trim()
+            .slice(0, 2000);
+
+          const seoPrompt = `Projet: "${projectData.title}"
+Catégorie: ${projectData.tag || "Technologie"}
+Technologies: ${projectData.technologies.join(", ") || "Non spécifiées"}
+Extrait du contenu: ${plainText}
+
+Génère un titre SEO (50-60 caractères) et une méta-description percutante (140-160 caractères) pour ce projet de Landry Kayoyo.
+Réponds UNIQUEMENT par un JSON: {"seo_title": "...", "seo_description": "..."}`;
+
+          adminApi.generateAiText({ prompt: seoPrompt, temperature: 0.6 })
+            .then((res) => {
+              const json = res.text.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
+              const parsed = JSON.parse(json);
+              if (parsed.seo_title && parsed.seo_description) {
+                onApplySeo(parsed.seo_title, parsed.seo_description);
+                toast.success("SEO généré automatiquement ✨");
+              }
+            })
+            .catch(() => {}); // silencieux si erreur
+        }
+
+        toast.success("Étude de cas insérée dans l'éditeur !");
         onOpenChange(false);
       }
     }
@@ -585,11 +656,11 @@ Réponds uniquement par la liste séparée par des virgules. Sans aucun émoji n
                               <Button
                                 type="button"
                                 size="sm"
-                                onClick={() => handleInsertAllSections(m.parsedSections!, true)}
+                                onClick={() => handleInsertAllSections(m.parsedSections!, true, false)}
                                 className="h-7.5 px-3 text-xs font-semibold gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg shadow-2xs w-full sm:w-auto"
                               >
                                 <Sparkles size={13} />
-                                <span>Tout insérer dans le projet</span>
+                                <span>Ajouter au projet</span>
                               </Button>
                             </div>
 

@@ -223,6 +223,9 @@
 @utility page-enter { animation: page-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
 @media (prefers-reduced-motion: reduce) { .page-enter { animation: none; } }
 
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@utility animate-fade-in { animation: fade-in 0.2s ease-out both; }
+
 /* ── Flèche de scroll hero ── */
 @keyframes scroll-bounce {
   0%, 100% { transform: translateY(0); opacity: 0.5; }
@@ -256,3 +259,268 @@ img.img-fallback {
   background-color: var(--color-secondary);
   padding: 15%;
 }
+
+/* ── Styles riches pour l'éditeur WYSIWYG & le rendu public des projets ── */
+.tiptap-content,
+.project-prose {
+  color: var(--color-foreground);
+  line-height: 1.75;
+}
+
+.tiptap-content:focus {
+  outline: none;
+}
+
+.tiptap-content p,
+.project-prose p {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  line-height: 1.8;
+  word-break: break-word;
+}
+
+.tiptap-content h1,
+.project-prose h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+  color: var(--color-foreground);
+}
+
+.tiptap-content h2,
+.project-prose h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-top: 2.25rem;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.01em;
+  color: var(--color-foreground);
+}
+
+.tiptap-content h3,
+.project-prose h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-foreground);
+}
+
+.tiptap-content ul,
+.project-prose ul {
+  list-style-type: disc;
+  padding-left: 1.75rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.tiptap-content ol,
+.project-prose ol {
+  list-style-type: decimal;
+  padding-left: 1.75rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.tiptap-content li,
+.project-prose li {
+  margin: 0;
+  line-height: 1.7;
+}
+
+.tiptap-content blockquote,
+.project-prose blockquote {
+  border-left: 4px solid var(--color-primary);
+  background-color: var(--color-muted);
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  border-radius: 0 0.75rem 0.75rem 0;
+  font-style: italic;
+  color: var(--color-foreground);
+}
+
+.tiptap-content blockquote p,
+.project-prose blockquote p {
+  margin: 0;
+}
+
+.tiptap-content pre,
+.project-prose pre {
+  background-color: var(--color-ink);
+  color: var(--color-ink-foreground);
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin: 1.5rem 0;
+}
+
+.tiptap-content code,
+.project-prose code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.875em;
+  background-color: var(--color-secondary);
+  color: var(--color-secondary-foreground);
+  padding: 0.15rem 0.35rem;
+  border-radius: 0.375rem;
+}
+
+.tiptap-content pre code,
+.project-prose pre code {
+  background-color: transparent;
+  color: inherit;
+  padding: 0;
+  border-radius: 0;
+}
+
+.tiptap-content a,
+.project-prose a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.tiptap-content a:hover,
+.project-prose a:hover {
+  opacity: 0.8;
+}
+
+.tiptap-content hr,
+.project-prose hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 2rem 0;
+}
+
+.tiptap-content figure,
+.project-prose figure {
+  margin: 2rem 0;
+}
+
+.tiptap-content img,
+.project-prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 20px -5px oklch(0 0 0 / 0.08);
+}
+
+.tiptap-content figcaption,
+.project-prose figcaption {
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--color-muted-foreground);
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+.tiptap-content table,
+.project-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.875rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.tiptap-content th,
+.project-prose th {
+  background-color: var(--color-secondary);
+  color: var(--color-secondary-foreground);
+  font-weight: 600;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
+}
+
+.tiptap-content td,
+.project-prose td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
+}
+
+.tiptap-content tr:last-child td,
+.project-prose tr:last-child td {
+  border-bottom: none;
+}
+
+.tiptap-content td:last-child,
+.tiptap-content th:last-child,
+.project-prose td:last-child,
+.project-prose th:last-child {
+  border-right: none;
+}
+
+.tiptap-content iframe,
+.project-prose iframe {
+  width: 100%;
+  max-width: 48rem;
+  aspect-ratio: 16 / 9;
+  border-radius: 1rem;
+  margin: 2rem auto;
+  display: block;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 20px -5px oklch(0 0 0 / 0.1);
+  background-color: var(--color-muted);
+}
+
+.tiptap-content div[data-youtube-video],
+.project-prose div[data-youtube-video] {
+  margin: 2rem auto;
+  display: flex;
+  justify-content: center;
+  max-width: 48rem;
+}
+
+.tiptap-content div[data-youtube-video] iframe,
+.project-prose div[data-youtube-video] iframe {
+  border-radius: 1rem;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 20px -5px oklch(0 0 0 / 0.1);
+  background-color: var(--color-muted);
+}
+
+.tiptap-content .project-btn,
+.project-prose .project-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.625rem 1.25rem;
+  border-radius: 9999px;
+  background-image: var(--gradient-primary);
+  color: var(--color-primary-foreground);
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 4px 14px -3px oklch(0.5 0.2 258 / 0.4);
+  transition: transform 0.2s;
+}
+
+.tiptap-content .project-btn:hover,
+.project-prose .project-btn:hover {
+  transform: translateY(-1px);
+}
+
