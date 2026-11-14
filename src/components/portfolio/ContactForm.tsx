@@ -85,7 +85,7 @@ export function ContactForm() {
         <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
           <div>
     
- <label htmlFor="subject" className="mb-1 block text-xs font-semibold text-foreground sm:mb-1.5 sm:text-sm">Objet</label>
+ <label htmlFor="name" className="mb-1 block text-xs font-semibold text-foreground sm:mb-1.5 sm:text-sm">Votre nom</label>
 
             <input id="name" name="name" type="text" autoComplete="name" placeholder="Votre nom" className={fieldBase} aria-invalid={!!errors.name} aria-describedby={errors.name ? "name-err" : undefined} />
             {errors.name && <p id="name-err" className="mt-1 text-xs font-medium text-destructive">{errors.name}</p>}
