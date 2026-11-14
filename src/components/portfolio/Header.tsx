@@ -1,10 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  Menu,
-  X,
-} from "lucide-react";
+import { Facebook, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { nav, profile } from "@/content/portfolio";
 import { cvUrlQuery } from "@/lib/content.queries";
@@ -23,7 +20,6 @@ export function Header() {
   const cvUrlQ = useQuery(cvUrlQuery);
   const cvUrl = cvUrlQ.data ?? profile.cvUrl;
 
-  // Détection du scroll fluide et non-bloquante (100% rAF + passive)
   useEffect(() => {
     let ticking = false;
     const updateScroll = () => {
@@ -48,7 +44,6 @@ export function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Fermeture automatique lors d'un clic ou touch à l'extérieur du menu
   useEffect(() => {
     if (!open) return;
 
@@ -74,7 +69,6 @@ export function Header() {
     };
   }, [open]);
 
-  // Fermeture sur touche Échap
   useEffect(() => {
     if (!open) return;
 
@@ -96,14 +90,12 @@ export function Header() {
           : "border-b border-border/80 bg-background py-0.5"
       }`}
     >
-      {/* Jauge discrète de lecture au scroll (GPU transform, 100% non-bloquante) */}
       <div
         className="pointer-events-none absolute bottom-0 left-0 h-[2px] w-full bg-gradient-primary origin-left transition-transform duration-75 ease-out"
         style={{ transform: `scaleX(${progress})`, opacity: scrolled ? 1 : 0 }}
         aria-hidden="true"
       />
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-5 md:h-20 md:px-8">
-        {/* Logo */}
         <Link
           to="/"
           hash="top"
@@ -123,7 +115,6 @@ export function Header() {
           </span>
         </Link>
 
-        {/* Navigation Desktop */}
         <nav aria-label="Navigation principale" className="hidden items-center gap-7 md:flex">
           {nav
             .filter((n) => ("to" in n ? n.to !== "/contact" : n.href !== "#contact"))
@@ -152,7 +143,6 @@ export function Header() {
             )}
         </nav>
 
-        {/* CTA Desktop & Bouton burger Mobile */}
         <div className="flex items-center gap-2.5">
           {cvUrl && (
             <span className="hidden md:inline-flex">
@@ -164,13 +154,20 @@ export function Header() {
             </span>
           )}
 
+          <span className="hidden md:inline-flex">
+            <Button asChild variant="outline" size="sm" className="rounded-full px-3.5 gap-1.5 border-border hover:border-primary/50 text-foreground">
+              <a href={profile.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                <span className="inline-flex items-center gap-1.5"><Facebook className="h-4 w-4" /><span>Facebook</span></span>
+              </a>
+            </Button>
+          </span>
+
           <span className="hidden sm:inline-flex">
             <Button asChild className="rounded-full bg-gradient-primary px-5 shadow-sm">
               <Link to="/contact">Me contacter</Link>
             </Button>
           </span>
 
-          {/* Bouton burger animé (uniquement visible sur mobile/tablette) */}
           <button
             ref={buttonRef}
             type="button"
@@ -195,7 +192,6 @@ export function Header() {
         </div>
       </div>
 
-      {/* Arrière-plan assombri (ferme au clic) */}
       <div
         className={`fixed inset-0 top-16 z-40 bg-black/40 transition-opacity duration-300 ease-in-out md:hidden ${
           open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
@@ -204,7 +200,6 @@ export function Header() {
         aria-hidden="true"
       />
 
-      {/* Tiroir de navigation mobile 100% opaque (zéro transparence) */}
       <div
         ref={menuRef}
         className={`fixed inset-x-0 top-16 z-50 max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-border bg-card shadow-2xl transition-all duration-200 ease-out md:hidden ${
@@ -248,7 +243,17 @@ export function Header() {
               );
             })}
 
-            {/* Lien direct de téléchargement du CV sur le menu mobile */}
+            <a
+              href={profile.facebook}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setOpen(false)}
+              className="mt-3 flex min-h-12 items-center gap-2 rounded-lg border-t border-border/60 px-3 pt-3 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+            >
+              <Facebook className="h-4 w-4" />
+              Facebook
+            </a>
+
             {cvUrl && (
               <a
                 href={cvUrl}
