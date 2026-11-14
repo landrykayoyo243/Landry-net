@@ -127,8 +127,8 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
             </div>
           </div>
           <div className="order-1 mx-auto hidden w-full md:order-2 md:block md:max-w-[370px] lg:max-w-[400px]">
-            <div className="relative overflow-hidden rounded-[2.2rem] border border-white/15 bg-white/5 p-2 shadow-2xl backdrop-blur-md sm:rounded-[2.6rem] sm:p-2.5">
-              <picture><source srcSet={photo.webp} type="image/webp" /><img src={photo.fallback} alt="Portrait de Landry Kayoyo — Administrateur systèmes & réseaux et développeur web" width={800} height={1000} loading="eager" fetchPriority="high" decoding="async" className="aspect-[4/5] w-full rounded-[1.8rem] object-cover object-[55%_22%] sm:rounded-[2.2rem]" /></picture>
+            <div className="relative overflow-hidden rounded-3xl">
+              <picture><source srcSet={photo.webp} type="image/webp" /><img src={photo.fallback} alt="Portrait de Landry Kayoyo — Administrateur systèmes & réseaux et développeur web" width={800} height={1000} loading="eager" fetchPriority="high" decoding="async" className="aspect-[4/5] w-full rounded-3xl object-cover object-[55%_22%]" /></picture>
             </div>
           </div>
         </div>
