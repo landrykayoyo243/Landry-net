@@ -84,25 +84,31 @@ export function ContactForm() {
       <form onSubmit={onSubmit} noValidate className="space-y-3 sm:space-y-4">
         <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
           <div>
-            <label htmlFor="name" className="mb-1 block text-xs font-semibold text-foreground sm:mb-1.5 sm:text-sm">Nom complet</label>
+    
+
+
             <input id="name" name="name" type="text" autoComplete="name" placeholder="Votre nom" className={fieldBase} aria-invalid={!!errors.name} aria-describedby={errors.name ? "name-err" : undefined} />
             {errors.name && <p id="name-err" className="mt-1 text-xs font-medium text-destructive">{errors.name}</p>}
           </div>
           <div>
-            <label htmlFor="email" className="mb-1 block text-xs font-semibold text-foreground sm:mb-1.5 sm:text-sm">Adresse email</label>
+
+
+            
             <input id="email" name="email" type="email" autoComplete="email" placeholder="votre.email@exemple.com" className={fieldBase} aria-invalid={!!errors.email} aria-describedby={errors.email ? "email-err" : undefined} />
             {errors.email && <p id="email-err" className="mt-1 text-xs font-medium text-destructive">{errors.email}</p>}
           </div>
         </div>
 
         <div>
-          <label htmlFor="subject" className="mb-1 block text-xs font-semibold text-foreground sm:mb-1.5 sm:text-sm">Objet</label>
+
+         
           <input id="subject" name="subject" type="text" placeholder="Ex. : Projet réseau, site web…" className={fieldBase} aria-invalid={!!errors.subject} aria-describedby={errors.subject ? "subject-err" : undefined} />
           {errors.subject && <p id="subject-err" className="mt-1 text-xs font-medium text-destructive">{errors.subject}</p>}
         </div>
 
         <div>
-          <label htmlFor="message" className="mb-1 block text-xs font-semibold text-foreground sm:mb-1.5 sm:text-sm">Message</label>
+
+         
           <textarea id="message" name="message" rows={3} placeholder="Décrivez votre besoin…" className={`${fieldBase} resize-y`} aria-invalid={!!errors.message} aria-describedby={errors.message ? "message-err" : undefined} />
           {errors.message && <p id="message-err" className="mt-1 text-xs font-medium text-destructive">{errors.message}</p>}
         </div>
