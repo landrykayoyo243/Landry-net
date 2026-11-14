@@ -1,0 +1,52 @@
+/* Contact section: simple, bright and readable without nested card framing. */
+#contact {
+  background: #fff !important;
+  color: #172033 !important;
+  padding-top: 3.5rem !important;
+  padding-bottom: 3.5rem !important;
+}
+
+#contact .bg-grid {
+  display: none;
+}
+
+#contact h2 {
+  color: #172033 !important;
+}
+
+#contact h2 span {
+  color: hsl(var(--primary)) !important;
+}
+
+#contact p {
+  color: #596579 !important;
+}
+
+#contact [class*="rounded-[30px]"],
+#contact [class*="rounded-[24px]"] {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  padding: 0 !important;
+}
+
+/* The old standalone contact buttons are replaced by the WhatsApp note under the form. */
+#contact [class*="flex-col"][class*="items-start"] {
+  display: none !important;
+}
+
+#contact [class*="rounded-full"][class*="bg-white/10"] {
+  border: 0 !important;
+  background: transparent !important;
+  padding: 0 !important;
+  color: hsl(var(--primary)) !important;
+  backdrop-filter: none !important;
+}
+
+@media (max-width: 640px) {
+  #contact {
+    padding-top: 2.75rem !important;
+    padding-bottom: 2.75rem !important;
+  }
+}

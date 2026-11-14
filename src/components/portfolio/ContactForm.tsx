@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import "./contact-section.css";
 
 const schema = z.object({
   name: z.string().trim().min(1, "Veuillez indiquer votre nom").max(100, "100 caractères maximum"),
@@ -22,7 +23,7 @@ const schema = z.object({
 type Errors = Partial<Record<"name" | "email" | "subject" | "message", string>>;
 
 const fieldBase =
-  "w-full rounded-xl border border-input bg-card px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/70 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary sm:px-4 sm:py-3 sm:text-base";
+  "w-full rounded-lg border border-input bg-white px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/70 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary sm:px-4 sm:py-3 sm:text-base";
 
 async function sendMessage(data: z.infer<typeof schema>) {
   const response = await fetch("/api/contact", {
@@ -80,8 +81,6 @@ export function ContactForm() {
 
   return (
     <>
-      {/* Les liens directs sont remplacés par le lien WhatsApp compact sous le formulaire. */}
-      <style>{`#contact div.mt-9.flex.flex-col.items-start { display: none; }`}</style>
       <form onSubmit={onSubmit} noValidate className="space-y-3 sm:space-y-4">
         <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
           <div>
@@ -108,7 +107,7 @@ export function ContactForm() {
           {errors.message && <p id="message-err" className="mt-1 text-xs font-medium text-destructive">{errors.message}</p>}
         </div>
 
-        <button type="submit" disabled={status === "sending"} aria-busy={status === "sending"} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:py-3.5 sm:text-base">
+        <button type="submit" disabled={status === "sending"} aria-busy={status === "sending"} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:py-3.5 sm:text-base">
           {status === "sending" ? (
             <><span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" /><span>Envoi en cours…</span></>
           ) : (
@@ -118,7 +117,7 @@ export function ContactForm() {
 
         <div aria-live="polite">
           {status === "failed" && (
-            <div role="alert" className="space-y-3 rounded-2xl border border-destructive/40 bg-card p-4">
+            <div role="alert" className="space-y-3 rounded-lg border border-destructive/40 bg-white p-4">
               <p className="text-sm font-semibold text-destructive">{serverError || "Votre message n'a pas pu être envoyé. Vous pouvez réessayer ou m'écrire sur WhatsApp."}</p>
               <a href={profile.whatsapp} target="_blank" rel="noreferrer" className={errorBtn.whatsapp}>Écrire sur WhatsApp</a>
             </div>
