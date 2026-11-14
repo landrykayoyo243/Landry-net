@@ -42,7 +42,7 @@ const TITLE = "Landry Kayoyo — Administrateur Systèmes & Réseaux, Développe
 const DESC =
   "Portfolio officiel de Landry Kayoyo à Lubumbashi (RDC) : conception d'infrastructures informatiques fiables, haute disponibilité, cybersécurité et applications web modernes.";
 const KEYWORDS =
-  "Landry Kayoyo, Landry Net, Administrateur systèmes Lubumbashi, Administrateur réseaux RDC, Développeur web Lubumbashi, Cisco CCNA, Linux Ubuntu, Windows Server, Haute disponibilité, Cybersécurité, Lubumbashi, RDC";
+  "Landry Kayoyo, Landry Net, Administrateur systèmes Lubumbashi, Administrateur réseaux RDC, Développeur web Lubumbashi, Cisco CCNA, Linux Ubuntu, Windows Server, Haute disponibilité, Cybersécurité, Développement web";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -89,8 +89,8 @@ export const Route = createFileRoute("/")({
 
 const focus =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
-const btnPrimary = `inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-glow transition duration-300 hover:opacity-95 hover:shadow-md ${focus}`;
-const btnGhostDark = `inline-flex items-center justify-center gap-2 rounded-full border border-ink-foreground/20 bg-ink-foreground/5 px-6 py-3.5 text-sm font-semibold text-ink-foreground backdrop-blur-sm transition duration-300 hover:border-primary/40 hover:text-primary ${focus}`;
+const btnPrimary = `inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-glow transition duration-300 hover:brightness-110 ${focus}`;
+const btnGhostDark = `inline-flex items-center justify-center gap-2 rounded-full border border-ink-foreground/20 bg-ink-foreground/5 px-6 py-3.5 text-sm font-semibold text-ink-foreground backdrop-blur-sm transition duration-300 hover:bg-ink-foreground/10 ${focus}`;
 const container = "mx-auto w-full max-w-6xl px-5 md:px-8";
 
 function Hero({ cvUrl }: { cvUrl: string | null }) {
@@ -125,6 +125,7 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
               <a href={profile.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn de Landry Kayoyo" title="LinkedIn" className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}><Linkedin size={16} aria-hidden /></a>
               <a href={profile.github} target="_blank" rel="noreferrer" aria-label="GitHub de Landry Kayoyo" title="GitHub" className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}><Github size={16} aria-hidden /></a>
               <a href={profile.youtube} target="_blank" rel="noreferrer" aria-label="YouTube de Landry Kayoyo" title="YouTube" className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}><Youtube size={16} aria-hidden /></a>
+              <a href={profile.facebook} target="_blank" rel="noreferrer" aria-label="Facebook de Landry Kayoyo" title="Facebook" className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 font-semibold transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`} aria-hidden="true">f</a>
               <a href={profile.x} target="_blank" rel="noreferrer" aria-label="Profil X de Landry Kayoyo" title="X" className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 text-sm font-semibold transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}>𝕏</a>
             </div>
           </div>
@@ -143,7 +144,7 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
         <div className="mt-12 hidden justify-center md:flex">
           <a href="#competences" aria-label="Découvrir la suite" className={`flex flex-col items-center gap-1.5 text-white/40 transition-colors duration-300 hover:text-white/75 ${focus}`}>
             <span className="text-[10px] font-semibold uppercase tracking-[0.2em]">Découvrir</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-scroll-bounce" aria-hidden><path d="M12 5v14M5 12l7 7 7-7" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-bounce"><path d="m6 9 6 6 6-6" /></svg>
           </a>
         </div>
       </div>
@@ -190,11 +191,11 @@ function Index() {
 
         <section id="competences" className="scroll-mt-24 border-b border-border bg-muted/30 py-20 md:py-28">
           <div className={container}>
-            <Reveal><SectionHeading eyebrow="Domaines d’intervention" title="Du réseau à l’application," accent="une vision cohérente." description="J’interviens sur les fondations numériques et les outils qui font avancer votre activité, avec une même exigence de fiabilité et de simplicité." /></Reveal>
+            <Reveal><SectionHeading eyebrow="Domaines d’intervention" title="Du réseau à l’application," accent="une vision cohérente." description="J’interviens sur les fondations numériques pour concevoir des solutions fiables, sécurisées et utiles." /></Reveal>
             <div className="grid gap-5 md:grid-cols-3">
               {aboutPage.pillars.items.map((item, index) => {
                 const Icon = [Network, ShieldCheck, Code2][index];
-                return <Reveal key={item.title} delay={index * 110}><div className="pillar-card flex h-full flex-col rounded-[28px] border border-border/70 bg-card p-7 shadow-xs sm:p-8"><div><div className="flex items-center justify-between"><div className="grid h-12 w-12 place-items-center rounded-2xl bg-primary/10 text-primary"><Icon size={22} aria-hidden /></div><span className="font-serif text-sm font-semibold text-primary/70">0{index + 1}</span></div><p className="mt-6 text-xs font-semibold uppercase tracking-[0.16em] text-primary">{item.tag}</p><h3 className="mt-2 font-serif text-xl font-medium text-foreground sm:text-2xl">{item.title}</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.description}</p></div><p className="mt-6 border-t border-border/50 pt-4 text-xs leading-relaxed text-muted-foreground">{item.subtext}</p></div></Reveal>;
+                return <Reveal key={item.title} delay={index * 110}><div className="pillar-card flex h-full flex-col rounded-[28px] border border-border/70 bg-card p-7 shadow-xs sm:p-8"><div className="grid h-11 w-11 place-items-center rounded-2xl bg-primary/10 text-primary"><Icon size={20} /></div><h3 className="mt-5 font-serif text-2xl font-medium">{item.title}</h3><p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.description}</p><Link to={item.linkHref} className="mt-6 text-sm font-semibold text-primary hover:underline">{item.linkText}</Link></div></Reveal>;
               })}
             </div>
           </div>
@@ -202,18 +203,18 @@ function Index() {
 
         <section id="apropos" className="scroll-mt-24 border-b border-border bg-background py-20 md:py-28">
           <div className={container}><Reveal><div className="grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
-            <div className="relative mx-auto w-full max-w-[340px] sm:max-w-[400px] lg:max-w-none"><div className="relative aspect-[4/5] overflow-hidden rounded-[28px] border border-border/80 bg-muted/40 shadow-md"><picture><source srcSet="/Profil%20%26%20Conviction.webp" type="image/webp" /><img src="/Profil%20%26%20Conviction.jpg" alt="Landry Kayoyo — Mon histoire" width={700} height={800} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover object-[50%_25%]" /></picture></div></div>
-            <div className="mx-auto w-full max-w-2xl lg:mx-0"><div className="mb-5 inline-flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary"><span className="h-px w-7 rounded-full bg-primary/80" aria-hidden="true" /><span>Mon histoire</span></div><h2 className="font-serif text-3xl font-medium leading-[1.14] tracking-tight text-foreground sm:text-4xl lg:text-[2.65rem]">Du réseau au web, <span className="font-serif italic text-primary">des solutions fiables.</span></h2><div className="mt-6 space-y-4 text-base leading-relaxed text-muted-foreground sm:text-lg">{about.map((paragraph, index) => <p key={paragraph} className={index === 0 ? "font-medium text-foreground" : ""}>{paragraph}</p>)}</div><div className="mt-8"><Button asChild size="lg" className="rounded-full bg-gradient-primary"><Link to="/a-propos">Découvrir mon histoire <ArrowRight size={16} /></Link></Button></div></div>
+            <div className="relative mx-auto w-full max-w-[340px] sm:max-w-[400px] lg:max-w-none"><div className="relative aspect-[4/5] overflow-hidden rounded-[28px] border border-border/80 bg-muted"><picture><source srcSet={photo.webp} type="image/webp" /><img src={photo.fallback} alt="Landry Kayoyo" width={800} height={1000} loading="lazy" className="h-full w-full object-cover" /></picture></div></div>
+            <div className="mx-auto w-full max-w-2xl lg:mx-0"><div className="mb-5 inline-flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary"><span className="h-px w-7 bg-primary" />À propos</div><h2 className="font-serif text-3xl font-medium sm:text-4xl">Bâtisseur de l’invisible, garant de votre continuité numérique.</h2><div className="mt-6 space-y-4 text-muted-foreground">{about.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div><Link to="/a-propos" className="mt-7 inline-flex items-center gap-2 font-semibold text-primary">Mon histoire <ArrowRight size={16} /></Link></div>
           </div></Reveal></div>
         </section>
 
         <section id="projets" className="scroll-mt-24 border-b border-border bg-card py-20 md:py-28">
-          <div className={container}><Reveal><SectionHeading eyebrow="Réalisations" title="Des problèmes réels," accent="des solutions concrètes." description="Une sélection de projets conçus pour répondre à des besoins concrets, du réseau aux applications web." /></Reveal>
-            {projectsQ.isPending ? <ContentLoading rows={2} className="h-72" /> : projectsQ.isError ? <ContentError label="les projets" onRetry={() => projectsQ.refetch()} /> : <><div className="grid gap-7 md:grid-cols-2 lg:gap-8">{featured.slice(0, 3).map((project, index) => <Reveal key={project.slug} delay={index * 100}><ProjectCard p={project} /></Reveal>)}</div><div className="mt-12 flex justify-center"><Button asChild size="lg" variant="outline" className="rounded-full px-8 hover:bg-muted/50"><Link to="/projets" className="flex items-center gap-2">Voir tous les projets <ArrowRight size={16} /></Link></Button></div></>}
+          <div className={container}><Reveal><SectionHeading eyebrow="Réalisations" title="Des problèmes réels," accent="des solutions concrètes." description="Une sélection de projets conçus pour répondre aux besoins du terrain." /></Reveal>
+            {projectsQ.isPending ? <ContentLoading rows={2} className="h-72" /> : projectsQ.isError ? <ContentError label="les projets" onRetry={() => projectsQ.refetch()} /> : <><div className="mt-10 grid gap-6 md:grid-cols-2">{featured.map((project) => <ProjectCard key={project.slug} project={project} />)}</div><div className="mt-8 text-center"><Link to="/projets" className={btnPrimary}>Tous les projets <ArrowRight size={16} /></Link></div></>}
           </div>
         </section>
 
-        {immersionItems.length > 0 && <section id="immersion" className="scroll-mt-24 border-b border-border bg-muted/30 py-20 md:py-28"><div className={container}><Reveal><SectionHeading eyebrow="En images" title="Le numérique," accent="sur le terrain." description="Quelques aperçus des interventions, des environnements techniques et des réalisations qui prennent vie au quotidien." /></Reveal><div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{immersionItems.map((item) => <Reveal key={item.id} className="group"><figure className="relative aspect-[4/3] overflow-hidden rounded-[26px] border border-border/80 bg-muted shadow-sm transition-all duration-300 hover:border-primary/40 hover:shadow-card"><img src={getOptimizedImageUrl(item.image_url, { width: 720 })} alt={item.image_alt ?? item.title} loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" /><div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" aria-hidden /><figcaption className="absolute inset-x-0 bottom-0 p-5 text-white sm:p-6"><span className="inline-flex rounded-full bg-primary/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground">{item.tag}</span><h3 className="mt-2 font-serif text-lg font-medium leading-snug drop-shadow-sm">{item.title}</h3></figcaption></figure></Reveal>)}</div></div></section>}
+        {immersionItems.length > 0 && <section id="immersion" className="scroll-mt-24 border-b border-border bg-muted/30 py-20 md:py-28"><div className={container}><Reveal><SectionHeading eyebrow="Expérience" title="Sur le terrain," accent="au cœur des systèmes." description="Des expériences pratiques au service de systèmes fiables." /></Reveal><div className="mt-10 grid gap-5 md:grid-cols-2">{immersionItems.map((item) => <Reveal key={item.id}><article className="rounded-2xl border border-border bg-card p-6"><h3 className="font-semibold">{item.title}</h3><p className="mt-2 text-sm text-muted-foreground">{item.description}</p></article></Reveal>)}</div></div></section>}
 
         <BrandsMarquee />
 
@@ -222,9 +223,9 @@ function Index() {
           <div className={`${container} relative`}>
             <div className="grid items-start gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:gap-10">
               <Reveal className="text-left">
-                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary"><Sparkles size={12} /> Travaillons ensemble</div>
-                <h2 className="font-serif text-3xl font-normal leading-tight text-white sm:text-4xl md:text-5xl">Construisons une collaboration <span className="font-serif italic text-primary-glow">durable</span>.</h2>
-                <p className="mt-5 max-w-xl text-base leading-relaxed text-ink-foreground/75 sm:text-lg">Vous avez un réseau à sécuriser, un système à fiabiliser ou une application web à lancer ? Je vous accompagne avec des solutions fiables, simples et pensées pour durer.</p>
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Contact</div>
+                <h2 className="font-serif text-3xl font-normal leading-tight text-white sm:text-4xl md:text-5xl">Construisons une collaboration <span className="font-serif italic text-primary-glow">durable.</span></h2>
+                <p className="mt-5 max-w-xl text-base leading-relaxed text-ink-foreground/75 sm:text-lg">Vous avez un réseau à sécuriser, un système à fiabiliser ou une application web à lancer ? Échangeons sur votre besoin.</p>
               </Reveal>
               <Reveal className="w-full"><ContactForm /></Reveal>
             </div>
