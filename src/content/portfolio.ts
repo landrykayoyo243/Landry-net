@@ -42,6 +42,7 @@ export const profile = {
   github: "https://github.com/landrykayoyo",
   youtube: "https://www.youtube.com/@LandryNet",
   x: "https://x.com/Landrykayoyo",
+  facebook: "https://www.facebook.com/profile.php?id=61596234915347",
   location: "Lubumbashi, RD Congo",
   cvUrl: cv.url,
 };
@@ -91,7 +92,7 @@ export const aboutPage = {
     "Administrateur systèmes par discipline, développeur web par désir de créer. Je partage ici mon cheminement, mes racines à Lubumbashi et la façon dont je relie la technique brute aux besoins réels des organisations.",
 
   storyParagraphs: [
-    "Diplômé en Administration des Systèmes et Réseaux à l'Université Don Bosco et membre technique de l'équipe XSECURITY à Lubumbashi, j'ai développé mes compétences au contact direct du terrain et des impératifs réels des entreprises.",
+    "Diplômé en Administration des Systèmes et Réseaux à l'Université Don Bosco et membre technique de l'équipe XSECURITY à Lubumbashi, j'ai développé mes compétences au contact direct du terrain et des impératifs de production.",
     "Mon approche associe la rigueur de l'administration réseau et l'agilité du développement moderne. Je conçois des systèmes stables, sécurisés et pérennes, avec une priorité constante : garantir la continuité de service et la protection absolue des données.",
     "Aujourd'hui, j'accompagne les entreprises et porteurs de projets dans la modernisation de leur parc informatique, la mise en place d'architectures réseau résilientes et le déploiement d'applications web sur mesure.",
   ],
@@ -237,7 +238,6 @@ export const testimonials = [
   { quote: "Travail soigné, délais respectés et une vraie envie de bien faire. Je le recommande.", name: "Leader Bokassa", role: "Client" },
 ];
 
-
 // --- Section Hero (page d'accueil) ---
 export const heroSection = {
   badge: "Administrateur Systèmes · Développeur Web",
@@ -255,3 +255,4 @@ export const brandsSection = {
   titleLead: "Ils m'ont fait",
   titleAccent: "confiance.",
 };
+

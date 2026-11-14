@@ -40,6 +40,7 @@ export function Footer() {
               <li><a href={profile.linkedin} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-ink-foreground/70 transition-colors hover:text-white"><Linkedin size={15} /> LinkedIn</a></li>
               <li><a href={profile.github} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-ink-foreground/70 transition-colors hover:text-white"><Github size={15} /> GitHub</a></li>
               <li><a href={profile.youtube} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-ink-foreground/70 transition-colors hover:text-white"><Youtube size={15} /> YouTube</a></li>
+              <li><a href={profile.facebook} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-ink-foreground/70 transition-colors hover:text-white"><span className="w-[15px] text-center font-semibold">f</span> Facebook</a></li>
               <li><a href={profile.x} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-ink-foreground/70 transition-colors hover:text-white"><span className="w-[15px] text-center font-semibold">𝕏</span> X</a></li>
               <li><a href={`mailto:${profile.email}`} className="inline-flex items-center gap-2 text-ink-foreground/70 transition-colors hover:text-white"><Mail size={15} /> {profile.email}</a></li>
               <li><a href={profile.phoneHref} className="inline-flex items-center gap-2 text-ink-foreground/70 transition-colors hover:text-white"><Phone size={15} /> {profile.phone}</a></li>

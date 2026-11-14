@@ -35,7 +35,7 @@ export function buildPersonSchema() {
       profile.github,
       profile.youtube,
       profile.x,
-      "https://www.facebook.com/profile.php?id=61596234915347",
+      profile.facebook,
     ].filter(Boolean),
     knowsAbout: [
       "Administration de systèmes",
