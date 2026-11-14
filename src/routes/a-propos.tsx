@@ -106,7 +106,7 @@ function APropos() {
             aria-hidden
           />
           <div
-            className={`${container} relative grid items-center gap-10 pb-16 pt-28 sm:pb-20 sm:pt-36 md:grid-cols-[1.15fr_0.85fr] md:gap-14 md:pb-24 md:pt-42`}
+            className={`${container} relative grid items-center gap-10 pb-16 pt-28 sm:pb-20 sm:pt-36 md:grid-cols-[minmax(0,1fr)_minmax(300px,0.9fr)] md:gap-14 md:pb-24 md:pt-42`}
           >
             {/* Colonne texte (Ordre 2 sur mobile, 1 sur desktop) */}
             <div className="order-2 md:order-1 text-center md:text-left">
@@ -151,7 +151,7 @@ function APropos() {
             </div>
 
             {/* Photo Mobile : Ronde épurée sans bordure épaisse (style Natacha) */}
-            <div className="order-1 mx-auto block md:hidden mb-2">
+            <div className="order-1 mx-auto mb-2 block md:hidden">
               <div className="relative mx-auto h-60 w-60 sm:h-68 sm:w-68 rounded-full overflow-hidden shadow-2xl">
                 <picture>
                   <source srcSet={photo.webp} type="image/webp" />
@@ -169,10 +169,10 @@ function APropos() {
               </div>
             </div>
 
-            {/* Photo Desktop : Rectangulaire avec bords arrondis épurés */}
-            <div className="order-1 mx-auto hidden w-full md:order-2 md:block md:max-w-[360px] lg:max-w-[390px]">
+            {/* Photo Desktop : cadre plus généreux et plus stable sur grand écran */}
+            <div className="order-1 mx-auto hidden w-full md:order-2 md:block md:max-w-[380px] lg:max-w-[430px] xl:max-w-[470px]">
               <div className="relative">
-                <div className="relative overflow-hidden rounded-[2.2rem] sm:rounded-[2.6rem] border border-white/15 bg-white/5 p-2 sm:p-2.5 shadow-2xl backdrop-blur-md">
+                <div className="relative overflow-hidden rounded-[2.2rem] border border-white/15 bg-white/5 p-2 shadow-2xl backdrop-blur-md sm:rounded-[2.6rem] sm:p-2.5">
                   <picture>
                     <source srcSet={photo.webp} type="image/webp" />
                     <img
@@ -183,7 +183,7 @@ function APropos() {
                       loading="eager"
                       fetchPriority="high"
                       decoding="async"
-                      className="aspect-[4/5] w-full rounded-[1.8rem] sm:rounded-[2.2rem] object-cover object-[55%_22%]"
+                      className="aspect-[4/5] w-full rounded-[1.8rem] object-cover object-[55%_22%] sm:rounded-[2.2rem]"
                     />
                   </picture>
                 </div>
@@ -359,7 +359,7 @@ function APropos() {
                 <Link
                   to="/"
                   hash="projets"
-                  className={`inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-md transition duration-300 hover:bg-white/20 hover:border-white/40 ${focus}`}
+                  className={`inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-md transition duration-300 hover:bg-white/15 hover:border-white/35 ${focus}`}
                 >
                   {aboutPage.cta.secondary}
                 </Link>
