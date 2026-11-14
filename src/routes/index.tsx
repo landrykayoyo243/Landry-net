@@ -5,7 +5,6 @@ import {
   FileText,
   Github,
   Linkedin,
-  Mail,
   Network,
   ShieldCheck,
   Youtube,
@@ -35,11 +34,11 @@ const photo = {
   fallback: "/landry-a-propos.jpg",
 };
 
-const TITLE = "Landry Kayoyo — Administrateur Systèmes & Réseaux, Développeur Web | Lubumbashi";
+const TITLE = "Landry Kayoyo | Systèmes, réseaux et développement web";
 const DESC =
-  "Portfolio officiel de Landry Kayoyo à Lubumbashi (RDC) : conception d'infrastructures informatiques fiables, haute disponibilité, cybersécurité et applications web modernes.";
+  "Portfolio de Landry Kayoyo, administrateur systèmes et réseaux et développeur web à Lubumbashi. Découvrez ses projets concrets et son expérience de terrain.";
 const KEYWORDS =
-  "Landry Kayoyo, Landry Net, Administrateur systèmes Lubumbashi, Administrateur réseaux RDC, Développeur web Lubumbashi, Cisco CCNA, Linux Ubuntu, Windows Server, Haute disponibilité, Cybersécurité, Développement web";
+  "Landry Kayoyo, administrateur systèmes, réseaux, développeur web, Lubumbashi, RDC, cybersécurité, applications web, infrastructures informatiques";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -60,6 +59,8 @@ export const Route = createFileRoute("/")({
       { property: "og:image:alt", content: shareImage.alt },
       { name: "twitter:image", content: shareImage.url },
       { name: "twitter:image:alt", content: shareImage.alt },
+      { name: "twitter:title", content: TITLE },
+      { name: "twitter:description", content: DESC },
     ],
     links: [{ rel: "canonical", href: absoluteUrl("/") }],
     scripts: [
@@ -91,48 +92,98 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
       <div className="pointer-events-none absolute -top-36 right-0 h-[520px] w-[520px] rounded-full bg-primary/10 blur-[140px] animate-aura" aria-hidden />
       <div className="pointer-events-none absolute bottom-0 left-0 h-[360px] w-[360px] rounded-full bg-primary-glow/6 blur-[110px] animate-aura" style={{ animationDelay: "3s" }} aria-hidden />
 
-      <div className={`${container} relative pb-16 pt-24 sm:pb-20 sm:pt-32 md:pb-24 md:pt-36`}>
-        <div className="grid items-center gap-10 md:grid-cols-[1.15fr_0.85fr] lg:gap-16">
+      <div className={`${container} relative pb-12 pt-20 sm:pb-16 sm:pt-24 md:pb-16 md:pt-28`}>
+        <div className="grid items-center gap-8 md:grid-cols-[1.15fr_0.85fr] lg:gap-16">
           <div className="order-2 text-center md:order-1 md:text-left">
             <p className="mb-4 inline-flex items-center justify-center gap-2.5 text-xs font-semibold uppercase tracking-[0.22em] text-primary-glow sm:text-sm md:justify-start">
               <span className="inline-block h-px w-6 bg-primary-glow/70 sm:w-8" aria-hidden />
               <span>{heroSection.badge}</span>
             </p>
-            <h1 className="max-w-3xl font-serif text-3xl font-normal leading-[1.12] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-[3.35rem]">
+            <h1 className="max-w-3xl font-serif text-balance text-3xl font-normal leading-[1.12] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-[3.35rem]">
               {heroSection.titleLead}{" "}
               <span className="block font-serif italic text-primary-glow sm:inline">{heroSection.titleAccent}</span>
             </h1>
-            <p className="mx-auto mt-5 max-w-xl text-base leading-[1.8] text-ink-foreground/85 sm:text-lg md:mx-0">
+            <p className="mx-auto mt-5 max-w-xl text-pretty text-base leading-[1.8] text-ink-foreground/85 sm:text-lg md:mx-0">
               {heroSection.description}
             </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3.5 sm:gap-4 md:justify-start">
+            <div className="mt-7 flex flex-wrap items-center justify-center gap-3.5 sm:gap-4 md:justify-start">
               <Link to="/projets" className={btnPrimary}>{heroSection.ctaPrimary} <ArrowRight size={16} /></Link>
               {cvUrl && <a href={cvUrl} target="_blank" rel="noopener noreferrer" className={btnGhostDark}><FileText size={16} /> {heroSection.ctaSecondary}</a>}
-              <Link to="/" hash="contact" className={`inline-flex items-center gap-1.5 rounded-full px-4 py-3 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white ${focus}`}>
-                <Mail size={15} /> {heroSection.ctaContact}
-              </Link>
             </div>
-            <div className="mt-7 flex flex-wrap items-center justify-center gap-3 text-ink-foreground/70 md:justify-start">
-              <a href={profile.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn de Landry Kayoyo" title="LinkedIn" className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}><Linkedin size={16} aria-hidden /></a>
-              <a href={profile.github} target="_blank" rel="noreferrer" aria-label="GitHub de Landry Kayoyo" title="GitHub" className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}><Github size={16} aria-hidden /></a>
-              <a href={profile.youtube} target="_blank" rel="noreferrer" aria-label="YouTube de Landry Kayoyo" title="YouTube" className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}><Youtube size={16} aria-hidden /></a>
-              <a href={profile.facebook} target="_blank" rel="noreferrer" aria-label="Facebook de Landry Kayoyo" title="Facebook" className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 font-semibold transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}>f</a>
-              <a href={profile.x} target="_blank" rel="noreferrer" aria-label="Profil X de Landry Kayoyo" title="X" className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 text-sm font-semibold transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}>𝕏</a>
-            </div>
+            <nav
+              aria-label="Réseaux sociaux de Landry Kayoyo"
+              className="mt-6 flex items-center justify-center gap-3 text-ink-foreground/70 md:justify-start"
+            >
+              <a
+                href={profile.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn de Landry Kayoyo"
+                title="LinkedIn"
+                data-testid="social-link-linkedin"
+                className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}
+              >
+                <Linkedin size={16} aria-hidden="true" />
+              </a>
+              <a
+                href={profile.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="GitHub de Landry Kayoyo"
+                title="GitHub"
+                data-testid="social-link-github"
+                className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}
+              >
+                <Github size={16} aria-hidden="true" />
+              </a>
+              <a
+                href={profile.youtube}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube de Landry Kayoyo"
+                title="YouTube"
+                data-testid="social-link-youtube"
+                className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}
+              >
+                <Youtube size={16} aria-hidden="true" />
+              </a>
+              <a
+                href={profile.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook de Landry Kayoyo"
+                title="Facebook"
+                data-testid="social-link-facebook"
+                className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 font-semibold transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}
+              >
+                <span aria-hidden="true">f</span>
+              </a>
+              <a
+                href={profile.x}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Profil X de Landry Kayoyo"
+                title="X"
+                data-testid="social-link-x"
+                className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 text-sm font-semibold transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}
+              >
+                <span aria-hidden="true">𝕏</span>
+              </a>
+            </nav>
           </div>
 
           <div className="order-1 mx-auto mb-2 block md:hidden">
-            <div className="relative mx-auto h-60 w-60 overflow-hidden rounded-full shadow-2xl sm:h-68 sm:w-68">
-              <picture><source srcSet={photo.webp} type="image/webp" /><img src={photo.fallback} alt="Portrait de Landry Kayoyo" width={800} height={800} loading="eager" fetchPriority="high" decoding="async" className="h-full w-full scale-125 rounded-full object-cover object-[52%_15%]" /></picture>
+            <div className="relative mx-auto h-52 w-52 overflow-hidden rounded-full shadow-2xl sm:h-60 sm:w-60">
+              <picture><source srcSet={photo.webp} type="image/webp" /><img src={photo.fallback} alt="Portrait de Landry Kayoyo, administrateur systèmes et réseaux à Lubumbashi" width={800} height={800} loading="eager" fetchPriority="high" decoding="async" className="h-full w-full scale-125 rounded-full object-cover object-[52%_15%]" /></picture>
             </div>
           </div>
           <div className="order-1 mx-auto hidden w-full md:order-2 md:block md:max-w-[370px] lg:max-w-[400px]">
             <div className="relative overflow-hidden rounded-3xl">
-              <picture><source srcSet={photo.webp} type="image/webp" /><img src={photo.fallback} alt="Portrait de Landry Kayoyo — Administrateur systèmes & réseaux et développeur web" width={800} height={1000} loading="eager" fetchPriority="high" decoding="async" className="aspect-[4/5] w-full rounded-3xl object-cover object-[55%_22%]" /></picture>
+              <picture><source srcSet={photo.webp} type="image/webp" /><img src={photo.fallback} alt="Portrait de Landry Kayoyo, administrateur systèmes et réseaux et développeur web à Lubumbashi" width={800} height={1000} loading="eager" fetchPriority="high" decoding="async" className="aspect-[4/5] w-full rounded-3xl object-cover object-[55%_22%]" /></picture>
             </div>
           </div>
         </div>
-        <div className="mt-12 hidden justify-center md:flex">
+        <div className="mt-8 hidden justify-center md:flex">
           <a href="#competences" aria-label="Découvrir la suite" className={`flex flex-col items-center gap-1.5 text-white/40 transition-colors duration-300 hover:text-white/75 ${focus}`}>
             <span className="text-[10px] font-semibold uppercase tracking-[0.2em]">Découvrir</span>
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-scroll-bounce" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
@@ -159,10 +210,10 @@ function Index() {
       <main id="main">
         <Hero cvUrl={cvUrl} />
 
-        <section className="relative overflow-hidden border-b border-border bg-card py-14 md:py-20">
+        <section className="relative overflow-hidden border-b border-border bg-card py-12 md:py-16">
           <div className={`${container} text-center`}>
             <Reveal className="mx-auto max-w-3xl">
-              <blockquote className="font-serif text-xl font-normal leading-relaxed text-foreground sm:text-2xl md:text-3xl">
+              <blockquote className="text-balance font-serif text-lg font-normal leading-relaxed text-foreground sm:text-xl md:text-2xl">
                 « {conviction.text}{" "}<span className="font-serif font-medium italic text-primary">{conviction.highlight}</span>{" "}»
               </blockquote>
               <p className="mt-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground/70">Philosophie & exigence de conception</p>
@@ -170,17 +221,17 @@ function Index() {
           </div>
         </section>
 
-        <section className="border-b border-border bg-background py-12 sm:py-16">
+        <section className="border-b border-border bg-background py-10 sm:py-14">
           <div className={`${container} max-w-5xl`}>
             <Reveal className="mb-7 text-center sm:mb-9">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Repères concrets</p>
-              <h2 className="mt-2 font-serif text-2xl font-medium tracking-tight text-foreground sm:text-3xl">L’expérience en quelques chiffres</h2>
+              <h2 className="mt-2 font-serif text-balance text-2xl font-medium tracking-tight text-foreground sm:text-3xl">L’expérience en quelques chiffres</h2>
             </Reveal>
             <Reveal><AnimatedStats /></Reveal>
           </div>
         </section>
 
-        <section id="competences" className="scroll-mt-24 border-b border-border bg-muted/30 py-20 md:py-28">
+        <section id="competences" className="scroll-mt-24 border-b border-border bg-muted/30 py-16 md:py-20">
           <div className={container}>
             <Reveal><SectionHeading eyebrow="Domaines d’intervention" title="Du réseau à l’application," accent="une vision cohérente." description="J’interviens sur les fondations numériques pour concevoir des solutions fiables, sécurisées et utiles." /></Reveal>
             <div className="grid gap-5 md:grid-cols-3">
@@ -192,40 +243,40 @@ function Index() {
           </div>
         </section>
 
-        <section id="apropos" className="scroll-mt-24 border-b border-border bg-background py-20 md:py-28">
+        <section id="apropos" className="scroll-mt-24 border-b border-border bg-background py-16 md:py-20">
           <div className={container}>
             <Reveal>
-              <div className="grid items-center gap-10 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] md:gap-16">
-                <div className="relative mx-auto w-full max-w-[340px] sm:max-w-[400px] md:max-w-none">
+              <div className="grid items-center gap-8 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] md:gap-16">
+                <div className="relative mx-auto w-full max-w-[280px] sm:max-w-[340px] md:max-w-none">
                   <div className="relative aspect-[4/5] overflow-hidden rounded-[28px] border border-border/80 bg-muted">
                     <picture>
                       <source srcSet={photo.webp} type="image/webp" />
-                      <img src={photo.fallback} alt="Landry Kayoyo" width={800} height={1000} loading="lazy" className="h-full w-full object-cover" />
+                      <img src={photo.fallback} alt="Portrait de Landry Kayoyo, administrateur systèmes et réseaux et développeur web" width={800} height={1000} loading="lazy" decoding="async" className="h-full w-full object-cover" />
                     </picture>
                   </div>
                 </div>
                 <div className="mx-auto w-full max-w-2xl md:mx-0">
                   <div className="mb-5 inline-flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary"><span className="h-px w-7 bg-primary" />À propos</div>
-                  <h2 className="font-serif text-3xl font-medium sm:text-4xl">Bâtisseur de l’invisible, garant de votre continuité numérique.</h2>
-                  <div className="mt-6 space-y-4 text-muted-foreground">{about.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div>
-                  <Link to="/a-propos" className="mt-7 inline-flex items-center gap-2 font-semibold text-primary">Mon histoire <ArrowRight size={16} /></Link>
+                  <h2 className="font-serif text-balance text-3xl font-medium sm:text-4xl">Mon parcours en systèmes, réseaux et développement web.</h2>
+                  <div className="mt-6 space-y-4 text-pretty leading-relaxed text-muted-foreground">{about.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div>
+                  <Link to="/a-propos" className="mt-7 inline-flex items-center gap-2 font-semibold text-primary">Découvrir mon parcours <ArrowRight size={16} /></Link>
                 </div>
               </div>
             </Reveal>
           </div>
         </section>
 
-        <section id="projets" className="scroll-mt-24 border-b border-border bg-card py-20 md:py-28">
+        <section id="projets" className="scroll-mt-24 border-b border-border bg-card py-16 md:py-20">
           <div className={container}><Reveal><SectionHeading eyebrow="Réalisations" title="Des problèmes réels," accent="des solutions concrètes." description="Une sélection de projets conçus pour répondre aux besoins du terrain." /></Reveal>
-            {projectsQ.isPending ? <ContentLoading rows={2} className="h-72" /> : projectsQ.isError ? <ContentError label="les projets" onRetry={() => projectsQ.refetch()} /> : <><div className="mt-10 grid gap-6 md:grid-cols-2">{featured.map((project) => <ProjectCard key={project.slug} p={project} />)}</div><div className="mt-8 text-center"><Link to="/projets" className={btnPrimary}>Tous les projets <ArrowRight size={16} /></Link></div></>}
+            {projectsQ.isPending ? <ContentLoading rows={2} className="h-72" /> : projectsQ.isError ? <ContentError label="les projets" onRetry={() => projectsQ.refetch()} /> : <><div className="grid gap-6 md:grid-cols-2">{featured.map((project) => <ProjectCard key={project.slug} p={project} />)}</div><div className="mt-8 text-center"><Link to="/projets" className={btnPrimary}>Tous les projets <ArrowRight size={16} /></Link></div></>}
           </div>
         </section>
 
-        {immersionItems.length > 0 && <section id="immersion" className="scroll-mt-24 border-b border-border bg-muted/30 py-20 md:py-28"><div className={container}><Reveal><SectionHeading eyebrow="En images" title="Le numérique," accent="sur le terrain." description="Quelques aperçus des interventions et des environnements techniques." /></Reveal><div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{immersionItems.map((item) => <Reveal key={item.id} className="group"><figure className="relative aspect-[4/3] overflow-hidden rounded-[26px] border border-border/80 bg-muted shadow-sm"><img src={getOptimizedImageUrl(item.image_url, { width: 720 })} alt={item.image_alt ?? item.title} loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" /><div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" aria-hidden="true" /><figcaption className="absolute inset-x-0 bottom-0 p-5 text-white sm:p-6"><span className="inline-flex rounded-full bg-primary/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground">{item.tag}</span><h3 className="mt-2 font-serif text-lg font-medium leading-snug drop-shadow-sm">{item.title}</h3></figcaption></figure></Reveal>)}</div></div></section>}
+        {immersionItems.length > 0 && <section id="immersion" className="scroll-mt-24 border-b border-border bg-muted/30 py-16 md:py-20"><div className={container}><Reveal><SectionHeading eyebrow="En images" title="Le numérique," accent="sur le terrain." description="Quelques aperçus des interventions et des environnements techniques." /></Reveal><div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{immersionItems.map((item) => <Reveal key={item.id} className="group"><figure className="relative aspect-[4/3] overflow-hidden rounded-[26px] border border-border/80 bg-muted shadow-sm"><img src={getOptimizedImageUrl(item.image_url, { width: 720 })} alt={item.image_alt ?? item.title} loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" /><div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" aria-hidden="true" /><figcaption className="absolute inset-x-0 bottom-0 p-5 text-white sm:p-6"><span className="inline-flex rounded-full bg-primary/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground">{item.tag}</span><h3 className="mt-2 font-serif text-lg font-medium leading-snug drop-shadow-sm">{item.title}</h3></figcaption></figure></Reveal>)}</div></div></section>}
 
         <BrandsMarquee />
 
-        <section id="contact" className="relative overflow-hidden bg-hero py-14 text-ink-foreground sm:py-16 md:py-20">
+        <section id="contact" className="relative overflow-hidden bg-hero py-12 text-ink-foreground sm:py-14 md:py-16">
           <div className="bg-grid pointer-events-none absolute inset-0" aria-hidden />
           <div className={`${container} relative`}>
             <div className="grid items-start gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:gap-10">

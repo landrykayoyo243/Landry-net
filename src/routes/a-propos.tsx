@@ -80,7 +80,7 @@ export const Route = createFileRoute("/a-propos")({
 const focus =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
 const btnPrimary = `inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-glow transition duration-300 hover:brightness-110 ${focus}`;
-const container = "mx-auto w-full max-w-5xl px-5 md:px-8";
+const container = "mx-auto w-full max-w-6xl px-5 md:px-8";
 
 const pillarIcons = [Network, ShieldCheck, Code2];
 
@@ -98,45 +98,42 @@ function APropos() {
       </a>
       <Header />
       <main id="main">
-        <header className="relative overflow-hidden bg-hero text-ink-foreground">
-          <div className="pointer-events-none absolute -top-20 right-0 h-[420px] w-[420px] rounded-full bg-primary/10 blur-[120px]" aria-hidden />
-          <div className="pointer-events-none absolute bottom-0 left-0 h-[260px] w-[260px] rounded-full bg-primary-glow/10 blur-[100px]" aria-hidden />
-
-          <div className={`${container} relative grid items-center gap-8 pb-16 pt-24 sm:pb-20 sm:pt-28 md:grid-cols-[1.1fr_0.9fr] md:gap-12 md:pb-24 md:pt-32`}>
+        <header className="border-b border-border/70 bg-background text-foreground">
+          <div className={`${container} grid items-center gap-8 pb-14 pt-20 sm:gap-10 sm:pb-16 sm:pt-24 md:grid-cols-[1.15fr_0.85fr] md:gap-12 md:pb-20 md:pt-20`}>
             <div className="order-2 text-center md:order-1 md:text-left">
               <Link
                 to="/"
-                className={`mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-semibold text-white/90 backdrop-blur-sm transition duration-300 hover:bg-white/15 hover:text-white ${focus}`}
+                className={`mx-auto mb-5 flex w-fit items-center gap-2 text-xs font-medium text-muted-foreground transition-colors hover:text-primary md:mx-0 ${focus}`}
               >
                 <ArrowLeft size={14} /> {aboutPage.back}
               </Link>
 
-              <div className="mb-4 inline-flex items-center gap-2.5 text-xs md:text-sm font-semibold uppercase tracking-[0.22em] text-primary-glow justify-center md:justify-start">
-                <span className="h-px w-6 bg-primary-glow/70 sm:w-8" aria-hidden />
+              <div className="mb-4 inline-flex items-center justify-center gap-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary sm:text-sm md:justify-start">
+                <span className="h-px w-6 bg-primary/60 sm:w-8" aria-hidden />
                 <span>{aboutPage.eyebrow}</span>
               </div>
 
-              <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-[3.15rem] font-normal leading-[1.08] tracking-tight text-white">
+              <h1 className="mx-auto max-w-[19ch] font-serif text-balance text-3xl font-normal leading-[1.1] tracking-tight text-foreground sm:text-4xl md:mx-0 md:text-5xl lg:text-[3rem]">
                 {aboutPage.titleLead}{" "}
-                <span className="block italic font-serif text-primary-glow sm:inline">
+                <span className="block italic font-serif text-primary sm:inline">
                   {aboutPage.titleAccent}
                 </span>
               </h1>
 
-              <p className="mx-auto mt-5 max-w-xl text-base leading-[1.8] text-ink-foreground/80 sm:text-lg md:mx-0">
+              <p className="mx-auto mt-5 max-w-xl text-pretty text-base leading-[1.75] text-muted-foreground sm:text-lg md:mx-0">
                 {aboutPage.intro}
               </p>
 
               <div className="mt-8 flex flex-wrap items-center justify-center gap-3.5 sm:gap-4 md:justify-start">
                 <a href="#histoire" className={btnPrimary}>
-                  Découvrir mon histoire <ArrowRight size={16} />
+                  {aboutPage.primaryCta} <ArrowRight size={16} />
                 </a>
                 {cvUrl && (
                   <a
                     href={cvUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition duration-300 hover:bg-white/15 hover:border-white/35 ${focus}`}
+                    className={`inline-flex items-center justify-center gap-2 rounded-full border border-border bg-background px-6 py-3.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted ${focus}`}
                   >
                     <FileText size={16} /> Télécharger mon CV
                   </a>
@@ -144,31 +141,26 @@ function APropos() {
               </div>
             </div>
 
-            <div className="order-1 mx-auto w-full max-w-[340px] sm:max-w-[400px] md:max-w-none md:order-2">
-              <div className="relative mx-auto w-full max-w-[420px] md:max-w-none">
-                <div className="absolute inset-0 -z-10 rounded-[2rem] bg-white/5 blur-2xl" aria-hidden />
-                <div className="relative overflow-hidden rounded-[2rem] bg-white/5 shadow-[0_28px_70px_rgba(16,24,40,0.22)]">
-                  <picture>
-                    <source srcSet={photo.webp} type="image/webp" />
-                    <img
-                      src={photo.fallback}
-                      alt="Landry Kayoyo — Administrateur systèmes & réseaux et développeur web"
-                      width={800}
-                      height={800}
-                      loading="eager"
-                      fetchPriority="high"
-                      decoding="async"
-                      className="aspect-[4/5] w-full object-cover object-[55%_18%]"
-                    />
-                  </picture>
-                </div>
-              </div>
+            <div className="order-1 mx-auto w-full max-w-[200px] sm:max-w-[220px] md:order-2 md:max-w-[390px]">
+              <picture>
+                <source srcSet={photo.webp} type="image/webp" />
+                <img
+                  src={photo.fallback}
+                  alt="Landry Kayoyo — Administrateur systèmes et réseaux, développeur web"
+                  width={800}
+                  height={800}
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                  className="aspect-square w-full rounded-full object-cover object-[55%_18%] shadow-md md:aspect-[4/5] md:rounded-[2rem]"
+                />
+              </picture>
             </div>
           </div>
         </header>
 
         {/* rest of page remains unchanged */}
-        <section id="histoire" className="py-20 md:py-28 border-b border-border/60">
+        <section id="histoire" className="py-16 md:py-20 border-b border-border/60">
           <div className={`${container} max-w-3xl`}>
             <Reveal>
               <div className="text-center">
@@ -203,7 +195,7 @@ function APropos() {
           </div>
         </section>
 
-        <section className="bg-muted/30 py-20 md:py-28 border-b border-border/60">
+        <section className="bg-muted/30 py-16 md:py-20 border-b border-border/60">
           <div className={container}>
             <Reveal>
               <div className="text-center max-w-2xl mx-auto">
@@ -267,7 +259,7 @@ function APropos() {
           </div>
         </section>
 
-        <section className="py-20 md:py-28">
+        <section className="py-16 md:py-20">
           <div className={`${container} max-w-3xl`}>
             <Reveal>
               <div className="text-center">
@@ -307,7 +299,7 @@ function APropos() {
           </div>
         </section>
 
-        <section className="relative overflow-hidden bg-hero py-20 text-ink-foreground md:py-28">
+        <section className="relative overflow-hidden bg-hero py-16 text-ink-foreground md:py-20">
           <div className="bg-grid pointer-events-none absolute inset-0" aria-hidden />
           <div className={`${container} relative text-center`}>
             <Reveal className="mx-auto max-w-2xl">

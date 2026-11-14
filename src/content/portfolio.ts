@@ -81,15 +81,16 @@ export const conviction = {
   highlight: "Le code moderne ne vaut que s'il est fiable, sécurisé et immédiatement utile.",
 };
 
-// Contenu de la page dédiée /a-propos inspiré d'une narration fluide et percutante.
+// Contenu de la page dédiée /a-propos.
 export const aboutPage = {
   back: "Retour à l'accueil",
-  eyebrow: "Landry Kayoyo · Derrière la machine",
-  titleLead: "Bâtisseur de l'invisible,",
-  titleAccent: "garant de votre continuité numérique.",
-  title: "Bâtisseur de l'invisible, garant de votre continuité numérique.",
+  eyebrow: "À propos · Landry Kayoyo",
+  titleLead: "Mon parcours en",
+  titleAccent: "systèmes, réseaux et web.",
+  title: "Mon parcours en systèmes, réseaux et web.",
+  primaryCta: "Voir mon parcours",
   intro:
-    "Administrateur systèmes par discipline, développeur web par désir de créer. Je partage ici mon cheminement, mes racines à Lubumbashi et la façon dont je relie la technique brute aux besoins réels des organisations.",
+    "Diplômé en systèmes et réseaux à Lubumbashi, je travaille aussi au développement web. Je partage ici mon parcours, mon expérience de terrain et les projets qui l’ont fait évoluer.",
 
   storyParagraphs: [
     "Diplômé en Administration des Systèmes et Réseaux à l'Université Don Bosco et membre technique de l'équipe XSECURITY à Lubumbashi, j'ai développé mes compétences au contact direct du terrain et des impératifs de production.",
