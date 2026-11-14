@@ -31,6 +31,7 @@ import { about, aboutPage, conviction, heroSection, profile, shareImage } from "
 import { BrandsMarquee } from "@/components/portfolio/BrandsMarquee";
 import { absoluteUrl, getOptimizedImageUrl } from "@/lib/siteConfig";
 import { buildPersonSchema, buildWebSiteSchema } from "@/lib/seo";
+import { ContactForm } from "@/components/portfolio/ContactForm";
 
 const photo = {
   webp: "/landry-a-propos.webp",
@@ -41,7 +42,7 @@ const TITLE = "Landry Kayoyo — Administrateur Systèmes & Réseaux, Développe
 const DESC =
   "Portfolio officiel de Landry Kayoyo à Lubumbashi (RDC) : conception d'infrastructures informatiques fiables, haute disponibilité, cybersécurité et applications web modernes.";
 const KEYWORDS =
-  "Landry Kayoyo, Landry Net, Administrateur systèmes Lubumbashi, Administrateur réseaux RDC, Développeur web Lubumbashi, Cisco CCNA, Linux Ubuntu, Windows Server, Haute disponibilité, Cybersécurité, Infrastructure, Support IT";
+  "Landry Kayoyo, Landry Net, Administrateur systèmes Lubumbashi, Administrateur réseaux RDC, Développeur web Lubumbashi, Cisco CCNA, Linux Ubuntu, Windows Server, Haute disponibilité, Cybersécurité, Lubumbashi, RDC";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -88,8 +89,8 @@ export const Route = createFileRoute("/")({
 
 const focus =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
-const btnPrimary = `inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-glow transition duration-300 hover:brightness-110 ${focus}`;
-const btnGhostDark = `inline-flex items-center justify-center gap-2 rounded-full border border-ink-foreground/20 bg-ink-foreground/5 px-6 py-3.5 text-sm font-semibold text-ink-foreground backdrop-blur-sm transition duration-300 hover:bg-ink-foreground/10 ${focus}`;
+const btnPrimary = `inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-glow transition duration-300 hover:opacity-95 hover:shadow-md ${focus}`;
+const btnGhostDark = `inline-flex items-center justify-center gap-2 rounded-full border border-ink-foreground/20 bg-ink-foreground/5 px-6 py-3.5 text-sm font-semibold text-ink-foreground backdrop-blur-sm transition duration-300 hover:border-primary/40 hover:text-primary ${focus}`;
 const container = "mx-auto w-full max-w-6xl px-5 md:px-8";
 
 function Hero({ cvUrl }: { cvUrl: string | null }) {
@@ -140,7 +141,8 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
                 </a>
               )}
               <Link
-                to="/contact"
+                to="/"
+                hash="contact"
                 className={`inline-flex items-center gap-1.5 rounded-full px-4 py-3 text-sm font-medium text-white/80 hover:text-white transition hover:bg-white/10 ${focus}`}
               >
                 <Mail size={15} /> {heroSection.ctaContact}
@@ -468,7 +470,7 @@ function Index() {
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {immersionItems.map((item) => (
                   <Reveal key={item.id} className="group">
-                    <figure className="relative aspect-[4/3] overflow-hidden rounded-[26px] border border-border/80 bg-muted shadow-sm transition-all duration-300 hover:border-primary/40 hover:shadow-lg">
+                    <figure className="relative aspect-[4/3] overflow-hidden rounded-[26px] border border-border/80 bg-muted shadow-sm transition-all duration-300 hover:border-primary/40 hover:shadow-md">
                       <img
                         src={getOptimizedImageUrl(item.image_url, { width: 720 })}
                         alt={item.image_alt ?? item.title}
@@ -497,32 +499,42 @@ function Index() {
 
         <section id="contact" className="relative overflow-hidden bg-hero py-20 text-ink-foreground md:py-28">
           <div className="bg-grid pointer-events-none absolute inset-0" aria-hidden />
-          <div className={`${container} relative text-center`}>
-            <Reveal className="mx-auto max-w-3xl">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold text-primary-glow backdrop-blur-sm">
-                <Sparkles size={12} /> Travaillons ensemble
-              </div>
-              <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-normal leading-tight text-white">
-                Construisons une collaboration{" "}
-                <span className="italic font-serif text-primary-glow">durable</span>.
-              </h2>
-              <p className="mt-5 text-base sm:text-lg leading-relaxed text-ink-foreground/75 max-w-xl mx-auto">
-                Que vous ayez un réseau à installer, des données à sécuriser ou une application web à développer, échangeons sur votre besoin. Basé à Lubumbashi, j’accompagne les organisations et les entrepreneurs dans la mise en place d’outils fiables et efficaces.
-              </p>
-              <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link to="/contact" className={btnPrimary}>
-                  Échanger sur votre projet <ArrowRight size={16} />
-                </Link>
-                <a
-                  href={profile.whatsapp}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={btnGhostDark}
-                >
-                  <MessageSquare size={16} /> Écrire sur WhatsApp
-                </a>
-              </div>
-            </Reveal>
+          <div className={`${container} relative`}>
+            <div className="grid items-start gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:gap-10">
+              <Reveal className="text-left">
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold text-primary-glow backdrop-blur-sm">
+                  <Sparkles size={12} /> Travaillons ensemble
+                </div>
+                <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-normal leading-tight text-white">
+                  Construisons une collaboration{" "}
+                  <span className="italic font-serif text-primary-glow">durable</span>.
+                </h2>
+                <p className="mt-5 text-base sm:text-lg leading-relaxed text-ink-foreground/75 max-w-xl">
+                  Que vous ayez un réseau à installer, des données à sécuriser ou une application web à développer, échangeons sur votre besoin. Basé à Lubumbashi, j’accompagne les organisations et les entrepreneurs qui veulent avancer avec des outils fiables.
+                </p>
+                <div className="mt-9 flex flex-col sm:flex-row items-start gap-4">
+                  <a
+                    href={profile.whatsapp}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={btnGhostDark}
+                  >
+                    <MessageSquare size={16} /> Écrire sur WhatsApp
+                  </a>
+                  <a href={`mailto:${profile.email}`} className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-6 py-3.5 text-sm font-semibold text-white/90 transition hover:border-white/30 hover:bg-white/10">
+                    <Mail size={16} /> Écrire par email
+                  </a>
+                </div>
+              </Reveal>
+
+              <Reveal className="w-full">
+                <div className="rounded-[30px] border border-white/15 bg-white/8 p-3 sm:p-4 shadow-2xl backdrop-blur-md">
+                  <div className="rounded-[24px] border border-border/60 bg-card p-5 sm:p-7">
+                    <ContactForm />
+                  </div>
+                </div>
+              </Reveal>
+            </div>
           </div>
         </section>
       </main>
@@ -531,4 +543,3 @@ function Index() {
     </div>
   );
 }
-
