@@ -98,18 +98,12 @@ function APropos() {
       </a>
       <Header />
       <main id="main">
-        {/* ── 1. Hero d'introduction — Épuré & Impactant ─────────────────── */}
         <header className="relative overflow-hidden bg-hero text-ink-foreground">
-          <div className="bg-grid pointer-events-none absolute inset-0 opacity-30" aria-hidden />
-          <div
-            className="pointer-events-none absolute -top-36 right-0 h-[500px] w-[500px] rounded-full bg-primary/10 blur-[140px]"
-            aria-hidden
-          />
-          <div
-            className={`${container} relative grid items-center gap-10 pb-16 pt-28 sm:pb-20 sm:pt-36 md:grid-cols-[minmax(0,1fr)_minmax(300px,0.9fr)] md:gap-14 md:pb-24 md:pt-42`}
-          >
-            {/* Colonne texte (Ordre 2 sur mobile, 1 sur desktop) */}
-            <div className="order-2 md:order-1 text-center md:text-left">
+          <div className="pointer-events-none absolute -top-20 right-0 h-[420px] w-[420px] rounded-full bg-primary/10 blur-[120px]" aria-hidden />
+          <div className="pointer-events-none absolute bottom-0 left-0 h-[260px] w-[260px] rounded-full bg-primary-glow/10 blur-[100px]" aria-hidden />
+
+          <div className={`${container} relative grid items-center gap-8 pb-16 pt-24 sm:pb-20 sm:pt-28 md:grid-cols-[1.1fr_0.9fr] md:gap-12 md:pb-24 md:pt-32`}>
+            <div className="order-2 text-center md:order-1 md:text-left">
               <Link
                 to="/"
                 className={`mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-semibold text-white/90 backdrop-blur-sm transition duration-300 hover:bg-white/15 hover:text-white ${focus}`}
@@ -118,22 +112,22 @@ function APropos() {
               </Link>
 
               <div className="mb-4 inline-flex items-center gap-2.5 text-xs md:text-sm font-semibold uppercase tracking-[0.22em] text-primary-glow justify-center md:justify-start">
-                <span className="h-px w-6 sm:w-8 bg-primary-glow/70 inline-block" aria-hidden />
+                <span className="h-px w-6 bg-primary-glow/70 sm:w-8" aria-hidden />
                 <span>{aboutPage.eyebrow}</span>
               </div>
 
-              <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-normal leading-[1.12] tracking-tight text-white">
+              <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-[3.15rem] font-normal leading-[1.08] tracking-tight text-white">
                 {aboutPage.titleLead}{" "}
-                <span className="italic font-serif text-primary-glow block sm:inline">
+                <span className="block italic font-serif text-primary-glow sm:inline">
                   {aboutPage.titleAccent}
                 </span>
               </h1>
 
-              <p className="mt-5 max-w-xl text-base sm:text-lg leading-[1.8] text-ink-foreground/80 mx-auto md:mx-0">
+              <p className="mx-auto mt-5 max-w-xl text-base leading-[1.8] text-ink-foreground/80 sm:text-lg md:mx-0">
                 {aboutPage.intro}
               </p>
 
-              <div className="mt-8 flex flex-wrap items-center justify-center md:justify-start gap-3.5 sm:gap-4">
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-3.5 sm:gap-4 md:justify-start">
                 <a href="#histoire" className={btnPrimary}>
                   Découvrir mon histoire <ArrowRight size={16} />
                 </a>
@@ -150,29 +144,10 @@ function APropos() {
               </div>
             </div>
 
-            {/* Photo Mobile : Ronde épurée sans bordure épaisse (style Natacha) */}
-            <div className="order-1 mx-auto mb-2 block md:hidden">
-              <div className="relative mx-auto h-60 w-60 sm:h-68 sm:w-68 rounded-full overflow-hidden shadow-2xl">
-                <picture>
-                  <source srcSet={photo.webp} type="image/webp" />
-                  <img
-                    src={photo.fallback}
-                    alt="Landry Kayoyo — Administrateur systèmes & réseaux et développeur web"
-                    width={800}
-                    height={800}
-                    loading="eager"
-                    fetchPriority="high"
-                    decoding="async"
-                    className="h-full w-full rounded-full object-cover object-[52%_15%] scale-125"
-                  />
-                </picture>
-              </div>
-            </div>
-
-            {/* Photo Desktop : cadre plus généreux et plus stable sur grand écran */}
-            <div className="order-1 mx-auto hidden w-full md:order-2 md:block md:max-w-[380px] lg:max-w-[430px] xl:max-w-[470px]">
-              <div className="relative">
-                <div className="relative overflow-hidden rounded-[2.2rem] border border-white/15 bg-white/5 p-2 shadow-2xl backdrop-blur-md sm:rounded-[2.6rem] sm:p-2.5">
+            <div className="order-1 mx-auto w-full max-w-[340px] sm:max-w-[400px] md:max-w-none md:order-2">
+              <div className="relative mx-auto w-full max-w-[420px] md:max-w-none">
+                <div className="absolute inset-0 -z-10 rounded-[2rem] bg-white/5 blur-2xl" aria-hidden />
+                <div className="relative overflow-hidden rounded-[2rem] bg-white/5 shadow-[0_28px_70px_rgba(16,24,40,0.22)]">
                   <picture>
                     <source srcSet={photo.webp} type="image/webp" />
                     <img
@@ -183,7 +158,7 @@ function APropos() {
                       loading="eager"
                       fetchPriority="high"
                       decoding="async"
-                      className="aspect-[4/5] w-full rounded-[1.8rem] object-cover object-[55%_22%] sm:rounded-[2.2rem]"
+                      className="aspect-[4/5] w-full object-cover object-[55%_18%]"
                     />
                   </picture>
                 </div>
@@ -192,7 +167,7 @@ function APropos() {
           </div>
         </header>
 
-        {/* ── 2. Mon Histoire — Narration fluide et continue ──────────────── */}
+        {/* rest of page remains unchanged */}
         <section id="histoire" className="py-20 md:py-28 border-b border-border/60">
           <div className={`${container} max-w-3xl`}>
             <Reveal>
@@ -215,7 +190,6 @@ function APropos() {
               ))}
             </div>
 
-            {/* Citation de vision */}
             <Reveal className="mt-14">
               <div className="rounded-2xl border-l-4 border-primary bg-secondary/35 p-6 sm:p-8 backdrop-blur-sm">
                 <p className="text-sm font-medium uppercase tracking-wider text-primary">
@@ -229,7 +203,6 @@ function APropos() {
           </div>
         </section>
 
-        {/* ── 3. Les Trois Domaines d'Intervention (Modèle piliers) ────────── */}
         <section className="bg-muted/30 py-20 md:py-28 border-b border-border/60">
           <div className={container}>
             <Reveal>
@@ -294,7 +267,6 @@ function APropos() {
           </div>
         </section>
 
-        {/* ── 4. Les étapes clés (Chronologie épurée sb-timeline) ──────────── */}
         <section className="py-20 md:py-28">
           <div className={`${container} max-w-3xl`}>
             <Reveal>
@@ -312,7 +284,7 @@ function APropos() {
             </Reveal>
 
             <div className="mt-14 space-y-6">
-              {aboutPage.timeline.items.map((step, index) => (
+              {aboutPage.timeline.items.map((step) => (
                 <Reveal key={step.year}>
                   <div className="group relative flex flex-col sm:flex-row gap-4 sm:gap-8 rounded-2xl border border-border/70 bg-card p-6 shadow-sm transition duration-300 hover:border-primary/40 hover:shadow-card">
                     <div className="sm:w-32 shrink-0">
@@ -335,7 +307,6 @@ function APropos() {
           </div>
         </section>
 
-        {/* ── 5. Me contacter (CTA simple & élégant) ───────────────────────── */}
         <section className="relative overflow-hidden bg-hero py-20 text-ink-foreground md:py-28">
           <div className="bg-grid pointer-events-none absolute inset-0" aria-hidden />
           <div className={`${container} relative text-center`}>
