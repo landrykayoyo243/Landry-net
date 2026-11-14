@@ -6,15 +6,12 @@ import {
   Github,
   Linkedin,
   Mail,
-  MessageSquare,
   Network,
-  Sparkles,
   ShieldCheck,
   Youtube,
 } from "lucide-react";
 import { Header } from "@/components/portfolio/Header";
 import { Footer } from "@/components/portfolio/Footer";
-import { Button } from "@/components/ui/button";
 import { Reveal, SectionHeading } from "@/components/portfolio/Reveal";
 import { ProjectCard } from "@/components/portfolio/ProjectCard";
 import { AnimatedStats } from "@/components/portfolio/AnimatedStats";
@@ -66,14 +63,8 @@ export const Route = createFileRoute("/")({
     ],
     links: [{ rel: "canonical", href: absoluteUrl("/") }],
     scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify(buildPersonSchema()),
-      },
-      {
-        type: "application/ld+json",
-        children: JSON.stringify(buildWebSiteSchema()),
-      },
+      { type: "application/ld+json", children: JSON.stringify(buildPersonSchema()) },
+      { type: "application/ld+json", children: JSON.stringify(buildWebSiteSchema()) },
     ],
   }),
   loader: ({ context }) =>
@@ -125,7 +116,7 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
               <a href={profile.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn de Landry Kayoyo" title="LinkedIn" className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}><Linkedin size={16} aria-hidden /></a>
               <a href={profile.github} target="_blank" rel="noreferrer" aria-label="GitHub de Landry Kayoyo" title="GitHub" className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}><Github size={16} aria-hidden /></a>
               <a href={profile.youtube} target="_blank" rel="noreferrer" aria-label="YouTube de Landry Kayoyo" title="YouTube" className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}><Youtube size={16} aria-hidden /></a>
-              <a href={profile.facebook} target="_blank" rel="noreferrer" aria-label="Facebook de Landry Kayoyo" title="Facebook" className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 font-semibold transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`} aria-hidden="true">f</a>
+              <a href={profile.facebook} target="_blank" rel="noreferrer" aria-label="Facebook de Landry Kayoyo" title="Facebook" className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 font-semibold transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}>f</a>
               <a href={profile.x} target="_blank" rel="noreferrer" aria-label="Profil X de Landry Kayoyo" title="X" className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 text-sm font-semibold transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}>𝕏</a>
             </div>
           </div>
@@ -144,7 +135,7 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
         <div className="mt-12 hidden justify-center md:flex">
           <a href="#competences" aria-label="Découvrir la suite" className={`flex flex-col items-center gap-1.5 text-white/40 transition-colors duration-300 hover:text-white/75 ${focus}`}>
             <span className="text-[10px] font-semibold uppercase tracking-[0.2em]">Découvrir</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-bounce"><path d="m6 9 6 6 6-6" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-bounce" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
           </a>
         </div>
       </div>
@@ -214,7 +205,7 @@ function Index() {
           </div>
         </section>
 
-        {immersionItems.length > 0 && <section id="immersion" className="scroll-mt-24 border-b border-border bg-muted/30 py-20 md:py-28"><div className={container}><Reveal><SectionHeading eyebrow="Expérience" title="Sur le terrain," accent="au cœur des systèmes." description="Des expériences pratiques au service de systèmes fiables." /></Reveal><div className="mt-10 grid gap-5 md:grid-cols-2">{immersionItems.map((item) => <Reveal key={item.id}><article className="rounded-2xl border border-border bg-card p-6"><h3 className="font-semibold">{item.title}</h3><p className="mt-2 text-sm text-muted-foreground">{item.description}</p></article></Reveal>)}</div></div></section>}
+        {immersionItems.length > 0 && <section id="immersion" className="scroll-mt-24 border-b border-border bg-muted/30 py-20 md:py-28"><div className={container}><Reveal><SectionHeading eyebrow="En images" title="Le numérique," accent="sur le terrain." description="Quelques aperçus des interventions et des environnements techniques." /></Reveal><div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{immersionItems.map((item) => <Reveal key={item.id} className="group"><figure className="relative aspect-[4/3] overflow-hidden rounded-[26px] border border-border/80 bg-muted shadow-sm"><img src={getOptimizedImageUrl(item.image_url, { width: 720 })} alt={item.image_alt ?? item.title} loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" /><div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" aria-hidden="true" /><figcaption className="absolute inset-x-0 bottom-0 p-5 text-white sm:p-6"><span className="inline-flex rounded-full bg-primary/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground">{item.tag}</span><h3 className="mt-2 font-serif text-lg font-medium leading-snug drop-shadow-sm">{item.title}</h3></figcaption></figure></Reveal>)}</div></div></section>}
 
         <BrandsMarquee />
 
@@ -223,7 +214,7 @@ function Index() {
           <div className={`${container} relative`}>
             <div className="grid items-start gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:gap-10">
               <Reveal className="text-left">
-                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Contact</div>
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Travaillons ensemble</div>
                 <h2 className="font-serif text-3xl font-normal leading-tight text-white sm:text-4xl md:text-5xl">Construisons une collaboration <span className="font-serif italic text-primary-glow">durable.</span></h2>
                 <p className="mt-5 max-w-xl text-base leading-relaxed text-ink-foreground/75 sm:text-lg">Vous avez un réseau à sécuriser, un système à fiabiliser ou une application web à lancer ? Échangeons sur votre besoin.</p>
               </Reveal>
