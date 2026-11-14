@@ -128,14 +128,14 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
           </div>
           <div className="order-1 mx-auto hidden w-full md:order-2 md:block md:max-w-[370px] lg:max-w-[400px]">
             <div className="relative overflow-hidden rounded-[2.2rem] border border-white/15 bg-white/5 p-2 shadow-2xl backdrop-blur-md sm:rounded-[2.6rem] sm:p-2.5">
-              <picture><source srcSet={photo.webp} type="image/webp" /><img src={photo.fallback} alt="Portrait de Landry Kayoyo — Administrateur systèmes & réseaux et développeur web" width={800} height={800} loading="eager" fetchPriority="high" decoding="async" className="aspect-[4/5] w-full rounded-[1.8rem] object-cover object-[55%_22%] sm:rounded-[2.2rem]" /></picture>
+              <picture><source srcSet={photo.webp} type="image/webp" /><img src={photo.fallback} alt="Portrait de Landry Kayoyo — Administrateur systèmes & réseaux et développeur web" width={800} height={1000} loading="eager" fetchPriority="high" decoding="async" className="aspect-[4/5] w-full rounded-[1.8rem] object-cover object-[55%_22%] sm:rounded-[2.2rem]" /></picture>
             </div>
           </div>
         </div>
         <div className="mt-12 hidden justify-center md:flex">
           <a href="#competences" aria-label="Découvrir la suite" className={`flex flex-col items-center gap-1.5 text-white/40 transition-colors duration-300 hover:text-white/75 ${focus}`}>
             <span className="text-[10px] font-semibold uppercase tracking-[0.2em]">Découvrir</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-bounce" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-scroll-bounce" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
           </a>
         </div>
       </div>
@@ -193,10 +193,26 @@ function Index() {
         </section>
 
         <section id="apropos" className="scroll-mt-24 border-b border-border bg-background py-20 md:py-28">
-          <div className={container}><Reveal><div className="grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
-            <div className="relative mx-auto w-full max-w-[340px] sm:max-w-[400px] lg:max-w-none"><div className="relative aspect-[4/5] overflow-hidden rounded-[28px] border border-border/80 bg-muted"><picture><source srcSet={photo.webp} type="image/webp" /><img src={photo.fallback} alt="Landry Kayoyo" width={800} height={1000} loading="lazy" className="h-full w-full object-cover" /></picture></div></div>
-            <div className="mx-auto w-full max-w-2xl lg:mx-0"><div className="mb-5 inline-flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary"><span className="h-px w-7 bg-primary" />À propos</div><h2 className="font-serif text-3xl font-medium sm:text-4xl">Bâtisseur de l’invisible, garant de votre continuité numérique.</h2><div className="mt-6 space-y-4 text-muted-foreground">{about.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div><Link to="/a-propos" className="mt-7 inline-flex items-center gap-2 font-semibold text-primary">Mon histoire <ArrowRight size={16} /></Link></div>
-          </div></Reveal></div>
+          <div className={container}>
+            <Reveal>
+              <div className="grid items-center gap-10 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] md:gap-16">
+                <div className="relative mx-auto w-full max-w-[340px] sm:max-w-[400px] md:max-w-none">
+                  <div className="relative aspect-[4/5] overflow-hidden rounded-[28px] border border-border/80 bg-muted">
+                    <picture>
+                      <source srcSet={photo.webp} type="image/webp" />
+                      <img src={photo.fallback} alt="Landry Kayoyo" width={800} height={1000} loading="lazy" className="h-full w-full object-cover" />
+                    </picture>
+                  </div>
+                </div>
+                <div className="mx-auto w-full max-w-2xl md:mx-0">
+                  <div className="mb-5 inline-flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary"><span className="h-px w-7 bg-primary" />À propos</div>
+                  <h2 className="font-serif text-3xl font-medium sm:text-4xl">Bâtisseur de l’invisible, garant de votre continuité numérique.</h2>
+                  <div className="mt-6 space-y-4 text-muted-foreground">{about.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div>
+                  <Link to="/a-propos" className="mt-7 inline-flex items-center gap-2 font-semibold text-primary">Mon histoire <ArrowRight size={16} /></Link>
+                </div>
+              </div>
+            </Reveal>
+          </div>
         </section>
 
         <section id="projets" className="scroll-mt-24 border-b border-border bg-card py-20 md:py-28">
