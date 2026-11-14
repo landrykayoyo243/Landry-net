@@ -201,7 +201,7 @@ function Index() {
 
         <section id="projets" className="scroll-mt-24 border-b border-border bg-card py-20 md:py-28">
           <div className={container}><Reveal><SectionHeading eyebrow="Réalisations" title="Des problèmes réels," accent="des solutions concrètes." description="Une sélection de projets conçus pour répondre aux besoins du terrain." /></Reveal>
-            {projectsQ.isPending ? <ContentLoading rows={2} className="h-72" /> : projectsQ.isError ? <ContentError label="les projets" onRetry={() => projectsQ.refetch()} /> : <><div className="mt-10 grid gap-6 md:grid-cols-2">{featured.map((project) => <ProjectCard key={project.slug} project={project} />)}</div><div className="mt-8 text-center"><Link to="/projets" className={btnPrimary}>Tous les projets <ArrowRight size={16} /></Link></div></>}
+            {projectsQ.isPending ? <ContentLoading rows={2} className="h-72" /> : projectsQ.isError ? <ContentError label="les projets" onRetry={() => projectsQ.refetch()} /> : <><div className="mt-10 grid gap-6 md:grid-cols-2">{featured.map((project) => <ProjectCard key={project.slug} p={project} />)}</div><div className="mt-8 text-center"><Link to="/projets" className={btnPrimary}>Tous les projets <ArrowRight size={16} /></Link></div></>}
           </div>
         </section>
 
