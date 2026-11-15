@@ -70,9 +70,9 @@ export const brands = [
 
 // Résumé court affiché sur la page d'accueil (5 à 8 lignes).
 export const about = [
-  "Diplômé en administration des systèmes et réseaux à l'Université Don Bosco de Lubumbashi, je suis membre de l'équipe technique de XSECURITY.",
-  "J'accompagne les petites entreprises : mise en place de réseaux, sécurisation des systèmes et développement d'applications web.",
-  "Mon objectif : livrer des services fiables, sécurisés et simples à maintenir.",
+  "Formé en administration des systèmes et réseaux à l’Université Don Bosco de Lubumbashi, je mets aujourd’hui mes compétences en pratique au sein de l’équipe technique de XSECURITY.",
+  "J’accompagne les petites structures sur leurs besoins numériques : mise en place de réseaux, sécurisation des systèmes et développement d’applications web utiles.",
+  "Mon fil conducteur : proposer des solutions fiables, simples à utiliser et faciles à maintenir.",
 ];
 
 // Phrase d'accroche / conviction éditoriale affichée en haut de la page d'accueil
@@ -242,9 +242,10 @@ export const testimonials = [
 // --- Section Hero (page d'accueil) ---
 export const heroSection = {
   badge: "Administrateur Systèmes · Développeur Web",
-  titleLead: "Infrastructures fiables,",
-  titleAccent: "code créé pour durer.",
-  description: "J'aide les organisations à sécuriser leurs systèmes, gérer leurs parcs informatiques et déployer des applications web robustes.",
+  titleLead: "Des systèmes fiables,",
+  titleAccent: "du code conçu pour durer.",
+  description:
+    "J’accompagne les organisations dans la sécurisation de leurs systèmes, la fiabilité de leurs réseaux et la création d’applications web adaptées à leurs besoins.",
   ctaPrimary: "Voir mes projets",
   ctaSecondary: "Télécharger mon CV",
   ctaContact: "Me contacter",

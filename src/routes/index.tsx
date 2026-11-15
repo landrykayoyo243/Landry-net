@@ -82,112 +82,142 @@ export const Route = createFileRoute("/")({
 const focus =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
 const btnPrimary = `inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-glow transition duration-300 hover:brightness-110 ${focus}`;
-const btnGhostDark = `inline-flex items-center justify-center gap-2 rounded-full border border-ink-foreground/20 bg-ink-foreground/5 px-6 py-3.5 text-sm font-semibold text-ink-foreground backdrop-blur-sm transition duration-300 hover:bg-ink-foreground/10 ${focus}`;
 const container = "mx-auto w-full max-w-6xl px-5 md:px-8";
+const heroHighlights = [
+  { label: "Infrastructures", title: "Systèmes & réseaux", icon: Network, position: "left-0 top-[8%]" },
+  { label: "Protection", title: "Cybersécurité", icon: ShieldCheck, position: "right-0 top-[20%]" },
+  { label: "Applications", title: "Développement web", icon: Code2, position: "bottom-[8%] left-1/2 -translate-x-1/2" },
+];
 
 function Hero({ cvUrl }: { cvUrl: string | null }) {
   return (
-    <section className="relative overflow-hidden bg-hero text-ink-foreground">
-      <div className="bg-grid pointer-events-none absolute inset-0 opacity-30" aria-hidden />
-      <div className="pointer-events-none absolute -top-36 right-0 h-[520px] w-[520px] rounded-full bg-primary/10 blur-[140px] animate-aura" aria-hidden />
-      <div className="pointer-events-none absolute bottom-0 left-0 h-[360px] w-[360px] rounded-full bg-primary-glow/6 blur-[110px] animate-aura" style={{ animationDelay: "3s" }} aria-hidden />
-
-      <div className={`${container} relative pb-12 pt-20 sm:pb-16 sm:pt-24 md:pb-16 md:pt-28`}>
-        <div className="grid items-center gap-8 md:grid-cols-[1.15fr_0.85fr] lg:gap-16">
-          <div className="order-2 text-center md:order-1 md:text-left">
-            <p className="mb-4 inline-flex items-center justify-center gap-2.5 text-xs font-semibold uppercase tracking-[0.22em] text-primary-glow sm:text-sm md:justify-start">
-              <span className="inline-block h-px w-6 bg-primary-glow/70 sm:w-8" aria-hidden />
+    <section className="relative overflow-hidden border-b border-border bg-background text-foreground">
+      <div className={`${container} relative pb-12 pt-20 sm:pb-14 sm:pt-20 md:pb-16 md:pt-24`}>
+        <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-12">
+          <div className="mx-auto w-full max-w-3xl text-center lg:mx-0 lg:text-left">
+            <p className="mb-5 inline-flex items-center gap-2.5 rounded-full border border-primary/15 bg-primary/5 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-primary sm:text-xs">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
               <span>{heroSection.badge}</span>
             </p>
-            <h1 className="max-w-3xl font-serif text-balance text-3xl font-normal leading-[1.12] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-[3.35rem]">
+            <h1 className="mx-auto max-w-[22ch] font-serif text-balance text-4xl font-normal leading-[1.08] tracking-tight text-foreground sm:text-5xl md:text-6xl lg:mx-0 lg:max-w-[20ch] lg:text-5xl xl:text-6xl">
               {heroSection.titleLead}{" "}
-              <span className="block font-serif italic text-primary-glow sm:inline">{heroSection.titleAccent}</span>
+              <span className="block font-serif italic text-primary">{heroSection.titleAccent}</span>
             </h1>
-            <p className="mx-auto mt-5 max-w-xl text-pretty text-base leading-[1.8] text-ink-foreground/85 sm:text-lg md:mx-0">
+            <p className="mx-auto mt-5 max-w-2xl text-pretty text-base leading-[1.8] text-muted-foreground sm:mt-6 sm:text-lg lg:mx-0">
               {heroSection.description}
             </p>
-            <div className="mt-7 flex flex-wrap items-center justify-center gap-3.5 sm:gap-4 md:justify-start">
-              <Link to="/projets" className={btnPrimary}>{heroSection.ctaPrimary} <ArrowRight size={16} /></Link>
-              {cvUrl && <a href={cvUrl} target="_blank" rel="noopener noreferrer" className={btnGhostDark}><FileText size={16} /> {heroSection.ctaSecondary}</a>}
+            <div className="mx-auto mt-7 flex w-full max-w-lg flex-col items-stretch justify-center gap-3 sm:mt-8 sm:flex-row sm:items-center lg:mx-0 lg:justify-start">
+              <Link to="/projets" className={`${btnPrimary} w-full sm:w-auto`}>
+                {heroSection.ctaPrimary} <ArrowRight size={16} />
+              </Link>
+              {cvUrl && (
+                <a
+                  href={cvUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`inline-flex w-full items-center justify-center gap-2 rounded-full border border-border bg-card px-6 py-3.5 text-sm font-semibold text-foreground transition-colors hover:border-primary/30 hover:bg-muted sm:w-auto ${focus}`}
+                >
+                  <FileText size={16} /> {heroSection.ctaSecondary}
+                </a>
+              )}
             </div>
-            <nav
-              aria-label="Réseaux sociaux de Landry Kayoyo"
-              className="mt-6 flex items-center justify-center gap-3 text-ink-foreground/70 md:justify-start"
+            <a
+              href="#competences"
+              className={`mx-auto mt-5 inline-flex w-fit items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary/75 lg:mx-0 ${focus}`}
             >
-              <a
-                href={profile.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="LinkedIn de Landry Kayoyo"
-                title="LinkedIn"
-                data-testid="social-link-linkedin"
-                className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}
+              Explorer mes domaines <ArrowRight size={15} />
+            </a>
+            <div className="mt-8 flex flex-col items-center gap-3 lg:flex-row lg:gap-4">
+              <span className="text-xs font-medium text-muted-foreground">Retrouvez-moi aussi sur</span>
+              <nav
+                aria-label="Réseaux sociaux de Landry Kayoyo"
+                className="flex items-center justify-center gap-2.5 text-muted-foreground"
               >
-                <Linkedin size={16} aria-hidden="true" />
-              </a>
-              <a
-                href={profile.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="GitHub de Landry Kayoyo"
-                title="GitHub"
-                data-testid="social-link-github"
-                className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}
-              >
-                <Github size={16} aria-hidden="true" />
-              </a>
-              <a
-                href={profile.youtube}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="YouTube de Landry Kayoyo"
-                title="YouTube"
-                data-testid="social-link-youtube"
-                className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}
-              >
-                <Youtube size={16} aria-hidden="true" />
-              </a>
-              <a
-                href={profile.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Facebook de Landry Kayoyo"
-                title="Facebook"
-                data-testid="social-link-facebook"
-                className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 font-semibold transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}
-              >
-                <span aria-hidden="true">f</span>
-              </a>
-              <a
-                href={profile.x}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Profil X de Landry Kayoyo"
-                title="X"
-                data-testid="social-link-x"
-                className={`grid h-9 w-9 place-items-center rounded-full border border-white/15 text-sm font-semibold transition hover:border-white/40 hover:bg-white/10 hover:text-white ${focus}`}
-              >
-                <span aria-hidden="true">𝕏</span>
-              </a>
-            </nav>
-          </div>
-
-          <div className="order-1 mx-auto mb-2 block md:hidden">
-            <div className="relative mx-auto h-52 w-52 overflow-hidden rounded-full shadow-2xl sm:h-60 sm:w-60">
-              <picture><source srcSet={photo.webp} type="image/webp" /><img src={photo.fallback} alt="Portrait de Landry Kayoyo, administrateur systèmes et réseaux à Lubumbashi" width={800} height={800} loading="eager" fetchPriority="high" decoding="async" className="h-full w-full scale-125 rounded-full object-cover object-[52%_15%]" /></picture>
+                <a
+                  href={profile.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="LinkedIn de Landry Kayoyo"
+                  title="LinkedIn"
+                  data-testid="social-link-linkedin"
+                  className={`grid h-10 w-10 place-items-center rounded-full border border-border bg-card transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary ${focus}`}
+                >
+                  <Linkedin size={16} aria-hidden="true" />
+                </a>
+                <a
+                  href={profile.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="GitHub de Landry Kayoyo"
+                  title="GitHub"
+                  data-testid="social-link-github"
+                  className={`grid h-10 w-10 place-items-center rounded-full border border-border bg-card transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary ${focus}`}
+                >
+                  <Github size={16} aria-hidden="true" />
+                </a>
+                <a
+                  href={profile.youtube}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="YouTube de Landry Kayoyo"
+                  title="YouTube"
+                  data-testid="social-link-youtube"
+                  className={`grid h-10 w-10 place-items-center rounded-full border border-border bg-card transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary ${focus}`}
+                >
+                  <Youtube size={16} aria-hidden="true" />
+                </a>
+                <a
+                  href={profile.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook de Landry Kayoyo"
+                  title="Facebook"
+                  data-testid="social-link-facebook"
+                  className={`grid h-10 w-10 place-items-center rounded-full border border-border bg-card font-semibold transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary ${focus}`}
+                >
+                  <span aria-hidden="true">f</span>
+                </a>
+                <a
+                  href={profile.x}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Profil X de Landry Kayoyo"
+                  title="X"
+                  data-testid="social-link-x"
+                  className={`grid h-10 w-10 place-items-center rounded-full border border-border bg-card text-sm font-semibold transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary ${focus}`}
+                >
+                  <span aria-hidden="true">𝕏</span>
+                </a>
+              </nav>
             </div>
           </div>
-          <div className="order-1 mx-auto hidden w-full md:order-2 md:block md:max-w-[370px] lg:max-w-[400px]">
-            <div className="relative overflow-hidden rounded-3xl">
-              <picture><source srcSet={photo.webp} type="image/webp" /><img src={photo.fallback} alt="Portrait de Landry Kayoyo, administrateur systèmes et réseaux et développeur web à Lubumbashi" width={800} height={1000} loading="eager" fetchPriority="high" decoding="async" className="aspect-[4/5] w-full rounded-3xl object-cover object-[55%_22%]" /></picture>
+          <div className="relative mx-auto hidden aspect-[1.1/1] w-full max-w-[430px] lg:block" aria-hidden="true">
+            <div className="absolute inset-[8%] rounded-full border border-primary/10 bg-gradient-to-br from-primary/10 via-background to-secondary/60" />
+            <div className="absolute inset-[20%] rounded-full border border-dashed border-primary/15" />
+            <svg viewBox="0 0 420 380" className="absolute inset-0 h-full w-full text-primary/25">
+              <path d="M210 190 76 72M210 190l134-82M210 190v135" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="5 7" />
+              <circle cx="76" cy="72" r="4" fill="currentColor" />
+              <circle cx="344" cy="108" r="4" fill="currentColor" />
+              <circle cx="210" cy="325" r="4" fill="currentColor" />
+            </svg>
+            <div className="absolute left-1/2 top-1/2 z-10 grid h-28 w-28 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-[2rem] bg-gradient-primary text-primary-foreground shadow-glow ring-8 ring-primary/5">
+              <Network size={44} strokeWidth={1.6} />
             </div>
+            {heroHighlights.map(({ label, title, icon: Icon, position }) => (
+              <div
+                key={label}
+                className={`absolute z-20 flex w-[190px] items-center gap-3 rounded-2xl border border-border/80 bg-card/95 p-3.5 shadow-card backdrop-blur-sm ${position}`}
+              >
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                  <Icon size={19} aria-hidden="true" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{label}</span>
+                  <span className="mt-0.5 block text-sm font-semibold leading-snug text-foreground">{title}</span>
+                </span>
+              </div>
+            ))}
           </div>
-        </div>
-        <div className="mt-8 hidden justify-center md:flex">
-          <a href="#competences" aria-label="Découvrir la suite" className={`flex flex-col items-center gap-1.5 text-white/40 transition-colors duration-300 hover:text-white/75 ${focus}`}>
-            <span className="text-[10px] font-semibold uppercase tracking-[0.2em]">Découvrir</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-scroll-bounce" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
-          </a>
         </div>
       </div>
     </section>
@@ -246,20 +276,22 @@ function Index() {
         <section id="apropos" className="scroll-mt-24 border-b border-border bg-background py-16 md:py-20">
           <div className={container}>
             <Reveal>
-              <div className="grid items-center gap-8 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] md:gap-16">
-                <div className="relative mx-auto w-full max-w-[280px] sm:max-w-[340px] md:max-w-none">
-                  <div className="relative aspect-[4/5] overflow-hidden rounded-[28px] border border-border/80 bg-muted">
+              <div className="grid items-center gap-9 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] md:gap-14 lg:gap-16">
+                <div className="relative mx-auto w-full max-w-[260px] sm:max-w-[320px] md:max-w-none">
+                  <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] border border-border/80 bg-muted shadow-card">
                     <picture>
                       <source srcSet={photo.webp} type="image/webp" />
-                      <img src={photo.fallback} alt="Portrait de Landry Kayoyo, administrateur systèmes et réseaux et développeur web" width={800} height={1000} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+                      <img src={photo.fallback} alt="Portrait de Landry Kayoyo, administrateur systèmes et réseaux et développeur web à Lubumbashi" width={800} height={1000} loading="lazy" decoding="async" className="h-full w-full object-cover object-[55%_18%]" />
                     </picture>
                   </div>
                 </div>
                 <div className="mx-auto w-full max-w-2xl md:mx-0">
-                  <div className="mb-5 inline-flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary"><span className="h-px w-7 bg-primary" />À propos</div>
-                  <h2 className="font-serif text-balance text-3xl font-medium sm:text-4xl">Mon parcours en systèmes, réseaux et développement web.</h2>
-                  <div className="mt-6 space-y-4 text-pretty leading-relaxed text-muted-foreground">{about.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div>
-                  <Link to="/a-propos" className="mt-7 inline-flex items-center gap-2 font-semibold text-primary">Découvrir mon parcours <ArrowRight size={16} /></Link>
+                  <div className="mb-5 inline-flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-primary"><span className="h-px w-7 bg-primary" aria-hidden />Mon histoire</div>
+                  <h2 className="max-w-[22ch] font-serif text-balance text-3xl font-medium leading-tight tracking-tight sm:text-4xl">Un parcours entre systèmes, réseaux et web.</h2>
+                  <div className="mt-6 space-y-4 text-pretty leading-[1.8] text-muted-foreground">{about.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div>
+                  <Link to="/a-propos" className={`mt-7 inline-flex items-center gap-2 rounded-full border border-primary/20 px-5 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary/5 ${focus}`}>
+                    Lire mon histoire <ArrowRight size={16} />
+                  </Link>
                 </div>
               </div>
             </Reveal>
