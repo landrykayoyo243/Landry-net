@@ -95,11 +95,11 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
       <div className={`${container} relative pb-12 pt-20 sm:pb-14 sm:pt-20 md:pb-16 md:pt-24`}>
         <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-12">
           <div className="mx-auto w-full max-w-3xl text-center lg:mx-0 lg:text-left">
-            <p className="mb-5 inline-flex items-center gap-2.5 rounded-full border border-primary/15 bg-primary/5 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-primary sm:text-xs">
+            <p className="mb-5 inline-flex items-center gap-2.5 rounded-full border border-primary/15 bg-primary/5 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-primary sm:text-[12px]">
               <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
               <span>{heroSection.badge}</span>
             </p>
-            <h1 className="mx-auto max-w-[22ch] font-serif text-balance text-4xl font-normal leading-[1.08] tracking-tight text-foreground sm:text-5xl md:text-6xl lg:mx-0 lg:max-w-[20ch] lg:text-5xl xl:text-6xl">
+            <h1 className="mx-auto max-w-[22ch] font-serif text-balance text-4xl font-normal leading-[1.08] tracking-tight text-foreground sm:text-5xl md:text-6xl lg:mx-0 lg:max-w-[20ch] lg:text-[4.25rem]">
               {heroSection.titleLead}{" "}
               <span className="block font-serif italic text-primary">{heroSection.titleAccent}</span>
             </h1>
@@ -115,7 +115,7 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
                   href={cvUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`inline-flex w-full items-center justify-center gap-2 rounded-full border border-border bg-card px-6 py-3.5 text-sm font-semibold text-foreground transition-colors hover:border-primary/30 hover:bg-muted sm:w-auto ${focus}`}
+                  className={`inline-flex w-full items-center justify-center gap-2 rounded-full border border-border bg-card px-6 py-3.5 text-sm font-semibold text-foreground transition-colors hover:border-primary/20 hover:bg-primary/5 hover:text-primary ${focus}`}
                 >
                   <FileText size={16} /> {heroSection.ctaSecondary}
                 </a>
@@ -200,7 +200,7 @@ function Hero({ cvUrl }: { cvUrl: string | null }) {
               <circle cx="344" cy="108" r="4" fill="currentColor" />
               <circle cx="210" cy="325" r="4" fill="currentColor" />
             </svg>
-            <div className="absolute left-1/2 top-1/2 z-10 grid h-28 w-28 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-[2rem] bg-gradient-primary text-primary-foreground shadow-glow ring-8 ring-primary/5">
+            <div className="absolute left-1/2 top-1/2 z-10 grid h-28 w-28 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-[2rem] bg-gradient-primary text-primary-foreground shadow-glow">
               <Network size={44} strokeWidth={1.6} />
             </div>
             {heroHighlights.map(({ label, title, icon: Icon, position }) => (
@@ -263,11 +263,11 @@ function Index() {
 
         <section id="competences" className="scroll-mt-24 border-b border-border bg-muted/30 py-16 md:py-20">
           <div className={container}>
-            <Reveal><SectionHeading eyebrow="Domaines d’intervention" title="Du réseau à l’application," accent="une vision cohérente." description="J’interviens sur les fondations numériques pour concevoir des solutions fiables, sécurisées et utiles." /></Reveal>
+            <Reveal><SectionHeading eyebrow="Domaines d’intervention" title="Du réseau à l’application," accent="une vision cohérente." description="J’interviens sur les fondations numériques de vos projets, de l’infrastructure à l’expérience utilisateur, avec une logique concrète et durable." /></Reveal>
             <div className="grid gap-5 md:grid-cols-3">
               {aboutPage.pillars.items.map((item, index) => {
                 const Icon = [Network, ShieldCheck, Code2][index];
-                return <Reveal key={item.title} delay={index * 110}><div className="pillar-card flex h-full flex-col rounded-[28px] border border-border/70 bg-card p-7 shadow-xs sm:p-8"><div className="grid h-11 w-11 place-items-center rounded-2xl bg-primary/10 text-primary"><Icon size={20} /></div><h3 className="mt-5 font-serif text-2xl font-medium">{item.title}</h3><p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.description}</p><Link to={item.linkHref} className="mt-6 text-sm font-semibold text-primary hover:underline">{item.linkText}</Link></div></Reveal>;
+                return <Reveal key={item.title} delay={index * 110}><div className="pillar-card flex h-full flex-col rounded-[28px] border border-border/70 bg-card p-7 shadow-xs sm:p-8"><div className="mb-5 grid h-12 w-12 place-items-center rounded-2xl bg-primary/10 text-primary"><Icon size={22} aria-hidden="true" /></div><h3 className="font-serif text-2xl font-medium leading-tight text-foreground">{item.title}</h3><p className="mt-3 text-sm leading-7 text-muted-foreground">{item.description}</p></div></Reveal>;
               })}
             </div>
           </div>
@@ -277,12 +277,15 @@ function Index() {
           <div className={container}>
             <Reveal>
               <div className="grid items-center gap-9 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] md:gap-14 lg:gap-16">
-                <div className="relative mx-auto w-full max-w-[260px] sm:max-w-[320px] md:max-w-none">
-                  <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] border border-border/80 bg-muted shadow-card">
-                    <picture>
-                      <source srcSet={photo.webp} type="image/webp" />
-                      <img src={photo.fallback} alt="Portrait de Landry Kayoyo, administrateur systèmes et réseaux et développeur web à Lubumbashi" width={800} height={1000} loading="lazy" decoding="async" className="h-full w-full object-cover object-[55%_18%]" />
-                    </picture>
+                <div className="relative mx-auto w-full max-w-[280px] sm:max-w-[320px] md:max-w-none">
+                  <div className="absolute inset-5 -z-10 rounded-[2.5rem] bg-gradient-to-br from-primary/15 via-primary/5 to-transparent blur-2xl" />
+                  <div className="relative rounded-[2.25rem] border border-border/80 bg-gradient-to-b from-secondary to-card p-3 shadow-card">
+                    <div className="relative aspect-[4/5] overflow-hidden rounded-[1.8rem] border border-white/60 bg-muted">
+                      <picture>
+                        <source srcSet={photo.webp} type="image/webp" />
+                        <img src={photo.fallback} alt="Portrait de Landry Kayoyo, administrateur systèmes et réseaux et développeur web à Lubumbashi" width={800} height={1000} loading="lazy" className="h-full w-full object-cover" />
+                      </picture>
+                    </div>
                   </div>
                 </div>
                 <div className="mx-auto w-full max-w-2xl md:mx-0">
@@ -299,23 +302,29 @@ function Index() {
         </section>
 
         <section id="projets" className="scroll-mt-24 border-b border-border bg-card py-16 md:py-20">
-          <div className={container}><Reveal><SectionHeading eyebrow="Réalisations" title="Des problèmes réels," accent="des solutions concrètes." description="Une sélection de projets conçus pour répondre aux besoins du terrain." /></Reveal>
-            {projectsQ.isPending ? <ContentLoading rows={2} className="h-72" /> : projectsQ.isError ? <ContentError label="les projets" onRetry={() => projectsQ.refetch()} /> : <><div className="grid gap-6 md:grid-cols-2">{featured.map((project) => <ProjectCard key={project.slug} p={project} />)}</div><div className="mt-8 text-center"><Link to="/projets" className={btnPrimary}>Tous les projets <ArrowRight size={16} /></Link></div></>}
+          <div className={container}><Reveal><SectionHeading eyebrow="Réalisations" title="Des problèmes réels," accent="des solutions concrètes." description="Une sélection de projets conçus pour améliorer les processus, sécuriser les opérations et offrir une meilleure expérience à l’utilisateur." /></Reveal>
+            {projectsQ.isPending ? <ContentLoading rows={2} className="h-72" /> : projectsQ.isError ? <ContentError label="les projets" onRetry={() => projectsQ.refetch()} /> : <><div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">{featured.map((project) => <ProjectCard key={project.id} project={project} />)}</div>{featured.length > 0 && <div className="mt-8 text-center"><Link to="/projets" className={`${btnPrimary} mx-auto`}>Voir tous les projets <ArrowRight size={15} /></Link></div>}</>}
           </div>
         </section>
 
-        {immersionItems.length > 0 && <section id="immersion" className="scroll-mt-24 border-b border-border bg-muted/30 py-16 md:py-20"><div className={container}><Reveal><SectionHeading eyebrow="En images" title="Le numérique," accent="sur le terrain." description="Quelques aperçus des interventions et des environnements techniques." /></Reveal><div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{immersionItems.map((item) => <Reveal key={item.id} className="group"><figure className="relative aspect-[4/3] overflow-hidden rounded-[26px] border border-border/80 bg-muted shadow-sm"><img src={getOptimizedImageUrl(item.image_url, { width: 720 })} alt={item.image_alt ?? item.title} loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" /><div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" aria-hidden="true" /><figcaption className="absolute inset-x-0 bottom-0 p-5 text-white sm:p-6"><span className="inline-flex rounded-full bg-primary/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground">{item.tag}</span><h3 className="mt-2 font-serif text-lg font-medium leading-snug drop-shadow-sm">{item.title}</h3></figcaption></figure></Reveal>)}</div></div></section>}
+        {immersionItems.length > 0 && <section id="immersion" className="scroll-mt-24 border-b border-border bg-muted/30 py-16 md:py-20"><div className={container}><Reveal><SectionHeading eyebrow="Immersion" title="Des missions terrain," accent="des choix justifiés." description="Un regard sur les défis rencontrés en contexte réel, là où les décisions techniques impactent directement la performance et la confiance." /></Reveal>{immersionItems.length > 0 && <div className="mt-8 grid gap-5 md:grid-cols-2">{immersionItems.map((item, index) => <div key={item.id ?? index} className="rounded-[28px] border border-border/70 bg-card p-6 shadow-xs"><p className="text-xs font-semibold uppercase tracking-[0.15em] text-primary">{item.period}</p><h3 className="mt-3 font-serif text-2xl font-medium text-foreground">{item.title}</h3><p className="mt-3 text-sm leading-7 text-muted-foreground">{item.summary}</p></div>)}</div>}</div></section>}
 
         <BrandsMarquee />
 
         <section id="contact" className="relative overflow-hidden bg-hero py-12 text-ink-foreground sm:py-14 md:py-16">
           <div className="bg-grid pointer-events-none absolute inset-0" aria-hidden />
           <div className={`${container} relative`}>
-            <div className="grid items-start gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:gap-10">
-              <Reveal className="text-left">
-                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Travaillons ensemble</div>
-                <h2 className="font-serif text-3xl font-normal leading-tight text-white sm:text-4xl md:text-5xl">Construisons une collaboration <span className="font-serif italic text-primary-glow">durable.</span></h2>
-                <p className="mt-5 max-w-xl text-base leading-relaxed text-ink-foreground/75 sm:text-lg">Vous avez un réseau à sécuriser, un système à fiabiliser ou une application web à lancer ? Échangeons sur votre besoin.</p>
+            <div className="grid items-center gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:gap-10">
+              <Reveal className="w-full">
+                <div className="contact-copy rounded-[2rem] border border-white/10 bg-white/5 p-5 shadow-[0_20px_60px_-20px_rgba(20,30,60,0.4)] backdrop-blur-sm sm:p-7">
+                  <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Travaillons ensemble</div>
+                  <h2 className="font-serif text-3xl font-normal leading-tight text-white sm:text-4xl md:text-5xl">Construisons une collaboration <span className="font-serif italic text-primary-glow">durable.</span></h2>
+                  <p className="mt-5 max-w-xl text-base leading-relaxed text-ink-foreground/80 sm:text-lg">Vous avez un réseau à sécuriser, un système à fiabiliser ou une application web à lancer ? Échangeons sur votre besoin.</p>
+                  <div className="contact-meta mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                    <a href={profile.whatsapp} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm font-medium text-white transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary">WhatsApp</a>
+                    <a href={`mailto:${profile.email}`} className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm font-medium text-white transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary">{profile.email}</a>
+                  </div>
+                </div>
               </Reveal>
               <Reveal className="w-full"><ContactForm /></Reveal>
             </div>
@@ -328,3 +337,4 @@ function Index() {
 }
 
 export default Index;
+

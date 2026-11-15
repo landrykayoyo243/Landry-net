@@ -10,6 +10,16 @@
   display: none;
 }
 
+#contact .contact-copy {
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)) !important;
+  border-color: rgba(148, 163, 184, 0.22) !important;
+  box-shadow: 0 24px 60px -28px rgba(15, 23, 42, 0.5) !important;
+}
+
+#contact .contact-meta a {
+  color: #fff !important;
+}
+
 #contact h2 {
   color: #172033 !important;
 }
@@ -22,6 +32,35 @@
   color: #596579 !important;
 }
 
+#contact .contact-form {
+  background: rgba(255, 255, 255, 0.97) !important;
+  border: 1px solid rgba(148, 163, 184, 0.24) !important;
+  border-radius: 1.6rem !important;
+  padding: 1.25rem !important;
+  box-shadow: 0 20px 50px -28px rgba(15, 23, 42, 0.28) !important;
+}
+
+#contact .contact-form input,
+#contact .contact-form textarea {
+  background: #ffffff !important;
+  border-color: rgba(148, 163, 184, 0.32) !important;
+  color: #111827 !important;
+}
+
+#contact .contact-form input::placeholder,
+#contact .contact-form textarea::placeholder {
+  color: rgba(71, 85, 105, 0.7) !important;
+}
+
+#contact .contact-form .text-destructive,
+#contact .contact-form p[role="alert"] {
+  color: hsl(var(--destructive)) !important;
+}
+
+#contact .contact-form-note {
+  color: #475569 !important;
+}
+
 #contact [class*="rounded-[30px]"],
 #contact [class*="rounded-[24px]"] {
   border: 0 !important;
@@ -31,7 +70,6 @@
   padding: 0 !important;
 }
 
-/* The old standalone contact buttons are replaced by the WhatsApp note under the form. */
 #contact [class*="flex-col"][class*="items-start"] {
   display: none !important;
 }
