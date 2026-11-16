@@ -96,13 +96,13 @@ function BlogIndexPage() {
         <section className="border-b border-border/70 bg-gradient-to-b from-primary/5 via-transparent to-transparent py-12 sm:py-16">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 md:px-8">
             <Link
-              to="/"
-              aria-label="Retour à l'accueil"
-              className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <ArrowLeft size={15} aria-hidden="true" />
-              <span>Retour à l&apos;accueil</span>
-            </Link>
+  to="/"
+  aria-label="Retour à l'accueil"
+  className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+>
+  <ArrowLeft size={15} aria-hidden="true" />
+  <span>Retour à l&apos;accueil</span>
+</Link>
 
             <div className="flex items-center gap-2 mb-4">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-xs font-semibold text-primary">
