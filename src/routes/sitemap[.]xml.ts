@@ -30,33 +30,28 @@ function escapeXml(value: string): string {
     .replace(/'/g, "&apos;");
 }
 
-function absoluteImageUrl(imageUrl: string | null | undefined, baseUrl: string): string | null {
-  const value = imageUrl?.trim();
-  if (!value) return null;
+function toAbsoluteImageUrl(value: string, baseUrl: string): string {
   if (/^https?:\/\//i.test(value)) return value;
   return `${baseUrl}/${value.replace(/^\/+/, "")}`;
 }
 
 function collectImageUrls(values: unknown[], baseUrl: string): string[] {
-  const found = new Set<string>();
+  const urls = new Set<string>();
   const visited = new Set<object>();
-  const imageKey = /^(src|srcset|url|image|image_url|cover_url|thumbnail|thumbnail_url)$/i;
+  const imageField = /^(src|srcset|url|image|image_url|cover_url|thumbnail|thumbnail_url)$/i;
   const isImageUrl = (value: string) =>
     /\.(avif|gif|jpe?g|png|svg|webp)(?:[?#].*)?$/i.test(value) || value.includes("res.cloudinary.com");
 
-  const add = (value: string) => {
-    const normalized = absoluteImageUrl(value, baseUrl);
-    if (normalized && isImageUrl(normalized)) found.add(normalized);
+  const addUrl = (value: string) => {
+    const absolute = toAbsoluteImageUrl(value.trim(), baseUrl);
+    if (isImageUrl(absolute)) urls.add(absolute);
   };
 
   const visit = (value: unknown, key = "") => {
     if (typeof value === "string") {
-      if (imageKey.test(key)) add(value);
-      const imgTags = value.matchAll(/<img\b[^>]*\bsrc\s*=\s*[\"']([^\"']+)[\"']/gi);
-      for (const match of imgTags) add(match[1]);
-      // Prend en charge les URLs d'images stockées dans du HTML ou des blocs sérialisés.
-      const urls = value.matchAll(/(?:https?:\/\/|\/)[^\s\"'<>]+?\.(?:avif|gif|jpe?g|png|svg|webp)(?:\?[^\s\"'<>]*)?/gi);
-      for (const match of urls) add(match[0]);
+      if (imageField.test(key)) addUrl(value);
+      for (const match of value.matchAll(/<img\b[^>]*\bsrc\s*=\s*[\"']([^\"']+)[\"']/gi)) addUrl(match[1]);
+      for (const match of value.matchAll(/(?:https?:\/\/|\/)[^\s\"'<>]+?\.(?:avif|gif|jpe?g|png|svg|webp)(?:\?[^\s\"'<>]*)?/gi)) addUrl(match[0]);
       return;
     }
     if (!value || typeof value !== "object" || visited.has(value)) return;
@@ -69,7 +64,7 @@ function collectImageUrls(values: unknown[], baseUrl: string): string[] {
   };
 
   values.forEach((value) => visit(value));
-  return [...found];
+  return [...urls];
 }
 
 export const Route = createFileRoute("/sitemap.xml")({
@@ -129,31 +124,27 @@ export const Route = createFileRoute("/sitemap.xml")({
           }
         }
 
-        const staticPages: SitemapPage[] = [
-          { loc: `${baseUrl}/`, priority: "1.0", changefreq: "weekly", lastmod: today },
-          { loc: `${baseUrl}/projets`, priority: "0.9", changefreq: "weekly", lastmod: today },
-          { loc: `${baseUrl}/blog`, priority: "0.9", changefreq: "weekly", lastmod: today },
-          { loc: `${baseUrl}/a-propos`, priority: "0.8", changefreq: "monthly", lastmod: today },
-          { loc: `${baseUrl}/contact`, priority: "0.8", changefreq: "monthly", lastmod: today },
+        const pages: SitemapPage[] = [
+          { loc: `${baseUrl}/`, lastmod: today, priority: "1.0", changefreq: "weekly", images: [`${baseUrl}/landry-a-propos.webp`] },
+          { loc: `${baseUrl}/projets`, lastmod: today, priority: "0.9", changefreq: "weekly" },
+          { loc: `${baseUrl}/blog`, lastmod: today, priority: "0.9", changefreq: "weekly" },
+          { loc: `${baseUrl}/a-propos`, lastmod: today, priority: "0.8", changefreq: "monthly", images: [`${baseUrl}/landry-a-propos.webp`] },
+          ...publishedProjects.map((project): SitemapPage => ({
+            loc: `${baseUrl}/projets/${project.slug}`,
+            lastmod: project.lastmod,
+            priority: "0.8",
+            changefreq: "monthly",
+            images: project.images,
+          })),
+          ...publishedBlogPosts.map((post): SitemapPage => ({
+            loc: `${baseUrl}/blog/${post.slug}`,
+            lastmod: post.lastmod,
+            priority: "0.8",
+            changefreq: "weekly",
+            images: post.images,
+          })),
         ];
 
-        const projectPages: SitemapPage[] = publishedProjects.map((project) => ({
-          loc: `${baseUrl}/projets/${project.slug}`,
-          lastmod: project.lastmod,
-          priority: "0.8",
-          changefreq: "monthly",
-          images: project.images,
-        }));
-
-        const blogPages: SitemapPage[] = publishedBlogPosts.map((post) => ({
-          loc: `${baseUrl}/blog/${post.slug}`,
-          lastmod: post.lastmod,
-          priority: "0.8",
-          changefreq: "weekly",
-          images: post.images,
-        }));
-
-        const pages = [...staticPages, ...projectPages, ...blogPages];
         const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 ${pages.map((page) => `  <url>
