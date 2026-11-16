@@ -61,36 +61,32 @@ function BlogIndexPage() {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState(ALL_CATEGORIES);
 
+  // Catégories uniques
   const categories = useMemo(() => {
     const set = new Set<string>();
-    posts.forEach((post) => {
-      if (post.category) set.add(post.category.trim());
+    posts.forEach((p) => {
+      if (p.category) set.add(p.category.trim());
     });
     return [ALL_CATEGORIES, ...Array.from(set)];
   }, [posts]);
 
+  // Filtrage combiné (catégorie + texte de recherche)
   const filtered = useMemo(() => {
-    return posts.filter((post) => {
-      const matchesCategory = activeCategory === ALL_CATEGORIES || post.category === activeCategory;
-      const query = search.trim().toLowerCase();
-      if (!query) return matchesCategory;
-      const matchesSearch =
-        post.title.toLowerCase().includes(query) ||
-        post.summary.toLowerCase().includes(query) ||
-        post.seo_description.toLowerCase().includes(query) ||
-        post.tags.some((tag) => tag.toLowerCase().includes(query));
-      return matchesCategory && matchesSearch;
+    return posts.filter((p) => {
+      const matchCat = activeCategory === ALL_CATEGORIES || p.category === activeCategory;
+      const q = search.trim().toLowerCase();
+      if (!q) return matchCat;
+      const matchSearch =
+        p.title.toLowerCase().includes(q) ||
+        p.summary.toLowerCase().includes(q) ||
+        p.seo_description.toLowerCase().includes(q) ||
+        p.tags.some((t) => t.toLowerCase().includes(q));
+      return matchCat && matchSearch;
     });
   }, [posts, activeCategory, search]);
 
-  const featured = useMemo(
-    () => filtered.find((post) => post.featured) || (filtered.length > 0 ? filtered[0] : null),
-    [filtered]
-  );
-  const rest = useMemo(
-    () => (featured && filtered.length > 1 ? filtered.filter((post) => post.id !== featured.id) : filtered),
-    [filtered, featured]
-  );
+  const featured = useMemo(() => filtered.find((p) => p.featured) || (filtered.length > 0 ? filtered[0] : null), [filtered]);
+  const rest = useMemo(() => (featured && filtered.length > 1 ? filtered.filter((p) => p.id !== featured.id) : filtered), [filtered, featured]);
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -104,7 +100,8 @@ function BlogIndexPage() {
               aria-label="Retour à l'accueil"
               className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <ArrowLeft size={16} aria-hidden="true" /> Retour à l&apos;accueil
+              <ArrowLeft size={15} aria-hidden="true" />
+              <span>Retour à l&apos;accueil</span>
             </Link>
 
             <div className="flex items-center gap-2 mb-4">
@@ -125,37 +122,41 @@ function BlogIndexPage() {
           </div>
         </section>
 
+        {/* Barre de Recherche et Filtres */}
         <div className="mx-auto max-w-5xl px-4 sm:px-6 md:px-8 py-8">
           <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between mb-8">
+            {/* Input recherche */}
             <div className="relative flex-1 max-w-md">
               <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="search"
                 placeholder="Rechercher par titre, mot-clé, tag..."
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
+                onChange={(e) => setSearch(e.target.value)}
                 className="w-full h-10 rounded-xl border border-border bg-card pl-10 pr-4 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
             </div>
 
+            {/* Filtres de catégories */}
             <div className="flex flex-wrap gap-1.5 items-center">
-              {categories.map((category) => (
+              {categories.map((cat) => (
                 <button
-                  key={category}
+                  key={cat}
                   type="button"
-                  onClick={() => setActiveCategory(category)}
+                  onClick={() => setActiveCategory(cat)}
                   className={`rounded-full px-3 py-1 text-xs font-semibold transition-all cursor-pointer ${
-                    activeCategory === category
+                    activeCategory === cat
                       ? "bg-primary text-primary-foreground shadow-xs"
                       : "bg-secondary text-secondary-foreground hover:bg-primary/10 hover:text-primary"
                   }`}
                 >
-                  {category}
+                  {cat}
                 </button>
               ))}
             </div>
           </div>
 
+          {/* Article en vedette si aucun filtre textuel n'est actif */}
           {!search && featured && filtered.length > 1 && (
             <div className="mb-10">
               <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-1.5">
@@ -217,6 +218,7 @@ function BlogIndexPage() {
             </div>
           )}
 
+          {/* Grille des articles */}
           {rest.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {rest.map((post) => (
