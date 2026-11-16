@@ -30,6 +30,7 @@ export function Footer() {
               <li><Link to="/" className="text-ink-foreground/70 transition-colors hover:text-white">Accueil</Link></li>
               <li><Link to="/a-propos" className="text-ink-foreground/70 transition-colors hover:text-white">Mon histoire & Vision</Link></li>
               <li><Link to="/projets" className="text-ink-foreground/70 transition-colors hover:text-white">Toutes les réalisations</Link></li>
+              <li><Link to="/blog" className="text-ink-foreground/70 transition-colors hover:text-white">Blog</Link></li>
               <li><Link to="/" hash="contact" className="text-ink-foreground/70 transition-colors hover:text-white">Me contacter</Link></li>
             </ul>
           </div>
@@ -40,8 +41,8 @@ export function Footer() {
               <li><a href={profile.linkedin} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-ink-foreground/70 transition-colors hover:text-white"><Linkedin size={15} /> LinkedIn</a></li>
               <li><a href={profile.github} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-ink-foreground/70 transition-colors hover:text-white"><Github size={15} /> GitHub</a></li>
               <li><a href={profile.youtube} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-ink-foreground/70 transition-colors hover:text-white"><Youtube size={15} /> YouTube</a></li>
-              <li><a href={profile.facebook} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-ink-foreground/70 transition-colors hover:text-white"><span className="w-[15px] text-center font-semibold">f</span> Facebook</a></li>
-              <li><a href={profile.x} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-ink-foreground/70 transition-colors hover:text-white"><span className="w-[15px] text-center font-semibold">𝕏</span> X</a></li>
+              <li><a href={profile.facebook} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-ink-foreground/70 transition-colors hover:text-white"><span className="inline-flex h-[15px] w-[15px] items-center justify-center rounded-full bg-white/10 text-[10px] font-bold">f</span> Facebook</a></li>
+              <li><a href={profile.x} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-ink-foreground/70 transition-colors hover:text-white"><span className="inline-flex h-[15px] w-[15px] items-center justify-center rounded-full bg-white/10 text-[9px] font-bold">𝕏</span> X</a></li>
               <li><a href={`mailto:${profile.email}`} className="inline-flex items-center gap-2 text-ink-foreground/70 transition-colors hover:text-white"><Mail size={15} /> {profile.email}</a></li>
               <li><a href={profile.phoneHref} className="inline-flex items-center gap-2 text-ink-foreground/70 transition-colors hover:text-white"><Phone size={15} /> {profile.phone}</a></li>
             </ul>
@@ -50,7 +51,9 @@ export function Footer() {
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 text-xs text-ink-foreground/60 sm:flex-row">
           <p className="flex items-center gap-2"><span>© {new Date().getFullYear()} Landry Kayoyo.</span><span>·</span><span>{profile.location}</span></p>
-          <button type="button" onClick={scrollToTop} className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-ink-foreground/70 transition-all duration-200 hover:border-white/20 hover:text-white"><span>Haut de page</span><ArrowUp size={13} /></button>
+          <button type="button" onClick={scrollToTop} className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-ink-foreground/70 transition-all duration-200 hover:border-primary/40 hover:text-white">
+            <ArrowUp size={13} /> Remonter
+          </button>
         </div>
       </div>
     </footer>
